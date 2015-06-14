@@ -45,7 +45,7 @@ var generatedPortalOrange = false;
 var arrowOrangeLaunched = false;
 var orangeThrow;
 var xBeforeO = -1, yBeforeO = -1, zBeforeO = -1;
-var orangeInformations = [];
+var orangeInformation = [];
 var portalShotOrange = new java.util.Vector();
 
 //blue variables
@@ -53,7 +53,7 @@ var generatedPortalBlue = false;
 var arrowBlueLaunched = false;
 var blueThrow;
 var xBeforeB = -1, yBeforeB = -1, zBeforeB = -1;
-var blueInformations = [];
+var blueInformation = [];
 var portalShotBlue = new java.util.Vector();
 
 //entity support variables
@@ -238,7 +238,7 @@ ModPE.setItem(480, "record_stal", 0, "Turrets Options");
 
 ModPE.setItem(478, "record_strad", 0, "Turret");
 
-ModPE.setItem(475, "record_wait", 0, "Portal Informations");
+ModPE.setItem(475, "record_wait", 0, "Portal Information");
 Item.addShapedRecipe(475, 1, 0, [
 	"   ",
 	" w ",
@@ -632,8 +632,8 @@ function leaveGame()
 	initialized = true;
 	countdownInitialized = 0;
 
-	orangeInformations.length = 0;
-	blueInformations.length = 0;
+	orangeInformation.length = 0;
+	blueInformation.length = 0;
 	arrowOrangeLaunched = false;
 	arrowBlueLaunched = false;
 
@@ -646,7 +646,7 @@ function leaveGame()
 	displayedMessageTurretsBeta = false;
 	displayedMessageWoodStone = false;
 	displayedMessageNoSound = false;
-	displayedMessagePortalInformations = false;
+	displayedMessagePortalInformation = false;
 
 	turrets.lenght = 0;
 	turrets = [];
@@ -744,10 +744,10 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		return;
 	}
 
-	//Portal informations
+	//Portal information
 	if(itemId == 475)
 	{
-		informationsForPortalGUI();
+		informationForPortalGUI();
 		preventDefault();
 		return;
 	}
@@ -764,7 +764,7 @@ function changeCarriedItem(currentItem, previousItem)
 			break;
 		}
 
-		//player carrying the Portal Informations item
+		//player carrying the Portal Information item
 		case 475:
 		{
 			ModPE.showTipMessage("Tap on a block to open the GUI.");
@@ -939,29 +939,29 @@ function entityRemovedHook(entity)
 function destroyBlock(x, y, z)
 {
 	//Portals
-	if(Math.floor(x) == orangeInformations[0] && Math.floor(y) == orangeInformations[1] && Math.floor(z) == orangeInformations[2])
+	if(Math.floor(x) == orangeInformation[0] && Math.floor(y) == orangeInformation[1] && Math.floor(z) == orangeInformation[2])
 	{
 		generatedPortalOrange = false;
-		Level.setTile(orangeInformations[3], orangeInformations[4], orangeInformations[5], 0);
+		Level.setTile(orangeInformation[3], orangeInformation[4], orangeInformation[5], 0);
 		savePortalsToDelete();
 	}
-	if(Math.floor(x) == orangeInformations[3] && Math.floor(y) == orangeInformations[4] && Math.floor(z) == orangeInformations[5])
+	if(Math.floor(x) == orangeInformation[3] && Math.floor(y) == orangeInformation[4] && Math.floor(z) == orangeInformation[5])
 	{
 		generatedPortalOrange = false;
-		Level.setTile(orangeInformations[0], orangeInformations[1], orangeInformations[2], 0);
+		Level.setTile(orangeInformation[0], orangeInformation[1], orangeInformation[2], 0);
 		savePortalsToDelete();
 	}
 
-	if(Math.floor(x) == blueInformations[0] && Math.floor(y) == blueInformations[1] && Math.floor(z) == blueInformations[2])
+	if(Math.floor(x) == blueInformation[0] && Math.floor(y) == blueInformation[1] && Math.floor(z) == blueInformation[2])
 	{
 		generatedPortalBlue = false;
-		Level.setTile(blueInformations[3], blueInformations[4], blueInformations[5], 0);
+		Level.setTile(blueInformation[3], blueInformation[4], blueInformation[5], 0);
 		savePortalsToDelete();
 	}
-	if(Math.floor(x) == blueInformations[3] && Math.floor(y) == blueInformations[4] && Math.floor(z) == blueInformations[5])
+	if(Math.floor(x) == blueInformation[3] && Math.floor(y) == blueInformation[4] && Math.floor(z) == blueInformation[5])
 	{
 		generatedPortalBlue = false;
-		Level.setTile(blueInformations[0], blueInformations[1], blueInformations[2], 0);
+		Level.setTile(blueInformation[0], blueInformation[1], blueInformation[2], 0);
 		savePortalsToDelete();
 	}
 	
@@ -1602,12 +1602,12 @@ function modTick()
 	//player is in portal?
 	if(generatedPortalBlue && generatedPortalOrange)
 	{
-		if(orangeInformations[6] == 4)
+		if(orangeInformation[6] == 4)
 			entityIsInPortalOrange(Player.getEntity(), Player.getX(), Player.getY(), Player.getZ());
 		else
 			entityIsInPortalOrange(Player.getEntity(), Player.getX(), Player.getY() - 1, Player.getZ());
 
-		if(blueInformations[6] == 4)
+		if(blueInformation[6] == 4)
 			entityIsInPortalBlue(Player.getEntity(), Player.getX(), Player.getY(), Player.getZ());
 		else
 			entityIsInPortalBlue(Player.getEntity(), Player.getX(), Player.getY() - 1, Player.getZ());
@@ -1874,7 +1874,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x + 1, y, z, 195, 0);
 						Level.setTile(x + 1, y + 1, z, 196, 0);
 						savePortalAndDeleteOrange(x+1, y, z, x+1, y+1, z);
-						orangeInformations[6] = 5;
+						orangeInformation[6] = 5;
 					}
 				}else
 				{
@@ -1884,7 +1884,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x - 1, y, z, 197, 0);
 						Level.setTile(x - 1, y + 1, z, 198, 0);
 						savePortalAndDeleteOrange(x-1, y, z, x-1, y+1, z);
-						orangeInformations[6] = 6;
+						orangeInformation[6] = 6;
 					}
 				}
 			}else
@@ -1897,7 +1897,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z + 1, 187, 0);
 						Level.setTile(x, y + 1, z + 1, 188, 0);
 						savePortalAndDeleteOrange(x, y, z+1, x, y+1, z+1);
-						orangeInformations[6] = 1;
+						orangeInformation[6] = 1;
 					}
 				}else
 				{
@@ -1907,7 +1907,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z - 1, 189, 0);
 						Level.setTile(x, y + 1, z - 1, 190, 0);
 						savePortalAndDeleteOrange(x, y, z-1, x, y+1, z-1);
-						orangeInformations[6] = 2;
+						orangeInformation[6] = 2;
 					}
 				}
 			}
@@ -1919,7 +1919,7 @@ function setPortalOrange(x, y ,z)
 				Level.setTile(x, y + 1, z, 192);
 				Level.setTile(x, y + 1, z + 1, 191);
 				savePortalAndDeleteOrange(x, y+1, z, x, y+1, z+1);
-				orangeInformations[6] = 3;
+				orangeInformation[6] = 3;
 			}else
 			if(Level.getTile(x, y + 1, z - 1) == 0)
 			{
@@ -1927,7 +1927,7 @@ function setPortalOrange(x, y ,z)
 				Level.setTile(x, y + 1, z, 191);
 				Level.setTile(x, y + 1, z - 1, 192);	
 				savePortalAndDeleteOrange(x, y+1, z, x, y+1, z-1);
-				orangeInformations[6] = 3;
+				orangeInformation[6] = 3;
 			}
 		}
 	}else
@@ -1940,7 +1940,7 @@ function setPortalOrange(x, y ,z)
 				Level.setTile(x, y, z, 192);
 				Level.setTile(x, y, z + 1, 191);
 				savePortalAndDeleteOrange(x, y, z, x, y, z+1);
-				orangeInformations[6] = 3;
+				orangeInformation[6] = 3;
 				return;
 			}else
 			if(Level.getTile(x, y + 1, z) != 0)
@@ -1948,7 +1948,7 @@ function setPortalOrange(x, y ,z)
 				Level.setTile(x, y, z, 194);
 				Level.setTile(x, y, z + 1, 193);
 				savePortalAndDeleteOrange(x, y, z, x, y, z+1);
-				orangeInformations[6] = 4;
+				orangeInformation[6] = 4;
 				return;
 			}
 		}else
@@ -1961,7 +1961,7 @@ function setPortalOrange(x, y ,z)
 					Level.setTile(x, y, z, 197, 0);
 					Level.setTile(x, y + 1, z, 198, 0);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-					orangeInformations[6] = 6;
+					orangeInformation[6] = 6;
 					return;
 				}else
 				{
@@ -1970,7 +1970,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 198, 0);
 						Level.setTile(x, y - 1, z, 197, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-						orangeInformations[6] = 6;
+						orangeInformation[6] = 6;
 						return;
 					}
 				}
@@ -1983,7 +1983,7 @@ function setPortalOrange(x, y ,z)
 					Level.setTile(x, y, z, 189, 0);
 					Level.setTile(x, y + 1, z, 190, 0);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-					orangeInformations[6] = 2;
+					orangeInformation[6] = 2;
 					return;
 				}else
 				{
@@ -1992,7 +1992,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 190, 0);
 						Level.setTile(x, y - 1, z, 189, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-						orangeInformations[6] = 2;
+						orangeInformation[6] = 2;
 						return;
 					}
 				}
@@ -2005,7 +2005,7 @@ function setPortalOrange(x, y ,z)
 					Level.setTile(x, y, z, 195, 0);
 					Level.setTile(x, y + 1, z, 196, 0);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-					orangeInformations[6] = 5;
+					orangeInformation[6] = 5;
 					return;
 				}else
 				{
@@ -2014,7 +2014,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 196, 0);
 						Level.setTile(x, y - 1, z, 195, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-						orangeInformations[6] = 5;
+						orangeInformation[6] = 5;
 						return;
 					}
 				}
@@ -2027,7 +2027,7 @@ function setPortalOrange(x, y ,z)
 					Level.setTile(x, y, z, 187, 0);
 					Level.setTile(x, y + 1, z, 188, 0);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-					orangeInformations[6] = 1;
+					orangeInformation[6] = 1;
 					return;
 				}else
 				{
@@ -2036,7 +2036,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 188, 0);
 						Level.setTile(x, y - 1, z, 187, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-						orangeInformations[6] = 1;
+						orangeInformation[6] = 1;
 						return;
 					}
 				}
@@ -2051,7 +2051,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 197, 0);
 						Level.setTile(x, y + 1, z, 198, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 6;
+						orangeInformation[6] = 6;
 					return;
 					}else
 					{
@@ -2060,7 +2060,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 198, 0);
 							Level.setTile(x, y - 1, z, 197, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 6;
+							orangeInformation[6] = 6;
 							return;
 						}
 					}
@@ -2072,7 +2072,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 189, 0);
 						Level.setTile(x, y + 1, z, 190, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 2;
+						orangeInformation[6] = 2;
 						return;
 					}else
 					{
@@ -2081,7 +2081,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 190, 0);
 							Level.setTile(x, y - 1, z, 189, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 2;
+							orangeInformation[6] = 2;
 							return;
 						}
 					}
@@ -2097,7 +2097,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 197, 0);
 						Level.setTile(x, y + 1, z, 198, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 6;
+						orangeInformation[6] = 6;
 					return;
 					}else
 					{
@@ -2106,7 +2106,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 198, 0);
 							Level.setTile(x, y - 1, z, 197, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 6;
+							orangeInformation[6] = 6;
 							return;
 						}
 					}
@@ -2118,7 +2118,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 187, 0);
 						Level.setTile(x, y + 1, z, 188, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 1;
+						orangeInformation[6] = 1;
 						return;
 					}else
 					{
@@ -2127,7 +2127,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 188, 0);
 							Level.setTile(x, y - 1, z, 187, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 1;
+							orangeInformation[6] = 1;
 							return;
 						}
 					}
@@ -2143,7 +2143,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 195, 0);
 						Level.setTile(x, y + 1, z, 196, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 5;
+						orangeInformation[6] = 5;
 						return;
 					}else
 					{
@@ -2152,7 +2152,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 196, 0);
 							Level.setTile(x, y - 1, z, 195, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 5;
+							orangeInformation[6] = 5;
 							return;
 						}
 					}
@@ -2164,7 +2164,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 187, 0);
 						Level.setTile(x, y + 1, z, 188, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 1;
+						orangeInformation[6] = 1;
 						return;
 					}else
 					{
@@ -2173,7 +2173,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 188, 0);
 							Level.setTile(x, y - 1, z, 187, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 1;
+							orangeInformation[6] = 1;
 							return;
 						}
 					}
@@ -2189,7 +2189,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 195, 0);
 						Level.setTile(x, y + 1, z, 196, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 5;
+						orangeInformation[6] = 5;
 						return;
 					}else
 					{
@@ -2198,7 +2198,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 196, 0);
 							Level.setTile(x, y - 1, z, 195, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 5;
+							orangeInformation[6] = 5;
 							return;
 						}
 					}
@@ -2210,7 +2210,7 @@ function setPortalOrange(x, y ,z)
 						Level.setTile(x, y, z, 189, 0);
 						Level.setTile(x, y + 1, z, 190, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
-						orangeInformations[6] = 2;
+						orangeInformation[6] = 2;
 						return;
 					}else
 					{
@@ -2219,7 +2219,7 @@ function setPortalOrange(x, y ,z)
 							Level.setTile(x, y, z, 190, 0);
 							Level.setTile(x, y - 1, z, 189, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
-							orangeInformations[6] = 2;
+							orangeInformation[6] = 2;
 							return;
 						}
 					}
@@ -2250,7 +2250,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x + 1, y, z, 207, 0);
 						Level.setTile(x + 1, y + 1, z, 208, 0);
 						savePortalAndDeleteBlue(x+1, y, z, x+1, y+1, z);
-						blueInformations[6] = 5;
+						blueInformation[6] = 5;
 					}
 				}else
 				{
@@ -2260,7 +2260,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x - 1, y, z, 209, 0);
 						Level.setTile(x - 1, y + 1, z, 210, 0);
 						savePortalAndDeleteBlue(x-1, y, z, x-1, y+1, z);
-						blueInformations[6] = 6;
+						blueInformation[6] = 6;
 					}
 				}
 			}else
@@ -2273,7 +2273,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z + 1, 199, 0);
 						Level.setTile(x, y + 1, z + 1, 200, 0);
 						savePortalAndDeleteBlue(x, y, z+1, x, y+1, z+1);
-						blueInformations[6] = 1;
+						blueInformation[6] = 1;
 					}
 				}else
 				{
@@ -2283,7 +2283,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z - 1, 201, 0);
 						Level.setTile(x, y + 1, z - 1, 202, 0);
 						savePortalAndDeleteBlue(x, y, z-1, x, y+1, z-1);
-						blueInformations[6] = 2;
+						blueInformation[6] = 2;
 					}
 				}
 			}
@@ -2295,7 +2295,7 @@ function setPortalBlue(x, y ,z)
 				Level.setTile(x, y + 1, z, 204, 0);
 				Level.setTile(x, y + 1, z + 1, 203, 0);
 				savePortalAndDeleteBlue(x, y+1, z, x, y+1, z+1);
-				blueInformations[6] = 3;
+				blueInformation[6] = 3;
 			}else
 			if(Level.getTile(x, y + 1,z - 1) == 0)
 			{
@@ -2303,7 +2303,7 @@ function setPortalBlue(x, y ,z)
 				Level.setTile(x, y + 1, z, 203, 0);
 				Level.setTile(x, y + 1, z - 1, 204, 0);	
 				savePortalAndDeleteBlue(x, y+1, z, x, y+1, z-1);
-				blueInformations[6] = 3;
+				blueInformation[6] = 3;
 			}
 		}
 	}else
@@ -2316,7 +2316,7 @@ function setPortalBlue(x, y ,z)
 				Level.setTile(x, y, z, 204);
 				Level.setTile(x, y, z + 1, 203);
 				savePortalAndDeleteBlue(x, y, z, x, y, z+1);
-				blueInformations[6] = 3;
+				blueInformation[6] = 3;
 			return;
 			}else
 			if(Level.getTile(x, y + 1, z) != 0)
@@ -2324,7 +2324,7 @@ function setPortalBlue(x, y ,z)
 				Level.setTile(x, y, z, 206);
 				Level.setTile(x, y, z + 1, 205);
 				savePortalAndDeleteBlue(x, y, z, x, y, z+1);
-				blueInformations[6] = 4;
+				blueInformation[6] = 4;
 				return;
 			}
 		}else
@@ -2337,7 +2337,7 @@ function setPortalBlue(x, y ,z)
 					Level.setTile(x, y, z, 209, 0);
 					Level.setTile(x, y + 1, z, 210, 0);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-					blueInformations[6] = 6;
+					blueInformation[6] = 6;
 					return;
 				}else
 				{
@@ -2346,7 +2346,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 210, 0);
 						Level.setTile(x, y - 1, z, 209, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-						blueInformations[6] = 6;
+						blueInformation[6] = 6;
 						return;
 					}
 				}
@@ -2359,7 +2359,7 @@ function setPortalBlue(x, y ,z)
 					Level.setTile(x, y, z, 201, 0);
 					Level.setTile(x, y + 1, z, 202, 0);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-					blueInformations[6] = 2;
+					blueInformation[6] = 2;
 					return;
 				}else
 				{
@@ -2368,7 +2368,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 202, 0);
 						Level.setTile(x, y - 1, z, 201, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-						blueInformations[6] = 2;
+						blueInformation[6] = 2;
 						return;
 					}
 				}
@@ -2381,7 +2381,7 @@ function setPortalBlue(x, y ,z)
 					Level.setTile(x, y, z, 207, 0);
 					Level.setTile(x, y + 1, z, 208, 0);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-					blueInformations[6] = 5;
+					blueInformation[6] = 5;
 					return;
 				}else
 				{
@@ -2390,7 +2390,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 208, 0);
 						Level.setTile(x, y - 1, z, 207, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-						blueInformations[6] = 5;
+						blueInformation[6] = 5;
 						return;
 					}
 				}
@@ -2403,7 +2403,7 @@ function setPortalBlue(x, y ,z)
 					Level.setTile(x, y, z, 199, 0);
 					Level.setTile(x, y + 1, z, 200, 0);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-					blueInformations[6] = 1;
+					blueInformation[6] = 1;
 					return;
 				}else
 				{
@@ -2412,7 +2412,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 200, 0);
 						Level.setTile(x, y - 1, z, 199, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-						blueInformations[6] = 1;
+						blueInformation[6] = 1;
 						return;
 					}
 				}
@@ -2427,7 +2427,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 209, 0);
 						Level.setTile(x, y + 1, z, 210, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 6;
+						blueInformation[6] = 6;
 					return;
 					}else
 					{
@@ -2436,7 +2436,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 210, 0);
 							Level.setTile(x, y - 1, z, 209, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 6;
+							blueInformation[6] = 6;
 							return;
 						}
 					}
@@ -2448,7 +2448,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 201, 0);
 						Level.setTile(x, y + 1, z, 202, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 2;
+						blueInformation[6] = 2;
 						return;
 					}else
 					{
@@ -2457,7 +2457,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 202, 0);
 							Level.setTile(x, y - 1, z, 201, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 2;
+							blueInformation[6] = 2;
 							return;
 						}
 					}
@@ -2473,7 +2473,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 209, 0);
 						Level.setTile(x, y + 1, z, 210, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 6;
+						blueInformation[6] = 6;
 						return;
 					}else
 					{
@@ -2482,7 +2482,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 210, 0);
 							Level.setTile(x, y - 1, z, 209, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 6;
+							blueInformation[6] = 6;
 							return;
 						}
 					}
@@ -2494,7 +2494,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 199, 0);
 						Level.setTile(x, y + 1, z, 200, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 1;
+						blueInformation[6] = 1;
 						return;
 					}else
 					{
@@ -2503,7 +2503,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 200, 0);
 							Level.setTile(x, y - 1, z, 199, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 1;
+							blueInformation[6] = 1;
 							return;
 						}
 					}
@@ -2519,7 +2519,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 207, 0);
 						Level.setTile(x, y + 1, z, 208, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 5;
+						blueInformation[6] = 5;
 						return;
 					}else
 					{
@@ -2528,7 +2528,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 208, 0);
 							Level.setTile(x, y - 1, z, 207, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 5;
+							blueInformation[6] = 5;
 							return;
 						}
 					}
@@ -2540,7 +2540,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 199, 0);
 						Level.setTile(x, y + 1, z, 200, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 1;
+						blueInformation[6] = 1;
 						return;
 					}else
 					{
@@ -2549,7 +2549,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 200, 0);
 							Level.setTile(x, y - 1, z, 199, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 1;
+							blueInformation[6] = 1;
 							return;
 						}
 					}
@@ -2565,7 +2565,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 207, 0);
 						Level.setTile(x, y + 1, z, 208, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 5;
+						blueInformation[6] = 5;
 						return;
 					}else
 					{
@@ -2574,7 +2574,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 208, 0);
 							Level.setTile(x, y - 1, z, 207, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 5;
+							blueInformation[6] = 5;
 							return;
 						}
 					}
@@ -2586,7 +2586,7 @@ function setPortalBlue(x, y ,z)
 						Level.setTile(x, y, z, 201, 0);
 						Level.setTile(x, y + 1, z, 202, 0);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
-						blueInformations[6] = 2;
+						blueInformation[6] = 2;
 						return;
 					}else
 					{
@@ -2595,7 +2595,7 @@ function setPortalBlue(x, y ,z)
 							Level.setTile(x, y, z, 202, 0);
 							Level.setTile(x, y - 1, z, 201, 0);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
-							blueInformations[6] = 2;
+							blueInformation[6] = 2;
 							return;
 						}
 					}
@@ -2609,15 +2609,15 @@ function savePortalAndDeleteOrange(x, y, z, x1, y1, z1)
 {
 	if(generatedPortalOrange)
 	{
-		Level.setTile(orangeInformations[0], orangeInformations[1], orangeInformations[2], 0);
-		Level.setTile(orangeInformations[3], orangeInformations[4], orangeInformations[5], 0);
+		Level.setTile(orangeInformation[0], orangeInformation[1], orangeInformation[2], 0);
+		Level.setTile(orangeInformation[3], orangeInformation[4], orangeInformation[5], 0);
 	}
-	orangeInformations[0] = x;
-	orangeInformations[1] = y;
-	orangeInformations[2] = z;
-	orangeInformations[3] = x1;
-	orangeInformations[4] = y1;
-	orangeInformations[5] = z1;
+	orangeInformation[0] = x;
+	orangeInformation[1] = y;
+	orangeInformation[2] = z;
+	orangeInformation[3] = x1;
+	orangeInformation[4] = y1;
+	orangeInformation[5] = z1;
 	generatedPortalOrange = true;
 	savePortalsToDelete();
 }
@@ -2626,157 +2626,157 @@ function savePortalAndDeleteBlue(x, y, z, x1, y1, z1)
 {
 	if(generatedPortalBlue)
 	{
-		Level.setTile(blueInformations[0], blueInformations[1], blueInformations[2], 0);
-		Level.setTile(blueInformations[3], blueInformations[4], blueInformations[5], 0);
+		Level.setTile(blueInformation[0], blueInformation[1], blueInformation[2], 0);
+		Level.setTile(blueInformation[3], blueInformation[4], blueInformation[5], 0);
 	}
-	blueInformations[0] = x;
-	blueInformations[1] = y;
-	blueInformations[2] = z;
-	blueInformations[3] = x1;
-	blueInformations[4] = y1;
-	blueInformations[5] = z1;
+	blueInformation[0] = x;
+	blueInformation[1] = y;
+	blueInformation[2] = z;
+	blueInformation[3] = x1;
+	blueInformation[4] = y1;
+	blueInformation[5] = z1;
 	generatedPortalBlue = true;
 	savePortalsToDelete();
 }
 
 function entityIsInPortalOrange(entity, x, y, z)
 {
-	if((x > orangeInformations[0] && x < (orangeInformations[0] + 1) && y > orangeInformations[1] && y < (orangeInformations[1] + 1) && z > orangeInformations[2] && z < (orangeInformations[2] + 1)) || (x > orangeInformations[3] && x < (orangeInformations[3] + 1) && y > orangeInformations[4] && y < (orangeInformations[4] + 1) && z > orangeInformations[5] && z < (orangeInformations[5] + 1)))
+	if((x > orangeInformation[0] && x < (orangeInformation[0] + 1) && y > orangeInformation[1] && y < (orangeInformation[1] + 1) && z > orangeInformation[2] && z < (orangeInformation[2] + 1)) || (x > orangeInformation[3] && x < (orangeInformation[3] + 1) && y > orangeInformation[4] && y < (orangeInformation[4] + 1) && z > orangeInformation[5] && z < (orangeInformation[5] + 1)))
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
 		ModPE.playSoundFromFile("portals/portal_exit" + random + ".wav");
-		if(orangeInformations[6] == 2)
+		if(orangeInformation[6] == 2)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
 		}else
 
-		if(orangeInformations[6] == 1)
+		if(orangeInformation[6] == 1)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
 		}else
 
-		if(orangeInformations[6] == 3)
+		if(orangeInformation[6] == 3)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{
 				Entity.setRot(entity, 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				if(entity == Player.getEntity())
 					Entity.setVelZ(entity, velBeforeY);
 				else
 					Entity.setVelZ(entity, -0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, 360, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				if(entity == Player.getEntity())
 					Entity.setVelZ(entity, -velBeforeY);
 				else
 					Entity.setVelZ(entity, 0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
 					Entity.setVelY(entity, -velBeforeY);
 				else
 					Entity.setVelY(entity, 0.5);
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
 					Entity.setVelY(entity, Entity.getVelY(velBeforeY) - 0.15);
@@ -2784,20 +2784,20 @@ function entityIsInPortalOrange(entity, x, y, z)
 					Entity.setVelY(entity, 0);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				if(entity == Player.getEntity())
 					Entity.setVelX(entity, -velBeforeY);
 				else
 					Entity.setVelX(entity, 0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, 450, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				if(entity == Player.getEntity())
 					Entity.setVelX(entity, velBeforeY);
 				else
@@ -2806,141 +2806,141 @@ function entityIsInPortalOrange(entity, x, y, z)
 			}
 		}else
 
-		if(orangeInformations[6] == 4)
+		if(orangeInformation[6] == 4)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{
 				Entity.setRot(entity, 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				Entity.setVelZ(entity, -0.2);
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, 360, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				Entity.setVelZ(entity, 0.2);
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.5);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, Entity.getVelY(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, 0.2);
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, 450, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -0.2);
 			}
 		}else
 
-		if(orangeInformations[6] == 5)
+		if(orangeInformation[6] == 5)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
 		}else
 
-		if(orangeInformations[6] == 6)
+		if(orangeInformation[6] == 6)
 		{
-			if(blueInformations[6] == 2)
+			if(blueInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] - 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] - 1);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 1)
+			if(blueInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 1);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 1);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(blueInformations[6] == 3)
+			if(blueInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(blueInformations[6] == 4)
+			if(blueInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 0.5, blueInformations[1] - 0.05, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 0.5, blueInformation[1] - 0.05, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
 			}
-			if(blueInformations[6] == 5)
+			if(blueInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] + 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] + 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(blueInformations[6] == 6)
+			if(blueInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, blueInformations[0] - 1, blueInformations[1] + 2, blueInformations[2] + 0.5);
+				Entity.setPosition(entity, blueInformation[0] - 1, blueInformation[1] + 2, blueInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
@@ -2950,142 +2950,142 @@ function entityIsInPortalOrange(entity, x, y, z)
 
 function entityIsInPortalBlue(entity, x, y, z)
 {
-	if((x > blueInformations[0] && x < (blueInformations[0] + 1) && y > blueInformations[1] && y < (blueInformations[1] + 1) && z > blueInformations[2] && z < (blueInformations[2] + 1)) || (x > blueInformations[3] && x < (blueInformations[3] + 1) && y > blueInformations[4] && y < (blueInformations[4] + 1) && z > blueInformations[5] && z < (blueInformations[5] + 1)))
+	if((x > blueInformation[0] && x < (blueInformation[0] + 1) && y > blueInformation[1] && y < (blueInformation[1] + 1) && z > blueInformation[2] && z < (blueInformation[2] + 1)) || (x > blueInformation[3] && x < (blueInformation[3] + 1) && y > blueInformation[4] && y < (blueInformation[4] + 1) && z > blueInformation[5] && z < (blueInformation[5] + 1)))
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
 		ModPE.playSoundFromFile("portals/portal_exit" + random + ".wav");
-		if(blueInformations[6] == 2)
+		if(blueInformation[6] == 2)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
 		}else
 
-		if(blueInformations[6] == 1)
+		if(blueInformation[6] == 1)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
 		}else
 
-		if(blueInformations[6] == 3)
+		if(blueInformation[6] == 3)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{
 				Entity.setRot(entity, 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				if(entity == Player.getEntity())
 					Entity.setVelZ(entity, velBeforeY);
 				else
 					Entity.setVelZ(entity, -0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, 360, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				if(entity == Player.getEntity())
 					Entity.setVelZ(entity, -velBeforeY);
 				else
 					Entity.setVelZ(entity, 0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
 					Entity.setVelY(entity, -velBeforeY);
 				else
 					Entity.setVelY(entity, 0.5);
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
 					Entity.setVelY(entity, Entity.getVelY(velBeforeY) - 0.15);
@@ -3093,20 +3093,20 @@ function entityIsInPortalBlue(entity, x, y, z)
 					Entity.setVelY(entity, 0);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				if(entity == Player.getEntity())
 					Entity.setVelX(entity, -velBeforeY);
 				else
 					Entity.setVelX(entity, 0.2);
 				Entity.setVelY(entity, 0);
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, 450, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				if(entity == Player.getEntity())
 					Entity.setVelX(entity, velBeforeY);
 				else
@@ -3115,141 +3115,141 @@ function entityIsInPortalBlue(entity, x, y, z)
 			}
 		}else
 
-		if(blueInformations[6] == 4)
+		if(blueInformation[6] == 4)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{
 				Entity.setRot(entity, 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				Entity.setVelZ(entity, -0.2);
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, 360, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				Entity.setVelZ(entity, 0.2);
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, 0.5);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelY(entity, Entity.getVelY(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, 0.2);
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, 450, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -0.2);
 			}
 		}else
 
-		if(blueInformations[6] == 5)
+		if(blueInformation[6] == 5)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
 		}else
 
-		if(blueInformations[6] == 6)
+		if(blueInformation[6] == 6)
 		{
-			if(orangeInformations[6] == 2)
+			if(orangeInformation[6] == 2)
 			{	
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] - 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] - 1);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelZ(entity, -Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 1)
+			if(orangeInformation[6] == 1)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 1);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 1);
 				Entity.setVelX(entity, -Entity.getVelZ(entity));
 				Entity.setVelZ(entity, Entity.getVelX(entity));
 			}
-			if(orangeInformations[6] == 3)
+			if(orangeInformation[6] == 3)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelZ(entity));
 				Entity.setVelY(entity, 0.6);
 				Entity.setVelZ(entity, -0.4);	
 			}
-			if(orangeInformations[6] == 4)
+			if(orangeInformation[6] == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 0.5, orangeInformations[1] - 0.05, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 0.5, orangeInformation[1] - 0.05, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
 			}
-			if(orangeInformations[6] == 5)
+			if(orangeInformation[6] == 5)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] + 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] + 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));
 			}
-			if(orangeInformations[6] == 6)
+			if(orangeInformation[6] == 6)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangeInformations[0] - 1, orangeInformations[1] + 2, orangeInformations[2] + 0.5);
+				Entity.setPosition(entity, orangeInformation[0] - 1, orangeInformation[1] + 2, orangeInformation[2] + 0.5);
 				Entity.setVelX(entity, -Entity.getVelX(entity));
 				Entity.setVelZ(entity, -Entity.getVelZ(entity));
 			}
@@ -3513,12 +3513,12 @@ function savePortalsToDelete()
 				if(generatedPortalOrange)
 				{
 					var toSaveGeneratedOrange = "1";
-					var oX = orangeInformations[0];
-					var oY = orangeInformations[1];
-					var oZ = orangeInformations[2];
-					var oX1 = orangeInformations[3];
-					var oY1 = orangeInformations[4];
-					var oZ1 = orangeInformations[5];
+					var oX = orangeInformation[0];
+					var oY = orangeInformation[1];
+					var oZ = orangeInformation[2];
+					var oX1 = orangeInformation[3];
+					var oY1 = orangeInformation[4];
+					var oZ1 = orangeInformation[5];
 				}else
 				{
 					var toSaveGeneratedOrange = "0";
@@ -3532,12 +3532,12 @@ function savePortalsToDelete()
 				if(generatedPortalBlue)
 				{
 					var toSaveGeneratedBlue = "1";
-					var bX = blueInformations[0];
-					var bY = blueInformations[1];
-					var bZ = blueInformations[2];
-					var bX1 = blueInformations[3];
-					var bY1 = blueInformations[4];
-					var bZ1 = blueInformations[5];
+					var bX = blueInformation[0];
+					var bY = blueInformation[1];
+					var bZ = blueInformation[2];
+					var bX1 = blueInformation[3];
+					var bY1 = blueInformation[4];
+					var bZ1 = blueInformation[5];
 				}else
 				{
 					var toSaveGeneratedBlue = "0";
@@ -3734,7 +3734,7 @@ function dismissAllUIs()
 		popupInfo.dismiss();
 	}catch(e){}
 	try{
-		popupInformations.dismiss();
+		popupInformation.dismiss();
 	}catch(e){}
 	try{
 		popupSettings.dismiss();
@@ -3922,7 +3922,7 @@ function createCorrectButtonsImages()
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsGUI();
+						informationGUI();
 					}
 				});
 				testButton.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener()
@@ -3958,7 +3958,7 @@ function createCorrectButtonsImages()
 }
 
 
-function informationsForPortalGUI()
+function informationForPortalGUI()
 {
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
@@ -3976,16 +3976,16 @@ function informationsForPortalGUI()
 				infoText.setText(new android.text.Html.fromHtml("Welcome to the P<font color=#1E90FF>O</font>RTAL 2 M<font color=#FFA500>O</font>D by Desno365!<br>"));
 				layoutInfo.addView(infoText);
 
-				var informationsButton = minecraftButton("Informations");
-				informationsButton.setOnClickListener(new android.view.View.OnClickListener()
+				var informationButton = minecraftButton("Information");
+				informationButton.setOnClickListener(new android.view.View.OnClickListener()
 				{
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsGUI();
+						informationGUI();
 					}
 				});
-				layoutInfo.addView(informationsButton);
+				layoutInfo.addView(informationButton);
 
 				layoutInfo.addView(portalDivider());
 
@@ -4095,7 +4095,7 @@ function informationsForPortalGUI()
 	});
 }
 
-function informationsGUI()
+function informationGUI()
 {
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
@@ -4104,24 +4104,24 @@ function informationsGUI()
 			try
 			{
 				blackBackground();
-				var layoutInformations = minecraftLayout("Informations");
+				var layoutInformation = minecraftLayout("Information");
 
-				var scrollInformations = new android.widget.ScrollView(currentActivity);
-				scrollInformations.addView(layoutInformations);
+				var scrollInformation = new android.widget.ScrollView(currentActivity);
+				scrollInformation.addView(layoutInformation);
 
-				var informations1Text = new android.widget.TextView(currentActivity);
-				informations1Text.setText(new android.text.Html.fromHtml("<b>Portal guns:</b>" +
+				var information1Text = new android.widget.TextView(currentActivity);
+				information1Text.setText(new android.text.Html.fromHtml("<b>Portal guns:</b>" +
 					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, max damage: 1000" +
 					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, max damage: 500" +
 					"<br>-<i>PortalGun Iron</i>: bullet speed: 20 block/second, max damage: 250" +
 					"<br>-<i>PortalGun Lava</i>: bullet speed: 20 block/second, max damage: 200" +
 					"<br>-<i>PortalGun Wood & Stone</i>: Tap on a block to place a portal. max damage: 100"));
-				layoutInformations.addView(informations1Text);
+				layoutInformation.addView(information1Text);
 
-				layoutInformations.addView(portalDivider());
+				layoutInformation.addView(portalDivider());
 
-				var informations2Text = new android.widget.TextView(currentActivity);
-				informations2Text.setText(new android.text.Html.fromHtml("<b>Other Items:</b>" +
+				var information2Text = new android.widget.TextView(currentActivity);
+				information2Text.setText(new android.text.Html.fromHtml("<b>Other Items:</b>" +
 					"<br>-<i>GravityGun</i>: Hit a mob with this item to pick it, then you can bring it everywhere or shoot it." +
 					"<br>-<i>Turret</i>: Tap on a block with this item to spawn a turret." +
 					"<br>-<i>Turrets options</i>: Hit a turret with this item to display the options GUI." +
@@ -4132,41 +4132,41 @@ function informationsGUI()
 					"<br>-<i>Repulsion Gel Block</i>: When you fall on this block, it will repulse you in the air with a bit less speed than before." +
 					"<br>-<i>Propulsion Gel Block</i>: When you walk on these blocks your acceleration will increase." +
 					"<br>If you want a better explanation on how gels work watch <a href=\"http://youtu.be/32DaEaODKyI\">this YouTube video</a>"));
-				informations2Text.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
-				layoutInformations.addView(informations2Text);
+				information2Text.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+				layoutInformation.addView(information2Text);
 				
-				layoutInformations.addView(portalDivider());
+				layoutInformation.addView(portalDivider());
 				
-				var informations3Text = new android.widget.TextView(currentActivity);
-				informations3Text.setText(new android.text.Html.fromHtml("<b>Tips and tricks:</b>" +
+				var information3Text = new android.widget.TextView(currentActivity);
+				information3Text.setText(new android.text.Html.fromHtml("<b>Tips and tricks:</b>" +
 					'<br>-<i>Turrets</i>: Place 4 turrets in line, near themselves and they will start to sing "Cara Mia Addio".' +
-					'<br>-<i>Easter egg</i>: There is an easter egg hidden in the "Portal Informations" GUI, try to find it! ;-).' +
+					'<br>-<i>Easter egg</i>: There is an easter egg hidden in the "Portal Information" GUI, try to find it! ;-).' +
 					"<br>Can't find it? Try to long press all the buttons in the GUI."));
-				layoutInformations.addView(informations3Text);
+				layoutInformation.addView(information3Text);
 
-				var backInformationsButton = minecraftButton("Back");
-				backInformationsButton.setOnClickListener(new android.view.View.OnClickListener()
+				var backInformationButton = minecraftButton("Back");
+				backInformationButton.setOnClickListener(new android.view.View.OnClickListener()
 				{
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsForPortalGUI();
+						informationForPortalGUI();
 					}
 				});
-				layoutInformations.addView(backInformationsButton);
+				layoutInformation.addView(backInformationButton);
 				
-				var exitInformationsButton = minecraftButton("Close");
-				exitInformationsButton.setOnClickListener(new android.view.View.OnClickListener()
+				var exitInformationButton = minecraftButton("Close");
+				exitInformationButton.setOnClickListener(new android.view.View.OnClickListener()
 				{
 					onClick: function()
 					{
 						dismissAllUIs();
 					}
 				});
-				layoutInformations.addView(exitInformationsButton);
+				layoutInformation.addView(exitInformationButton);
 				
-				popupInformations = minecraftPopup(scrollInformations);
-				popupInformations.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.CENTER, 0, 0);
+				popupInformation = minecraftPopup(scrollInformation);
+				popupInformation.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.CENTER, 0, 0);
 
 			}catch(err)
 			{
@@ -4327,7 +4327,7 @@ function settingsGUI()
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsForPortalGUI();
+						informationForPortalGUI();
 					}
 				});
 				layoutSettings.addView(backSettingsButton);
@@ -4457,7 +4457,7 @@ function suggestionsMapMakerGUI()
 				scrollSuggestions.addView(layoutSuggestions);
 			
 				var suggestions1Text = new android.widget.TextView(currentActivity);
-				suggestions1Text.setText(new android.text.Html.fromHtml("<br>-You shouldn't give to the player the 'Portal Informations' item, because with this item the player can obtain the Aperture Lab equipment and use it for complete the chambers in an easier way.<br><br>" +
+				suggestions1Text.setText(new android.text.Html.fromHtml("<br>-You shouldn't give to the player the 'Portal Information' item, because with this item the player can obtain the Aperture Lab equipment and use it for complete the chambers in an easier way.<br><br>" +
 					'-If one or more of your levels/chambers require mobs support you can place a sign and say to the player that he have to type in chat "/enable" or "/mobs-support" to play this level/chamber, then he can disable the mobs support setting by typing in chat "/disable" or "/no-mobs".<br><br>' +
 					"-You should place the 'Portal Jukebox' at the start or at the end of your map.<br><br>" + 
 					"-When you finish the map you can upload it and make a thread at the minecraftforum.net site.<br><br>" +
@@ -4855,7 +4855,7 @@ function updateAvailableGUI()
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsForPortalGUI();
+						informationForPortalGUI();
 					}
 				});
 				layoutUpdates.addView(backButton);
@@ -4984,7 +4984,7 @@ function supportGUI()
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsForPortalGUI();
+						informationForPortalGUI();
 					}
 				});
 				layoutSupport.addView(backSupportButton);
@@ -5042,7 +5042,7 @@ function creditsGUI()
 					onClick: function()
 					{
 						dismissAllUIs();
-						informationsForPortalGUI();
+						informationForPortalGUI();
 					}
 				});
 				layoutCredits.addView(backCreditsButton);
@@ -5598,7 +5598,7 @@ function customMapsGUI()
 				{ 
 					onClick: function()
 					{
-						informationsForPortalGUI();
+						informationForPortalGUI();
 						popupCustomMaps.dismiss();
 					}
 				}); 

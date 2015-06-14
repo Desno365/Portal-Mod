@@ -18,6 +18,14 @@ SOFTWARE.
 const CURRENT_VERSION = "r009";
 var latestVersion;
 
+// minecraft variables
+const GameMode = {
+	SURVIVAL: 0,
+	CREATIVE: 1
+};
+const ITEM_CATEGORY_TOOL = 3; // 3 seems to be the category of the tools
+const VEL_Y_OFFSET = -0.07840000092983246;
+
 //initialize variables
 var countdownInitialized = 0;
 var initialized = true;
@@ -66,7 +74,7 @@ var currentGGButtonsDisplayed = false;
 var ggMob;
 
 //long fall boots variables
-var infiniteHealth = false;
+var isFalling = false;
 var countdownHealth = 0;
 var previousHealth;
 
@@ -1690,40 +1698,42 @@ function modTick()
 	}
 
 	//long fall boots
-	if(infiniteHealth)
-	{
-		if(Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ())))
-		{
-			countdownHealth++;
-			if(countdownHealth == 1)
-			{
-				var random = Math.floor((Math.random() * 2) + 1);
-				ModPE.playSoundFromFile("long_fall_boots/futureshoes" + random + ".wav");
-			}
-			if(countdownHealth == 2)
-			{
-				Player.setHealth(20);
-				infiniteHealth = false;
-				countdownHealth = 0;
-				Player.setHealth(previousHealth);
-				if(Player.getArmorSlotDamage(3) >= 1400)
-					ModPE.showTipMessage("Long fall boots are about to break. Damage: " + Player.getArmorSlotDamage(3) + ".");
-				if(Player.getArmorSlot(3) != 305)
-					ModPE.showTipMessage("Long fall boots are broken.");
-			}
-		}
-	}
 	if(Player.getArmorSlot(3) == 305)
 	{
-		if(Entity.getVelY(Player.getEntity()) <= -0.6 && !infiniteHealth)
+		if(Entity.getVelY(Player.getEntity()) <= -0.5 && !isFalling)
 		{
-			previousHealth = Entity.getHealth(Player.getEntity());
-			if(previousHealth > 20)
+			// Player is falling
+			if(Level.getGameMode() == GameMode.SURVIVAL)
+				Entity.addEffect(Player.getEntity(), MobEffect.jump, 999999, 254, false, false);
+
+			isFalling = true;
+		}
+
+		if(isFalling)
+		{
+			if(Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ())) > 0)
 			{
-				previousHealth = 20;
+				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
+				{
+					var random = Math.floor((Math.random() * 2) + 1);
+					ModPE.playSoundFromFile("long_fall_boots/futureshoes" + random + ".wav");
+
+					isFalling = false;
+
+					if(Level.getGameMode() == GameMode.SURVIVAL)
+					{
+						// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
+						//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
+						Entity.removeAllEffects(Player.getEntity());
+					}
+
+					// NOTE: no damage to boots with the jump effect
+					if(Player.getArmorSlotDamage(3) >= 1400)
+						ModPE.showTipMessage("Long fall boots are about to break. Damage: " + Player.getArmorSlotDamage(3) + ".");
+					if(Player.getArmorSlot(3) != 305)
+						ModPE.showTipMessage("Long fall boots are broken.");
+				}
 			}
-			Player.setHealth(9999);
-			infiniteHealth = true;
 		}
 	}
 	

@@ -224,6 +224,7 @@ Item.addShapedRecipe(470, 1, 0, [
 	" d ",
 	"f f"], ["f", 265, 0, "d", 264, 0]);
 Item.setCategory(470, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(470);
 
 Item.defineItem(471, "portalgungold", 0, "PortalGun Gold");
 Item.setMaxDamage(471, 500);
@@ -232,6 +233,7 @@ Item.addShapedRecipe(471, 1, 0, [
 	" g ",
 	"f f"], ["f", 265, 0, "g", 266, 0]);
 Item.setCategory(471, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(471);
 
 Item.defineItem(472, "portalguniron", 0, "PortalGun Iron");
 Item.setMaxDamage(472, 250);
@@ -240,6 +242,7 @@ Item.addShapedRecipe(472, 1, 0, [
 	"f f",
 	"fff"], ["f", 265, 0]);
 Item.setCategory(472, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(472);
 
 Item.defineItem(473, "portalgunlava", 0, "PortalGun Lava");
 Item.setMaxDamage(473, 200);
@@ -248,6 +251,7 @@ Item.addShapedRecipe(473, 1, 0, [
 	" a ",
 	"f f"], ["f", 265, 0, "a", 259, 0]);
 Item.setCategory(473, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(473);
 
 Item.defineItem(474, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
 Item.setMaxDamage(474, 100);
@@ -256,9 +260,11 @@ Item.addShapedRecipe(474, 1, 0, [
 	"s s",
 	"sws"], ["s", 98, 0, "w", 17, 0]);
 Item.setCategory(474, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(474);
 
 Item.defineItem(477, "portalgunorange", 0, "PortalGun");
 Item.setMaxDamage(477, 1000);
+Item.setVerticalRender(477);
 
 Item.defineItem(479, "gravitygun", 0, "GravityGun");
 Item.setMaxDamage(479, 400);
@@ -267,6 +273,7 @@ Item.addShapedRecipe(479, 1, 0, [
 	"r r",
 	"frf"], ["f", 265, 0, "r", 331, 0]);
 Item.setCategory(479, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(479);
 
 Item.defineItem(480, "turretoptions", 0, "Turret Options");
 Item.setCategory(480, ITEM_CATEGORY_TOOL);

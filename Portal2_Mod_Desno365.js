@@ -188,63 +188,100 @@ currentActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 var displayHeight = metrics.heightPixels;
 var displayWidth = metrics.widthPixels;
 var deviceDensity = android.content.Context(currentActivity).getResources().getDisplayMetrics().density;
+
+// item functions needed on load
+Item.setVerticalRender = function(id)
+{
+	try {
+		Item.setHandEquipped(id, true);
+	} catch(e) { /* old version of BlockLauncher */ }
+}
+Item.defineItem = function(id, textureName, textureNumber, name, stackLimit)
+{
+	try
+	{
+		if(stackLimit > 0)
+			ModPE.setItem(id, textureName, textureNumber, name, stackLimit);
+		else
+			ModPE.setItem(id, textureName, textureNumber, name);
+	}catch(e)
+	{
+		// user hasn't installed the texture pack
+		if(!textureUiShowed)
+			pleaseInstallTextureUI();
+
+		if(stackLimit > 0)
+			ModPE.setItem(id, "skull_zombie", 0, name, stackLimit);
+		else
+			ModPE.setItem(id, "skull_zombie", 0, name);
+	}
+}
 	
-ModPE.setItem(470, "record_11", 0, "PortalGun");
+Item.defineItem(470, "portalgunblue", 0, "PortalGun");
 Item.setMaxDamage(470, 1000);
 Item.addShapedRecipe(470, 1, 0, [
 	"f f",
 	" d ",
 	"f f"], ["f", 265, 0, "d", 264, 0]);
+Item.setCategory(470, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(471, "record_13", 0, "PortalGun Gold");
+Item.defineItem(471, "portalgungold", 0, "PortalGun Gold");
 Item.setMaxDamage(471, 500);
 Item.addShapedRecipe(471, 1, 0, [
 	"f f",
 	" g ",
 	"f f"], ["f", 265, 0, "g", 266, 0]);
+Item.setCategory(471, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(472, "record_blocks", 0, "PortalGun Iron");
+Item.defineItem(472, "portalguniron", 0, "PortalGun Iron");
 Item.setMaxDamage(472, 250);
 Item.addShapedRecipe(472, 1, 0, [
 	"fff",
 	"f f",
 	"fff"], ["f", 265, 0]);
+Item.setCategory(472, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(473, "record_cat", 0, "PortalGun Lava");
+Item.defineItem(473, "portalgunlava", 0, "PortalGun Lava");
 Item.setMaxDamage(473, 200);
 Item.addShapedRecipe(473, 1, 0, [
 	"f f",
 	" a ",
 	"f f"], ["f", 265, 0, "a", 259, 0]);
+Item.setCategory(473, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(474, "record_chirp", 0, "PortalGun Wood & Stone");
+Item.defineItem(474, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
 Item.setMaxDamage(474, 100);
 Item.addShapedRecipe(474, 1, 0, [
 	"sws",
 	"s s",
 	"sws"], ["s", 98, 0, "w", 17, 0]);
+Item.setCategory(474, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(477, "record_far", 0, "PortalGun");
+Item.defineItem(477, "portalgunorange", 0, "PortalGun");
 Item.setMaxDamage(477, 1000);
 
-ModPE.setItem(479, "record_mellohi", 0, "GravityGun");
+Item.defineItem(479, "gravitygun", 0, "GravityGun");
 Item.setMaxDamage(479, 400);
 Item.addShapedRecipe(479, 1, 0, [
 	"frf",
 	"r r",
 	"frf"], ["f", 265, 0, "r", 331, 0]);
+Item.setCategory(479, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(480, "record_stal", 0, "Turrets Options");
+Item.defineItem(480, "turretoptions", 0, "Turret Options");
+Item.setCategory(480, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(478, "record_strad", 0, "Turret");
+Item.defineItem(478, "turret", 0, "Turret");
+Item.setCategory(478, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(475, "record_wait", 0, "Portal Information");
+Item.defineItem(475, "portalinfo", 0, "Portal Information");
 Item.addShapedRecipe(475, 1, 0, [
 	"   ",
 	" w ",
 	"   "], ["w", 17, 0]);
+Item.setCategory(475, ITEM_CATEGORY_TOOL);
 
-ModPE.setItem(476, "record_ward", 0, "Long Fall Boot");
+Item.defineItem(476, "longfallboot", 0, "Long Fall Boot");
 Item.addShapedRecipe(476, 1, 0, [
 	"   ",
 	"f f",
@@ -257,18 +294,34 @@ Item.addShapedRecipe(305, 1, 0, [
 	"   ",
 	"l l"], ["l", 476, 0,]);
 
+// block functions needed on load
+Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
+{
+	try
+	{
+		Block.defineBlock(id, name, textureNames, sourceId, opaque, renderType);
+	} catch(e)
+	{
+		// user hasn't installed the texture pack
+		if(!textureUiShowed)
+			pleaseInstallTextureUI();
+
+		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
+	}
+}
+
 
 //Block.setShape(blockId, minX, minY, minZ, maxX, maxY, maxZ);
 // Type 1
 //orange z min down
-Block.defineBlock(187, "Orange portal z-min-d", "repeater_off");
+Block.newBlock(187, "Orange portal z-min-d", "portalorangedown");
 Block.setShape(187, 0, 0, 0, 1, 1, 0);
 Block.setDestroyTime(187, 3);
 Block.setRenderLayer(187, 1);
 //Block.setLightLevel(187, 5);
 
 //orange z min up
-Block.defineBlock(188, "Orange portal z-min-up", "repeater_on");
+Block.newBlock(188, "Orange portal z-min-up", "portalorangeup");
 Block.setShape(188, 0, 0, 0, 1, 1, 0);
 Block.setDestroyTime(188, 3);
 Block.setRenderLayer(188, 1);
@@ -277,14 +330,14 @@ Block.setRenderLayer(188, 1);
 
 // Type 2
 //orange z max down
-Block.defineBlock(189, "Orange portal z-max-d", "repeater_off");
+Block.newBlock(189, "Orange portal z-max-d", "portalorangedown");
 Block.setShape(189, 0, 0, 1, 1, 1, 1);
 Block.setDestroyTime(189, 3);
 Block.setRenderLayer(189, 1);
 //Block.setLightLevel(189, 5);
 
 //orange z max up
-Block.defineBlock(190, "Orange portal z-max-up", "repeater_on");
+Block.newBlock(190, "Orange portal z-max-up", "portalorangeup");
 Block.setShape(190, 0, 0, 1, 1, 1, 1);
 Block.setDestroyTime(190, 3);
 Block.setRenderLayer(190, 1);
@@ -293,14 +346,14 @@ Block.setRenderLayer(190, 1);
 
 // Type 3
 //orange y min down
-Block.defineBlock(191, "Orange portal y-min-d", "repeater_off");
+Block.newBlock(191, "Orange portal y-min-d", "portalorangedown");
 Block.setShape(191, 0, 0, 0, 1, 0, 1);
 Block.setDestroyTime(191, 3);
 Block.setRenderLayer(191, 1);
 //Block.setLightLevel(191, 5);
 
 //orange y min up
-Block.defineBlock(192, "Orange portal y-min-up", "repeater_on");
+Block.newBlock(192, "Orange portal y-min-up", "portalorangeup");
 Block.setShape(192, 0, 0, 0, 1, 0, 1);
 Block.setDestroyTime(192, 3);
 Block.setRenderLayer(192, 1);
@@ -309,14 +362,14 @@ Block.setRenderLayer(192, 1);
 
 // Type 4
 //orange y max down
-Block.defineBlock(193, "Orange portal y-max-d", "repeater_off");
+Block.newBlock(193, "Orange portal y-max-d", "portalorangedown");
 Block.setShape(193, 0, 1, 0, 1, 1, 1);
 Block.setDestroyTime(193, 3);
 Block.setRenderLayer(193, 1);
 //Block.setLightLevel(193, 5);
 
 //orange y max up
-Block.defineBlock(194, "Orange portal y-max-up", "repeater_on");
+Block.newBlock(194, "Orange portal y-max-up", "portalorangeup");
 Block.setShape(194, 0, 1, 0, 1, 1, 1);
 Block.setDestroyTime(194, 3);
 Block.setRenderLayer(194, 1);
@@ -325,14 +378,14 @@ Block.setRenderLayer(194, 1);
 
 // Type 5
 //orange x min down
-Block.defineBlock(195, "Orange portal x-min-d", "repeater_off");
+Block.newBlock(195, "Orange portal x-min-d", "portalorangedown");
 Block.setShape(195, 0, 0, 0, 0, 1, 1);
 Block.setDestroyTime(195, 3);
 Block.setRenderLayer(195, 1);
 //Block.setLightLevel(195, 5);
 
 //orange x min up
-Block.defineBlock(196, "Orange portal x-min-up", "repeater_on");
+Block.newBlock(196, "Orange portal x-min-up", "portalorangeup");
 Block.setShape(196, 0, 0, 0, 0, 1, 1);
 Block.setDestroyTime(196, 3);
 Block.setRenderLayer(196, 1);
@@ -341,14 +394,14 @@ Block.setRenderLayer(196, 1);
 
 // Type 6
 //orange x max down
-Block.defineBlock(197, "Orange portal x-max-d", "repeater_off");
+Block.newBlock(197, "Orange portal x-max-d", "portalorangedown");
 Block.setShape(197, 1, 0, 0, 1, 1, 1);
 Block.setDestroyTime(197, 3);
 Block.setRenderLayer(197, 1);
 //Block.setLightLevel(197, 5);
 
 //orange x max up
-Block.defineBlock(198, "Orange portal x-max-up", "repeater_on");
+Block.newBlock(198, "Orange portal x-max-up", "portalorangeup");
 Block.setShape(198, 1, 0, 0, 1, 1, 1);
 Block.setDestroyTime(198, 3);
 Block.setRenderLayer(198, 1);
@@ -357,14 +410,14 @@ Block.setRenderLayer(198, 1);
 
 // Type 1
 //blue z min down
-Block.defineBlock(199, "Blue portal z-min-d", [["enchanting_table_side", 0]]);
+Block.newBlock(199, "Blue portal z-min-d", "portalbluedown");
 Block.setShape(199, 0, 0, 0, 1, 1, 0);
 Block.setDestroyTime(199, 3);
 Block.setRenderLayer(199, 1);
 //Block.setLightLevel(199, 5);
 
 //blue z min up
-Block.defineBlock(200, "Blue portal z-min-up", [["enchanting_table_top", 0]]);
+Block.newBlock(200, "Blue portal z-min-up", "portalblueup");
 Block.setShape(200, 0, 0, 0, 1, 1, 0);
 Block.setDestroyTime(200, 3);
 Block.setRenderLayer(200, 1);
@@ -373,14 +426,14 @@ Block.setRenderLayer(200, 1);
 
 // Type 2
 //blue z max down
-Block.defineBlock(201, "Blue portal z-max-d", [["enchanting_table_side", 0]]);
+Block.newBlock(201, "Blue portal z-max-d", "portalbluedown");
 Block.setShape(201, 0, 0, 1, 1, 1, 1);
 Block.setDestroyTime(201, 3);
 Block.setRenderLayer(201, 1);
 //Block.setLightLevel(201, 5);
 
 //blue z max up
-Block.defineBlock(202, "Blue portal z-max-up", [["enchanting_table_top", 0]]);
+Block.newBlock(202, "Blue portal z-max-up", "portalblueup");
 Block.setShape(202, 0, 0, 1, 1, 1, 1);
 Block.setDestroyTime(202, 3);
 Block.setRenderLayer(202, 1);
@@ -389,14 +442,14 @@ Block.setRenderLayer(202, 1);
 
 // Type 3
 //blue y min down
-Block.defineBlock(203, "Blue portal y-min-d", [["enchanting_table_side", 0]]);
+Block.newBlock(203, "Blue portal y-min-d", "portalbluedown");
 Block.setShape(203, 0, 0, 0, 1, 0, 1);
 Block.setDestroyTime(203, 3);
 Block.setRenderLayer(203, 1);
 //Block.setLightLevel(203, 5);
 
 //blue y min up
-Block.defineBlock(204, "Blue portal y-min-up", [["enchanting_table_top", 0]]);
+Block.newBlock(204, "Blue portal y-min-up", "portalblueup");
 Block.setShape(204, 0, 0, 0, 1, 0, 1);
 Block.setDestroyTime(204, 3);
 Block.setRenderLayer(204, 1);
@@ -405,14 +458,14 @@ Block.setRenderLayer(204, 1);
 
 // Type 4
 //blue y max down
-Block.defineBlock(205, "Blue portal y-max-d", [["enchanting_table_side", 0]]);
+Block.newBlock(205, "Blue portal y-max-d", "portalbluedown");
 Block.setShape(205, 0, 1, 0, 1, 1, 1);
 Block.setDestroyTime(205, 3);
 Block.setRenderLayer(205, 1);
 //Block.setLightLevel(205, 5);
 
 //blue y max up
-Block.defineBlock(206, "Blue portal y-max-up", [["enchanting_table_top", 0]]);
+Block.newBlock(206, "Blue portal y-max-up", "portalblueup");
 Block.setShape(206, 0, 1, 0, 1, 1, 1);
 Block.setDestroyTime(206, 3);
 Block.setRenderLayer(206, 1);
@@ -421,14 +474,14 @@ Block.setRenderLayer(206, 1);
 
 // Type 5
 //blue x min down
-Block.defineBlock(207, "Blue portal x-min-d", [["enchanting_table_side", 0]]);
+Block.newBlock(207, "Blue portal x-min-d", "portalbluedown");
 Block.setShape(207, 0, 0, 0, 0, 1, 1);
 Block.setDestroyTime(207, 3);
 Block.setRenderLayer(207, 1);
 //Block.setLightLevel(207, 5);
 
 //blue x min up
-Block.defineBlock(208, "Blue portal x-min-up", [["enchanting_table_top", 0]]);
+Block.newBlock(208, "Blue portal x-min-up", "portalblueup");
 Block.setShape(208, 0, 0, 0, 0, 1, 1);
 Block.setDestroyTime(208, 3);
 Block.setRenderLayer(208, 1);
@@ -437,51 +490,51 @@ Block.setRenderLayer(208, 1);
 
 // Type 6
 //blue x max down
-Block.defineBlock(209, "Blue portal x-max-d", [["enchanting_table_side", 0]]);
+Block.newBlock(209, "Blue portal x-max-d", "portalbluedown");
 Block.setShape(209, 1, 0, 0, 1, 1, 1);
 Block.setDestroyTime(209, 3);
 Block.setRenderLayer(209, 1);
 //Block.setLightLevel(209, 5);
 
 //blue x max up
-Block.defineBlock(210, "Blue portal x-max-up", [["enchanting_table_top", 0]]);
+Block.newBlock(210, "Blue portal x-max-up", "portalblueup");
 Block.setShape(210, 1, 0, 0, 1, 1, 1);
 Block.setDestroyTime(210, 3);
 Block.setRenderLayer(210, 1);
 //Block.setLightLevel(210, 5);
 
 
-Block.defineBlock(220, "Portal Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]]);
+Block.newBlock(220, "Portal Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]]);
 Block.setDestroyTime(220, 1);
-Block.defineBlock(221, "Jumper", [["enchanting_table_bottom", 0]]);
+Block.newBlock(221, "Jumper", "jumper");
 Block.setDestroyTime(221, 1);
 
 //radio
-Block.defineBlock(222, "Portal Radio", [["cauldron_top", 0], ["cauldron_top", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0], ["brewing_stand", 0], ["brewing_stand_base", 0]]);
+Block.newBlock(222, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]]);
 Block.setDestroyTime(222, 1);
 Block.setShape(222, 5/16, 0, 0, 11/16, 10/16, 1);
 Block.setRenderLayer(222, 1);
-Block.defineBlock(223, "Portal Radio", [["cauldron_top", 0], ["cauldron_top", 0], ["brewing_stand", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0]]);
+Block.newBlock(223, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]]);
 Block.setDestroyTime(223, 1);
 Block.setShape(223, 0, 0, 5/16, 1, 10/16, 11/16);
 Block.setRenderLayer(223, 1);
-Block.defineBlock(224, "Portal Radio", [["cauldron_top", 0], ["cauldron_top", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0], ["brewing_stand", 0]]);
+Block.newBlock(224, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]]);
 Block.setDestroyTime(224, 1);
 Block.setShape(224, 5/16, 0, 0, 11/16, 10/16, 1);
 Block.setRenderLayer(224, 1);
-Block.defineBlock(225, "Portal Radio", [["cauldron_top", 0], ["cauldron_top", 0], ["brewing_stand_base", 0], ["brewing_stand", 0], ["brewing_stand_base", 0], ["brewing_stand_base", 0]]);
+Block.newBlock(225, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]]);
 Block.setDestroyTime(225, 1);
 Block.setShape(225, 0, 0, 5/16, 1, 10/16, 11/16);
 Block.setRenderLayer(225, 1);
 
 //blue gel
-Block.defineBlock(226, "Repulsion Gel Block", [["wool", 3]]);
+Block.newBlock(226, "Repulsion Gel Block", [["wool", 3]]);
 //Block.setShape(226, 0, 0, 0, 1, 1/16, 1);
 Block.setDestroyTime(226, 5);
 //Block.setRenderLayer(226, 1);
 
 //orange gel
-Block.defineBlock(227, "Propulsion Gel Block", [["wool", 1]]);
+Block.newBlock(227, "Propulsion Gel Block", [["wool", 1]]);
 //Block.setShape(227, 0, 0, 0, 1, 1/16, 1);
 Block.setDestroyTime(227, 5);
 //Block.setRenderLayer(227, 1);
@@ -712,7 +765,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			clientMessage("For now you can't spawn more than 20 turrets.");
 		else
 		{
-			ModPE.showTipMessage("Hit the turret with 'Turrets Options' to make it aggressive.");
+			ModPE.showTipMessage("Hit the turret with 'Turret Options' to make it aggressive.");
 
 			turrets[spawnedTurretsNumber] = new turret(Level.spawnMob(x + 0.5, y + 0.8, z + 0.5, 11, "mob/turret.png"));
 			Entity.setHealth(turrets[spawnedTurretsNumber].entity, 1);
@@ -3780,6 +3833,14 @@ function dismissAllUIs()
 // GUI functions
 //########################################################################################################################################################
 
+//########## used to make UI functions ##########
+function dividerText()
+{
+	var dividerText = new android.widget.TextView(currentActivity);
+	dividerText.setText(" ");
+	return dividerText;
+}
+
 function minecraftPopup(view)
 {
 	var popup = new android.widget.PopupWindow();
@@ -3956,7 +4017,7 @@ function createCorrectButtonsImages()
 		}
 	});
 }
-
+//########## used to make UI functions - END ##########
 
 function informationForPortalGUI()
 {
@@ -4124,7 +4185,7 @@ function informationGUI()
 				information2Text.setText(new android.text.Html.fromHtml("<b>Other Items:</b>" +
 					"<br>-<i>GravityGun</i>: Hit a mob with this item to pick it, then you can bring it everywhere or shoot it." +
 					"<br>-<i>Turret</i>: Tap on a block with this item to spawn a turret." +
-					"<br>-<i>Turrets options</i>: Hit a turret with this item to display the options GUI." +
+					"<br>-<i>Turret options</i>: Hit a turret with this item to display the options GUI." +
 					"<br>-<i>Long fall boots</i>: When you fall from a great height these boots prevent damage to you." +
 					"<br>-<i>Jumper</i>: When someone go above this block he will make a powerful jump." + 
 					"<br>-<i>Portal Jukebox</i>: Tap this block to open the GUI that consent you to listen to the beautiful songs of the Portal game." +
@@ -5252,6 +5313,58 @@ function turretsOptionsGUI(id)
 			{
 				clientMessage("Error: " + err);
 				clientMessage("Maybe GUI is not supported for your device. Report this error in the official minecraftforum.net thread, please.");
+			}
+		}
+	});
+}
+
+var textureUiShowed = false;
+function pleaseInstallTextureUI()
+{
+	textureUiShowed = true;
+	currentActivity.runOnUiThread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			try
+			{
+				var layout = new android.widget.LinearLayout(currentActivity);
+				var padding = Math.floor(8 * deviceDensity);
+				layout.setPadding(padding, padding, padding, padding);
+				layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+
+				var scroll = new android.widget.ScrollView(currentActivity);
+				scroll.addView(layout);
+
+				var popup = new android.app.Dialog(currentActivity);
+				popup.setContentView(scroll);
+				popup.setTitle(new android.text.Html.fromHtml("Texture not installed"));
+				popup.setCanceledOnTouchOutside(false);
+
+				var text = new android.widget.TextView(currentActivity);
+				text.setText(new android.text.Html.fromHtml("Seems that you haven't installed the Portal Mod texture pack.<br><br>Please install the Texture Pack of the mod and <b>restart BlockLauncher</b> to enjoy all the features of the Portal 2 Mod."));
+				layout.addView(text);
+
+				layout.addView(dividerText());
+
+				var exitButton = new android.widget.Button(currentActivity);
+				exitButton.setText("OK");
+				exitButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						textureUiShowed = false;
+						popup.dismiss();
+					}
+				});
+				layout.addView(exitButton);
+
+
+				popup.show();
+
+			} catch(err)
+			{
+				print("Error: " + err);
 			}
 		}
 	});

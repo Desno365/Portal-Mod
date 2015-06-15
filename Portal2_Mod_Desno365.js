@@ -29,7 +29,6 @@ const VEL_Y_OFFSET = -0.07840000092983246;
 //initialize variables
 var countdownInitialized = 0;
 var initialized = true;
-var initCreativeItems = true;
 var leftGame = true;
 
 //change carried item variables
@@ -518,8 +517,10 @@ function selectLevelHook()
 function newLevel()
 {
 	leftGame = false;
-	if(initCreativeItems)
+
+	if(Level.getGameMode() == GameMode.CREATIVE)
 	{
+		// crashes in survival
 		Player.addItemCreativeInv(ID_PORTAL_INFORMATION, 1);
 		Player.addItemCreativeInv(ID_PORTAL_GUN_BLUE, 1);
 		Player.addItemCreativeInv(ID_PORTAL_GUN_GOLD, 1);
@@ -537,7 +538,6 @@ function newLevel()
 		Player.addItemCreativeInv(PORTAL_RADIO_D, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
-		initCreativeItems = false;
 	}
 	
 	var bSizeTest = ModPE.readData("bSize");

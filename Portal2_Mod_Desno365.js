@@ -538,9 +538,6 @@ function newLevel()
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 		initCreativeItems = false;
 	}
-	currentActivity.runOnUiThread(new java.lang.Runnable(){run: function(){
-		android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal</b>: Checking for updates, please wait..."), 0).show();
-	}});
 	
 	var bSizeTest = ModPE.readData("bSize");
 	if(bSizeTest != "" && bSizeTest != null && bSizeTest != undefined)
@@ -591,14 +588,26 @@ function newLevel()
 			background.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
 		}
 	}
-	
-	getLatestVersionPortalMod();
-	if(latestVersion != CURRENT_VERSION && latestVersion != undefined)
-		updateAvailableGUI();
+
+	new java.lang.Thread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			getLatestVersionMod();
+			if(latestVersion != CURRENT_VERSION && latestVersion != undefined)
+				updateAvailableUI();
+			else
+			{
+				currentActivity.runOnUiThread(new java.lang.Runnable() {
+					run: function() {
+						android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2 Mod</b>: You have the latest version."), 0).show();
+					}
+				});
+			}
+		}
+	}).start();
 
 	clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
-	clientMessage("§fPortal Mod it's in §cBETA§f!");
-	clientMessage("If you have suggestions or if you find bugs, report them in the mincraftforum.net thread.");
 
 	ModPE.playSoundFromFile("game-entry1.wav");
 }
@@ -3663,34 +3672,34 @@ function saveTurrets()
 
 
 //########## internet functions ##########
-function getLatestVersionPortalMod()
+function getLatestVersionMod()
 {
 	try
 	{
-		var versionFile = new java.io.File(minecraftpePath + modSaveFolder + "/portalUpdatesFile.dat");
-		if(versionFile.exists())
-			versionFile.delete();
-		versionFile.createNewFile();
-		var streamVersionOutput = new java.io.FileOutputStream(versionFile);
-		var download = android.net.http.AndroidHttpClient.newInstance("getLatestVersionPortalMod()").execute(new org.apache.http.client.methods.HttpGet("https://raw.githubusercontent.com/Desno365/MCPE-scripts/master/portalMOD-version")).getEntity().writeTo(streamVersionOutput);
-		streamVersionOutput.close();
-		if(versionFile.exists())
+		// download content
+		var url = new java.net.URL("https://raw.githubusercontent.com/Desno365/MCPE-scripts/master/portalMOD-version");
+		var connection = url.openConnection();
+ 
+		// get content
+		inputStream = connection.getInputStream();
+ 
+		// read result
+		var loadedVersion = "";
+		var bufferedVersionReader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
+		var rowVersion = "";
+		while((rowVersion = bufferedVersionReader.readLine()) != null)
 		{
-			var loadedVersion = "";
-			var streamVersionInput = new java.io.FileInputStream(versionFile);
-			var bufferedVersionReader = new java.io.BufferedReader(new java.io.InputStreamReader(streamVersionInput));
-			var rowVersion = "";
-			while((rowVersion = bufferedVersionReader.readLine()) != null)
-			{
-				loadedVersion += rowVersion;
-			}
-			latestVersion = loadedVersion.split(" ");
-			bufferedVersionReader.close();
-			versionFile.delete();
+			loadedVersion += rowVersion;
 		}
-	}catch(err)
+		latestVersion = loadedVersion.split(" ")[0];
+ 
+		// close what needs to be closed
+		bufferedVersionReader.close();
+		inputStream.close();
+	} catch(err)
 	{
-		clientMessage("Error: " + err);
+		clientMessage("Portal Mod: Can't check for updates, please check your Internet connection.");
+		ModPE.log("Portal Mod: getLatestVersionMod(): caught an error: " + err);
 	}
 }
 //########## internet functions - END ##########
@@ -4039,7 +4048,7 @@ function informationForPortalGUI()
 						else
 						{
 							dismissAllUIs();
-							updateAvailableGUI();
+							updateAvailableUI();
 						}
 					}
 				});
@@ -4833,7 +4842,7 @@ function jumperPowerPicker()
 	});
 }
 
-function updateAvailableGUI()
+function updateAvailableUI()
 {
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{

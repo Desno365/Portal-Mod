@@ -328,8 +328,9 @@ Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, 
 	Block.newBlock(id, name, textureName, 0, false);
 	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
 	Block.setDestroyTime(id, 3);
-	Block.setRenderLayer(id, 1);
-	Block.setLightLevel(id, 7);
+	Block.setRenderLayer(id, 5);
+	Block.setLightLevel(id, 3);
+	Block.setLightOpacity(id, 0.01);
 }
 
 // Type 1
@@ -465,22 +466,22 @@ const PORTAL_RADIO_A = 226;
 Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_A, 1);
 Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
-Block.setLightLevel(PORTAL_RADIO_A, 5);
+Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
 const PORTAL_RADIO_B = 227;
 Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_B, 1);
 Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
-Block.setLightLevel(PORTAL_RADIO_B, 5);
+Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
 const PORTAL_RADIO_C = 228;
 Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_C, 1);
 Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
-Block.setLightLevel(PORTAL_RADIO_C, 5);
+Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
 const PORTAL_RADIO_D = 229;
 Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_D, 1);
 Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
-Block.setLightLevel(PORTAL_RADIO_D, 5);
+Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
 
 //blue gel
 const REPULSION_GEL_ID = 230;

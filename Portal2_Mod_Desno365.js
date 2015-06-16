@@ -207,6 +207,20 @@ Item.defineItem = function(id, textureName, textureNumber, name, stackLimit)
 		ModPE.setItem(id, "skull_zombie", 0, name, stackLimit);
 	}
 }
+Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType)
+{
+	try
+	{
+		Item.defineArmor(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType);
+	}catch(e)
+	{
+		// user hasn't installed the texture pack
+		if(!textureUiShowed)
+			pleaseInstallTextureUI();
+
+		Item.defineArmor(id, "skull_zombie", 0, name, "armor/chain_2.png", damageReduceAmount, maxDamage, armorType);
+	}
+}
 
 const ID_PORTAL_INFORMATION = 3650;
 Item.defineItem(ID_PORTAL_INFORMATION, "portalinfo", 0, "Portal Information");
@@ -296,8 +310,9 @@ Item.addShapedRecipe(ID_LONG_FALL_BOOT, 1, 0, [
 	"f f",
 	"r r"], ["f", 265, 0, "r", 331, 0]);
 
-const ID_LONG_FALL_BOOTS = 305;
-ModPE.langEdit("item.bootsChain.name", "Long Fall Boots");
+//Item.defineArmor(int id, String iconName, int iconIndex, String name, String texture, int damageReduceAmount, int maxDamage, int armorType)
+const ID_LONG_FALL_BOOTS = 3660;
+Item.newArmor(ID_LONG_FALL_BOOTS, "longfallboots", 0, "Long Fall Boots", "armor/longfallboots.png", 1, 1500, ArmorType.boots)
 Item.setMaxDamage(ID_LONG_FALL_BOOTS, 1500);
 Item.addShapedRecipe(ID_LONG_FALL_BOOTS, 1, 0, [
 	"   ",
@@ -4857,7 +4872,7 @@ function updateAvailableUI()
 
 				var updatesText = new android.widget.TextView(currentActivity);
 				updatesText.setText(new android.text.Html.fromHtml("New version available, you have the " + CURRENT_VERSION + " version and the latest version is " + latestVersion + ".<br>" +
-					"You can download it at the minecraftforum.net thread (press the button to visit it)."));
+					"You can find a download link on the minecraftforum.net thread (press the button to visit it)."));
 				layoutUpdates.addView(updatesText);
 							
 				var threadButton = minecraftButton("Visit thread");

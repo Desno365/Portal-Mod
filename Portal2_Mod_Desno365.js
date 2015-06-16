@@ -3842,7 +3842,10 @@ function minecraftLayout(title)
 	titleDefault.setPaintFlags(titleDefault.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
 	titleDefault.setTextSize(16);
 	titleDefault.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
-	titleDefault.setShadowLayer(0.001, Math.round(titleDefault.getLineHeight() / 8), Math.round(titleDefault.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
+	if(android.os.Build.VERSION.SDK_INT > 19) // KITKAT
+		titleDefault.setShadowLayer(1, Math.round(titleDefault.getLineHeight() / 8), Math.round(titleDefault.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
+	else
+		titleDefault.setShadowLayer(0.001, Math.round(titleDefault.getLineHeight() / 8), Math.round(titleDefault.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
 	defaultLayout.addView(titleDefault);
 
 	defaultLayout.addView(portalDivider());
@@ -3888,7 +3891,10 @@ function minecraftButton(text)
 	defaultButton.setPaintFlags(defaultButton.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
 	defaultButton.setTextSize(15);
 	defaultButton.setTextColor(android.graphics.Color.parseColor("#FFDDDDDD"));
-	defaultButton.setShadowLayer(0.001, Math.round(defaultButton.getLineHeight() / 8), Math.round(defaultButton.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
+	if(android.os.Build.VERSION.SDK_INT > 19) // KITKAT
+		defaultButton.setShadowLayer(1, Math.round(defaultButton.getLineHeight() / 8), Math.round(defaultButton.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
+	else
+		defaultButton.setShadowLayer(0.001, Math.round(defaultButton.getLineHeight() / 8), Math.round(defaultButton.getLineHeight() / 8), android.graphics.Color.parseColor("#FF333333"));
 	defaultButton.setPadding(0, 0, 0, 0);
 	defaultButton.setLineSpacing(0, 1.15);
 	return defaultButton;
@@ -4956,7 +4962,7 @@ function supportGUI()
 				scrollSupport.addView(layoutSupport);
 			
 				var infoTextSupport = new android.widget.TextView(currentActivity);
-				infoTextSupport.setText("This mod was brought to you with love by Desno365 :)<br>Thank you for playing with it.");
+				infoTextSupport.setText("This mod was brought to you with love by Desno365 :)\nThank you for playing with it.");
 				layoutSupport.addView(infoTextSupport);
 
 				var twitterSupportButton = minecraftButton("Follow me on Twitter");

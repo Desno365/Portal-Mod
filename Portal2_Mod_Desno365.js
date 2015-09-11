@@ -57,6 +57,10 @@ var buttonsSize = BUTTONS_SIZE_DEFAULT;
 var pixelsOffsetButtons = 0;
 var minecraftStyleForButtons = false;
 
+// action variables
+var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
+var blockUnderPlayerBefore = 0;
+
 
 // item functions needed on load
 Item.setVerticalRender = function(id)
@@ -131,6 +135,43 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 	"   ",
 	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
 
+//########################################################################################################################################################
+// Blocks
+//########################################################################################################################################################
+
+// block functions needed on load
+Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
+{
+	try
+	{
+		Block.defineBlock(id, name, textureNames, sourceId, opaque, renderType);
+	} catch(e)
+	{
+		// user hasn't installed the texture pack
+		if(!textureUiShowed)
+			pleaseInstallTextureUI();
+
+		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
+	}
+}
+
+// blue gel
+const REPULSION_GEL_ID = 230;
+Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
+Block.setDestroyTime(REPULSION_GEL_ID, 5);
+
+// orange gel
+const SPEED_MULTIPLIER_MIN = 1.3;
+const SPEED_MULTIPLIER_MAX = 1.65;
+var speedMultiplier = SPEED_MULTIPLIER_MIN;
+const PROPULSION_GEL_ID = 231;
+Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
+Block.setDestroyTime(PROPULSION_GEL_ID, 5);
+
+
+//########################################################################################################################################################
+// Hooks
+//########################################################################################################################################################
 
 function newLevel()
 {
@@ -140,6 +181,9 @@ function newLevel()
 	{
 		// crashes in survival
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
+
+		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
+		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 	}
 
 	new java.lang.Thread(new java.lang.Runnable()
@@ -151,11 +195,14 @@ function newLevel()
 				updateAvailableUI();
 			else
 			{
-				currentActivity.runOnUiThread(new java.lang.Runnable() {
-					run: function() {
-						android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal Mod</b>: You have the latest version."), 0).show();
-					}
-				});
+				if(latestVersion != undefined) // if == undefined there was an error
+				{
+					currentActivity.runOnUiThread(new java.lang.Runnable() {
+						run: function() {
+							android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal Mod</b>: You have the latest version."), 0).show();
+						}
+					});
+				}
 			}
 		}
 	}).start();
@@ -168,8 +215,12 @@ function leaveGame()
 	previousCarriedItem = 0;
 	previousSlotId = 0;
 
+	// Gravity Gun
 	removeGravityGunUI();
 	ggShotBlocks = [];
+
+	// blue gel
+	//beforeWasOnRepulsionBlock = false;
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
@@ -218,7 +269,7 @@ function attackHook(attacker, victim)
 	}
 }
 
-function changeCarriedItemHook(currentItem, previousItem)
+function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 {
 	// remove gravity gun UI
 	if(previousItem == GRAVITY_GUN_ID)
@@ -237,13 +288,35 @@ function changeCarriedItemHook(currentItem, previousItem)
 	}
 }
 
+function jumpHook() // not really an hook
+{
+	if(blockUnderPlayerBefore == REPULSION_GEL_ID)
+	{
+		makeBounceSound();
+	}
+}
+
 function modTick()
 {
+	var blockUnderPlayer = Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()))
+
 	ModTickFunctions.checkChangedCarriedItem();
 
-	ModTickFunctions.longFallBoots();
+	ModTickFunctions.checkJumpHook();
 
 	ModTickFunctions.gravityGun();
+
+	ModTickFunctions.gelBlue(blockUnderPlayer);
+
+	ModTickFunctions.gelOrange(blockUnderPlayer);
+
+	ModTickFunctions.longFallBoots(blockUnderPlayer);
+
+	// player actions
+	velBeforeX = Entity.getVelX(Player.getEntity());
+	velBeforeY = Entity.getVelY(Player.getEntity()); // used also for the blue gel
+	velBeforeZ = Entity.getVelZ(Player.getEntity());
+	blockUnderPlayerBefore = blockUnderPlayer;
 }
 
 var ModTickFunctions = {
@@ -264,53 +337,11 @@ var ModTickFunctions = {
 		previousSlotId = Player.getSelectedSlotId();
 	},
 
-	longFallBoots: function()
+	checkJumpHook: function()
 	{
-		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
+		if(Entity.getVelY(Player.getEntity()) > VEL_Y_OFFSET && velBeforeY == VEL_Y_OFFSET)
 		{
-			// player will hit the ground soon
-			if(isFalling && Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ())) > 0)
-			{
-				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
-				{
-					// STOP Long Fall Boots
-					isFalling = false;
-
-					if(Level.getGameMode() == GameMode.SURVIVAL)
-					{
-						// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
-						//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
-						Entity.removeAllEffects(Player.getEntity());
-					}
-
-					var random = Math.floor((Math.random() * 2) + 1);
-					Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
-				}
-			}
-
-			// player is falling
-			if(Entity.getVelY(Player.getEntity()) <= -0.5)
-			{
-				// START Long Fall Boots
-				isFalling = true;
-
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-					Entity.addEffect(Player.getEntity(), MobEffect.jump, 999999, 254, false, false);
-			}
-		} else
-		{
-			if(isFalling)
-			{
-				// STOP Long Fall Boots
-				isFalling = false;
-
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-				{
-					// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
-					//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
-					Entity.removeAllEffects(Player.getEntity());
-				}
-			}
+			jumpHook();
 		}
 	},
 
@@ -360,6 +391,100 @@ var ModTickFunctions = {
 				ggShotBlocks[i].previousZ = Entity.getZ(entity);
 			}
 		}
+	},
+
+	gelBlue: function(blockUnderPlayer)
+	{
+		if(blockUnderPlayer == REPULSION_GEL_ID)
+		{
+			if(velBeforeY < -0.666) // Satan confirmed!
+			{
+				Entity.setVelY(Player.getEntity(), -velBeforeY);
+				makeBounceSound();
+			}
+
+			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
+		}
+	},
+
+	gelOrange: function(blockUnderPlayer)
+	{
+		if(blockUnderPlayer == PROPULSION_GEL_ID)
+		{
+			currentActivity.runOnUiThread(new java.lang.Runnable(
+			{
+				run: function()
+				{
+					new android.os.Handler().postDelayed(new java.lang.Runnable(
+					{
+						run: function()
+						{
+							if(isInGame)
+							{
+								Entity.setVelX(Player.getEntity(), Entity.getVelX(Player.getEntity()) * speedMultiplier);
+								Entity.setVelZ(Player.getEntity(), Entity.getVelZ(Player.getEntity()) * speedMultiplier);
+									
+								if(speedMultiplier < SPEED_MULTIPLIER_MAX)
+									speedMultiplier = speedMultiplier + 0.025;
+							}
+						}
+					}), ((speedMultiplier - SPEED_MULTIPLIER_MIN) * 1000));
+				}
+			}));		
+		}else
+		{
+			if(speedMultiplier != SPEED_MULTIPLIER_MIN)
+				speedMultiplier = SPEED_MULTIPLIER_MIN;
+		}
+	},
+
+	longFallBoots: function(blockUnderPlayer)
+	{
+		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
+		{
+			// player will hit the ground soon
+			if(isFalling && blockUnderPlayer > 0)
+			{
+				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
+				{
+					// STOP Long Fall Boots
+					isFalling = false;
+
+					if(Level.getGameMode() == GameMode.SURVIVAL)
+					{
+						// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
+						//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
+						Entity.removeAllEffects(Player.getEntity());
+					}
+
+					makeLongFallBootsSound();
+				}
+			}
+
+			// player is falling
+			if(Entity.getVelY(Player.getEntity()) <= -0.5)
+			{
+				// START Long Fall Boots
+				isFalling = true;
+
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Entity.addEffect(Player.getEntity(), MobEffect.jump, 999999, 254, false, false);
+			}
+		} else
+		{
+			if(isFalling)
+			{
+				// STOP Long Fall Boots
+				isFalling = false;
+
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+				{
+					// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
+					//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
+					Entity.removeAllEffects(Player.getEntity());
+				}
+			}
+		}
 	}
 };
 
@@ -369,9 +494,27 @@ var ModTickFunctions = {
 // Added functions (No GUI and No render)
 //########################################################################################################################################################
 
+//########## LONG FALl BOOTS functions ##########
+function makeLongFallBootsSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
+}
+//########## LONG FALl BOOTS functions ##########
+
+//########## BLUE GEL functions ##########
+function makeBounceSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".wav");
+}
+//########## BLUE GEL functions ##########
+
 //########## GRAVITY GUN functions ##########
 function initializeAndShowGravityGunUI()
 {
+	Sound.playFromFileName("gravitygun/equip.ogg");
+
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
 		run: function()
@@ -517,7 +660,7 @@ function dropGravityGun()
 		var x = Player.getX() + (dir.x * 2);
 		var y = Player.getY() + (dir.y * 2.5);
 		var z = Player.getZ() + (dir.z * 2);
-		if(Level.getTile(x, y, z) == 0)
+		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
 		{
 			isGravityGunPicking = false;
 			Sound.playFromFileName("gravitygun/drop.ogg");

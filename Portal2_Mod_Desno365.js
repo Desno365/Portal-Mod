@@ -155,6 +155,10 @@ Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 	}
 }
 
+const JUMPER_ID = 225;
+Block.newBlock(JUMPER_ID, "Jumper", "jumper");
+Block.setDestroyTime(JUMPER_ID, 1);
+
 // blue gel
 const REPULSION_GEL_ID = 230;
 Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
@@ -182,6 +186,7 @@ function newLevel()
 		// crashes in survival
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 
+		Player.addItemCreativeInv(JUMPER_ID, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 	}
@@ -310,6 +315,8 @@ function modTick()
 
 	ModTickFunctions.gelOrange(blockUnderPlayer);
 
+	ModTickFunctions.jumper(blockUnderPlayer);
+
 	ModTickFunctions.longFallBoots(blockUnderPlayer);
 
 	// player actions
@@ -435,6 +442,20 @@ var ModTickFunctions = {
 		{
 			if(speedMultiplier != SPEED_MULTIPLIER_MIN)
 				speedMultiplier = SPEED_MULTIPLIER_MIN;
+		}
+	},
+
+	jumper: function(blockUnderPlayer)
+	{
+		if(blockUnderPlayer == JUMPER_ID)
+		{
+			var random = Math.floor((Math.random() * 4) + 3);
+			Sound.playFromFileName("jumper/alyx_gun_fire" + random + ".wav");
+
+			var jumperDir = getDirection(getYaw(), 0);
+			Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
+			Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
+			Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
 		}
 	},
 

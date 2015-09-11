@@ -44,6 +44,9 @@ var displayWidth = metrics.widthPixels;
 var deviceDensity = metrics.density;
 metrics = null;
 
+// sounds variables
+var radioPlayer = new android.media.MediaPlayer();
+
 // change carried item variables
 var previousCarriedItem = 0;
 var previousSlotId = 0;
@@ -57,7 +60,7 @@ var buttonsSize = BUTTONS_SIZE_DEFAULT;
 var pixelsOffsetButtons = 0;
 var minecraftStyleForButtons = false;
 
-// action variables
+// player interactions variables
 var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
 var blockUnderPlayerBefore = 0;
 
@@ -135,6 +138,19 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 	"   ",
 	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
 
+var isRadioPlaying = false;
+var radioCountdown = 0;
+const MAX_LOGARITHMIC_VOLUME = 20;
+var radioX;
+var radioY;
+var radioZ;
+const RADIO_ID = 3661;
+Item.defineItem(RADIO_ID, "portalradio", 0, "Portal Radio");
+Item.addShapedRecipe(RADIO_ID, 1, 0, [
+	"   ",
+	"iii",
+	"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
+
 //########################################################################################################################################################
 // Blocks
 //########################################################################################################################################################
@@ -155,9 +171,32 @@ Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 	}
 }
 
+// jumper
 const JUMPER_ID = 225;
 Block.newBlock(JUMPER_ID, "Jumper", "jumper");
 Block.setDestroyTime(JUMPER_ID, 1);
+
+// radio
+const PORTAL_RADIO_A = 226;
+Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]], 0, false, 0);
+Block.setDestroyTime(PORTAL_RADIO_A, 1);
+Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
+Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
+const PORTAL_RADIO_B = 227;
+Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
+Block.setDestroyTime(PORTAL_RADIO_B, 1);
+Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
+Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
+const PORTAL_RADIO_C = 228;
+Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
+Block.setDestroyTime(PORTAL_RADIO_C, 1);
+Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
+Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
+const PORTAL_RADIO_D = 229;
+Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
+Block.setDestroyTime(PORTAL_RADIO_D, 1);
+Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
+Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
 
 // blue gel
 const REPULSION_GEL_ID = 230;
@@ -172,6 +211,15 @@ const PROPULSION_GEL_ID = 231;
 Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 Block.setDestroyTime(PROPULSION_GEL_ID, 5);
 
+// cubes
+const CUBE_NORMAL_ID = 232;
+Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
+Block.setDestroyTime(CUBE_NORMAL_ID, -1);
+
+const CUBE_COMPANION_ID = 233;
+Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
+Block.setDestroyTime(CUBE_COMPANION_ID, -1);
+
 
 //########################################################################################################################################################
 // Hooks
@@ -185,10 +233,13 @@ function newLevel()
 	{
 		// crashes in survival
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
+		Player.addItemCreativeInv(RADIO_ID, 1);
 
 		Player.addItemCreativeInv(JUMPER_ID, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
+		Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
+		Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
 	}
 
 	new java.lang.Thread(new java.lang.Runnable()
@@ -220,16 +271,65 @@ function leaveGame()
 	previousCarriedItem = 0;
 	previousSlotId = 0;
 
+	// player interactions
+	velBeforeX = 0;
+	velBeforeY = 0;
+	velBeforeZ = 0;
+	blockUnderPlayerBefore = 0;
+
 	// Gravity Gun
 	removeGravityGunUI();
 	ggShotBlocks = [];
 
-	// blue gel
-	//beforeWasOnRepulsionBlock = false;
+	// radio
+	stopRadioMusic();
+
+	// orange gel
+	speedMultiplier = SPEED_MULTIPLIER_MIN;
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
 {
+	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
+
+	// radio
+	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+	{
+		preventDefault();
+		if(isRadioPlaying && Math.floor(radioX) == Math.floor(x) && Math.floor(radioY) == Math.floor(y) && Math.floor(radioZ) == Math.floor(z))
+		{
+			stopRadioMusic();
+		} else
+		{
+			isRadioPlaying = true;
+			radioX = Math.floor(x) + 0.5;
+			radioY = Math.floor(y);
+			radioZ = Math.floor(z) + 0.5;
+
+			startRadioMusic();
+		}
+	}
+	if(Player.getCarriedItem() == RADIO_ID)
+	{
+		var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
+		if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+		{
+			Level.placeBlockFromItem(x, y, z, side, 229);
+		}
+		if(angle >= 45 && angle < 135)
+		{
+			Level.placeBlockFromItem(x, y, z, side, 226);
+		}
+		if(angle >= 135 && angle < 225)
+		{
+			Level.placeBlockFromItem(x, y, z, side, 227);
+		}
+		if(angle >= 225 && angle < 315)
+		{
+			Level.placeBlockFromItem(x, y, z, side, 228);
+		}
+	}
+
 	// GravityGun
 	if(Player.getCarriedItem() == GRAVITY_GUN_ID && !isGravityGunPicking)
 	{
@@ -319,7 +419,9 @@ function modTick()
 
 	ModTickFunctions.longFallBoots(blockUnderPlayer);
 
-	// player actions
+	ModTickFunctions.radio();
+
+	// player interactions
 	velBeforeX = Entity.getVelX(Player.getEntity());
 	velBeforeY = Entity.getVelY(Player.getEntity()); // used also for the blue gel
 	velBeforeZ = Entity.getVelZ(Player.getEntity());
@@ -506,6 +608,27 @@ var ModTickFunctions = {
 				}
 			}
 		}
+	},
+
+	radio: function()
+	{
+		if(isRadioPlaying)
+		{
+			radioCountdown++;
+			if(radioCountdown >= 10)
+			{
+				radioCountdown = 0;
+				var distancePR = Math.sqrt( (Math.pow(radioX - Player.getX(), 2)) + (Math.pow(radioY - Player.getY(), 2)) + (Math.pow(radioZ - Player.getZ(), 2) ));
+				if(distancePR > MAX_LOGARITHMIC_VOLUME)
+				{
+					stopRadioMusic();
+				}else
+				{
+					radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME));
+					radioPlayer.setVolume(radioVolume, radioVolume);
+				}
+			}
+		}
 	}
 };
 
@@ -522,6 +645,39 @@ function makeLongFallBootsSound()
 	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
 }
 //########## LONG FALl BOOTS functions ##########
+
+//########## RADIO functions ##########
+function startRadioMusic()
+{
+	try
+	{
+		radioPlayer.reset();
+		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.wav");
+		radioPlayer.prepare();
+		radioPlayer.setLooping(true);
+		radioPlayer.setVolume(1.0, 1.0);
+		radioPlayer.start();
+	} catch(err)
+	{
+		ModPE.showTipMessage(getLogText() + "Sounds not installed!");
+		ModPE.log(getLogText() + "Error in startRadioMusic: " + err);
+		stopRadioMusic();
+	}
+}
+
+function stopRadioMusic()
+{
+	isRadioPlaying = false;
+	radioX = 0;
+	radioY = 0;
+	radioZ = 0;
+	radioCountdown = 0;
+	try
+	{
+		radioPlayer.reset();
+	} catch(err) { }
+}
+//########## RADIO functions ##########
 
 //########## BLUE GEL functions ##########
 function makeBounceSound()
@@ -988,6 +1144,60 @@ Level.setTileNotInAir = function(x, y, z, id, data)
 
 	Level.setTile(x, y, z, id, data);
 }
+
+Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
+{
+	if(canBePlacedOnAir == null)
+		canBePlacedOnAir = false; // must be placed on a block
+
+	var canBePlaced = true;
+
+	switch(side)
+	{
+		case 0: // down
+		{
+			y--;
+			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
+				canBePlaced = false;
+			break;
+		}
+		case 1: // up
+		{
+			y++;
+			break;
+		}
+		case 2:
+		{
+			z--;
+			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
+				canBePlaced = false;
+			break;
+		}
+		case 3:
+		{
+			z++;
+			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
+				canBePlaced = false;
+			break;
+		}
+		case 4:
+		{
+			x--;
+			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
+				canBePlaced = false;
+			break;
+		}
+		case 5:
+		{
+			x++;
+			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
+				canBePlaced = false;
+			break;
+		}
+	}
+	if(canBePlaced)
+		Level.setTile(x, y, z, blockId);
+}
 //########## LEVEL functions - END ##########
 
 //########## INTERNET functions ##########
@@ -1092,6 +1302,14 @@ function getLogText()
 {
 	//
 	return("Portal Mod: ");
+}
+
+function normalizeAngle(angle)
+{
+    var newAngle = angle;
+    while (newAngle < 0) newAngle += 360;
+    while (newAngle > 360) newAngle -= 360;
+    return newAngle;
 }
 
 function DroppedItemClass(entity, id, data)

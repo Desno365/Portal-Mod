@@ -26,6 +26,7 @@ const GameMode = {
 	CREATIVE: 1
 };
 const ITEM_CATEGORY_TOOL = 3; // 3 seems to be the category of the tools
+const ITEM_CATEGORY_MATERIAL = 1;
 const VEL_Y_OFFSET = -0.07840000092983246;
 var isInGame = false;
 
@@ -150,6 +151,7 @@ Item.addShapedRecipe(RADIO_ID, 1, 0, [
 	"   ",
 	"iii",
 	"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
+Item.setCategory(RADIO_ID, ITEM_CATEGORY_MATERIAL);
 
 //########################################################################################################################################################
 // Blocks
@@ -214,11 +216,11 @@ Block.setDestroyTime(PROPULSION_GEL_ID, 5);
 // cubes
 const CUBE_NORMAL_ID = 232;
 Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
-Block.setDestroyTime(CUBE_NORMAL_ID, -1);
+Block.setDestroyTime(CUBE_NORMAL_ID, 3);
 
 const CUBE_COMPANION_ID = 233;
 Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
-Block.setDestroyTime(CUBE_COMPANION_ID, -1);
+Block.setDestroyTime(CUBE_COMPANION_ID, 3);
 
 
 //########################################################################################################################################################
@@ -292,6 +294,21 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 {
 	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
 
+	// GravityGun
+	if(Player.getCarriedItem() == GRAVITY_GUN_ID && !isGravityGunPicking)
+	{
+		if(blockId != 7 && blockId != 26 && blockId != 52 && blockId != 54 && blockId != 59 && blockId != 61 && blockId != 62 && blockId != 63 && blockId != 64 && blockId != 68 && blockId != 71 && blockId != 83 && blockId != 90 && blockId != 96 && blockId != 104 && blockId != 105 && blockId != 106 && blockId != 111 && blockId != 115 && blockId != 141 && blockId != 142 && blockId != 207)
+		{
+			pickBlockGravityGun(blockId, Level.getData(x, y, z));
+			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
+		} else
+		{
+			Sound.playFromFileName("gravitygun/fail.ogg");
+			ModPE.showTipMessage("This block can't be picked");
+		}
+		return;
+	}
+
 	// radio
 	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
 	{
@@ -308,39 +325,39 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 
 			startRadioMusic();
 		}
-	}
-	if(Player.getCarriedItem() == RADIO_ID)
+	} else
 	{
-		var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
-		if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+		if(Player.getCarriedItem() == RADIO_ID)
 		{
-			Level.placeBlockFromItem(x, y, z, side, 229);
-		}
-		if(angle >= 45 && angle < 135)
-		{
-			Level.placeBlockFromItem(x, y, z, side, 226);
-		}
-		if(angle >= 135 && angle < 225)
-		{
-			Level.placeBlockFromItem(x, y, z, side, 227);
-		}
-		if(angle >= 225 && angle < 315)
-		{
-			Level.placeBlockFromItem(x, y, z, side, 228);
+			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
+			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+			{
+				Level.placeBlockFromItem(x, y, z, side, 229);
+			}
+			if(angle >= 45 && angle < 135)
+			{
+				Level.placeBlockFromItem(x, y, z, side, 226);
+			}
+			if(angle >= 135 && angle < 225)
+			{
+				Level.placeBlockFromItem(x, y, z, side, 227);
+			}
+			if(angle >= 225 && angle < 315)
+			{
+				Level.placeBlockFromItem(x, y, z, side, 228);
+			}
 		}
 	}
+}
 
-	// GravityGun
-	if(Player.getCarriedItem() == GRAVITY_GUN_ID && !isGravityGunPicking)
+function destroyBlock(x, y, z)
+{	
+	// radio
+	if(isRadioPlaying)
 	{
-		if(blockId != 7 && blockId != 26 && blockId != 52 && blockId != 54 && blockId != 59 && blockId != 61 && blockId != 62 && blockId != 63 && blockId != 64 && blockId != 68 && blockId != 71 && blockId != 83 && blockId != 90 && blockId != 96 && blockId != 104 && blockId != 105 && blockId != 106 && blockId != 111 && blockId != 115 && blockId != 141 && blockId != 142 && blockId != 207)
+		if(Math.floor(x) == Math.floor(radioX) && Math.floor(y) == Math.floor(radioY) && Math.floor(z) == Math.floor(radioZ))
 		{
-			pickBlockGravityGun(blockId, Level.getData(x, y, z));
-			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
-		} else
-		{
-			Sound.playFromFileName("gravitygun/fail.ogg");
-			ModPE.showTipMessage("This block can't be picked");
+			stopRadioMusic();
 		}
 	}
 }
@@ -370,6 +387,34 @@ function attackHook(attacker, victim)
 					return;
 				}
 			}*/
+		}
+	}
+}
+
+function deathHook(murderer, victim)
+{
+	// GravityGun
+	if(victim == ggEntity)
+	{
+		if(isGravityGunPicking)
+		{
+			isGravityGunPicking = false;
+			ggEntity = null;
+			updateEnabledGravityGunButtons();
+		}
+	}
+}
+
+function entityRemovedHook(entity)
+{
+	// GravityGun
+	if(entity == ggEntity)
+	{
+		if(isGravityGunPicking)
+		{
+			isGravityGunPicking = false;
+			ggEntity = null;
+			updateEnabledGravityGunButtons();
 		}
 	}
 }
@@ -826,7 +871,7 @@ function shootGravityGun()
 	}
 
 	ggEntity = null;
-	switchGravityGunButtons();
+	updateEnabledGravityGunButtons();
 }
 
 function dropGravityGun()
@@ -841,7 +886,7 @@ function dropGravityGun()
 		{
 			isGravityGunPicking = false;
 			Sound.playFromFileName("gravitygun/drop.ogg");
-			switchGravityGunButtons();
+			updateEnabledGravityGunButtons();
 
 			Level.setTileNotInAir(x, y, z, ggBlockId, ggBlockData);
 			Entity.remove(ggEntity);
@@ -855,12 +900,12 @@ function dropGravityGun()
 	{
 		isGravityGunPicking = false;
 		Sound.playFromFileName("gravitygun/drop.ogg");
-		switchGravityGunButtons();
+		updateEnabledGravityGunButtons();
 		ggEntity = null;
 	}
 }
 
-function switchGravityGunButtons()
+function updateEnabledGravityGunButtons()
 {
 	currentActivity.runOnUiThread(new java.lang.Runnable(
 	{
@@ -913,7 +958,7 @@ function pickWithGravityGun()
 	if(!isGravityGunPicking)
 	{		
 		isGravityGunPicking = true;
-		switchGravityGunButtons();
+		updateEnabledGravityGunButtons();
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.damageCarriedItem();
 		Sound.playFromFileName("gravitygun/pickup.ogg");

@@ -47,13 +47,14 @@ metrics = null;
 
 // sounds variables
 var radioPlayer = new android.media.MediaPlayer();
+const MAX_LOGARITHMIC_VOLUME = 20;
+
+// settings for audio
+var generalVolume = 1;
 
 // change carried item variables
 var previousCarriedItem = 0;
 var previousSlotId = 0;
-
-// settings for audio
-var generalVolume = 1;
 
 // buttons UI settings variables
 const BUTTONS_SIZE_DEFAULT = 24;
@@ -65,6 +66,17 @@ var minecraftStyleForButtons = false;
 var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
 var blockUnderPlayerBefore = 0;
 
+// images in base64
+var bluePortal = "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";
+var orangePortal = "iVBORw0KGgoAAAANSUhEUgAAALAAAAESCAYAAABdFF8PAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAB3RJTUUH3wkMCTcZk8fq6AAABstJREFUeNrt3LFyGzkQRVECpXCzTfy1DvZrnTjbeNuBy8EGtiRyBuhunBspomYaF48PQxZHRDyAqkwjQGXefv3x39e/TrnnZ95yBlWSJe8///5fYLI+9TrEzpLApH35f5GZwCWkJTOBW4n7p+siMoFLiSuVVx/myLv0uj10P1jgLgKQ+ECBuy26ND6kA3dfZIe9xgl8UkJJ42YCn7igakUTgU9fRBIX7cAWTjcum8DkNZeyAlsk8ykrsMVxwGt3iIMNX0Jgi2FuZQW2COZXVmDDN8eyAhu6eZYVmLzm2uoQBxK/zJsBPx6P5z6yjaQSDwL3l3fc8BqRSORjJJ6HyTtuXNxRTJwgcA3GYrkyiBynSDyb7/Bx0Mb57PxHB4lnU3mzvZ1nlbh8EnesECPxdY1kEo/qEs+Nu/7UQxSJJXCZ1M202VrWiblpSCfLu/Pa2/3O8SQviSunsO9CnFkp4gMbKU4SWPr2uKdyEk8Lfey9+Sh50yBO+KLKTolLpbAOTOLSh7q54Oalbz2JRxWJJTCJj+3A0rfXvZdMYQlM4tJ9eN54o9K3/hzSz10Ck7h0Ck8LRuJ3BB2ZJZ437VDU56jvQqD3O1PaFJ7Jd6X6oA9LYBJfInHKMCEwSvflmfgi1QcpLIFJvCxlg8Co8K6VKoXnRbsPuu4WT7ImsP5bd3ZBYGSWONXvD89sOwr5+Tb+TlMlJLAU/jRf4nu5Q5z+S+KUXVgCozQzwy6CFJbAkMCQwtVSmMAkbpvAYYDInsISWArrwAaMXSksgaVwywTWf6FCQArfXSMIDAkMKbwrhQkMCewAJ4V3pfBcUbRBYh0YIDASEQTG8TWCwCidwtPORuW1mnf0EkCFwCkpHASGBAYqdmECIwNBYByZwgSGDty1XyF/jZhkReX1UyHQpkL4FA67UzheERhwiAMIDDWiqMB6ONInsMdrUliFQGuCwFAhgOw1gsCQwA5yUnhXD5bAkMAAgaFGPFEjMgrs0ziUSGAHOagQODt8CAwJDCm860w0DxkCJDBA4EveNuAwJ4FRicgssB6MlAmsBqgRKgRQQWA1Au0SWAVRI971QYWABFYjQGCggcBSWA9ulcAOcignsBTGhwNtrv6HUCPuSmDJBxVCjQCB1RA1ooHAUhgtEhjYKvArFUAKo3wCk1gP/m0gqhCQwACBgQsEvqu7eJYLCQwHOQJDAgMEBooJ7CCHJQL75AtlDnIqBCoSBIYOrAfjNIEBAgPvCexJBK5i7BBYD4YKARAYeFJgPRgSWA+GCgEQGBsZHQVWI3C7wA5yUCGArgKrEZDAILAeDAmsRkCFAAgMAq/twWoEJDAIDLQVWI2ABAYIDDwpsBoBCQx0FlgK41aBfbkHElgKQwfGqYxXBVYjIIHVCKgQIHDiGiGFIYFBYF0YLQX2NAISWApjp8BSGBJYCqO7wMBtAq+qEVK4JpFdYBCxfIWQwuTVgUmMzwTlvPPFIX0lsBROm35dBR4kxqo18hQCpUPiLoGlMHRgEpvrToE9kXCAk8BS2Jr8aRPNZruWxIfN0lMIOMRJYekrgUmceXYjwRqMnQJ7IgEJLIXNbKfAw4KUZGS+Bk8hcMdmXxYc84DdLIV1YOliPjkrzMx2QSRONZeRfc4z464iMVQIdNjQI7PAUji3vKPCbKfFgwpRL4VPlzgSr8unrmFWuVASp7/nLbN0iFMnyqZvJoEHiaVv9QQm8f77G9U8UCHOkDi6ziybwIPE2+5nVFx/Cdxb4ug+p4wCDxIvv/5Rdd2zJjCJ8193itlkrhAkXnO9o/Ja68C9JF4lb5p5ZBd4kLh93RmdBc4ocSQUNxbONdX9qxC1FzGKh8I4ReCRVOIo+L9Hko17yZpWSuCsP0+1UuTdmyYd1SpE5t9Yu1Ouq157dFvHih04+w8FXinyla+VpTpcypvz2LK33LFRlkzyDgL/HEL3T8jI27RCVKkSZuQQZ4E2ziYqrNW0UC3FPULeLgLjWlHKyNtJYCmcU14dmMRLKsNd8g4Ck3jF/UbVtZgW9ejULS3v49H3k7iKH3SsFqPFfDo/hRjN7qWKvEvn3v27EJWT+A4RouA1Hy1wRYkrirvtHe+Ub6NllvjuhW8r70kCZ5B45SJH0/s6WuDVEq9e2Gi+KQm8WOJYsNinvKMQ+DfDXylAvChBJJwfgQ/vxVF486fA1yl9k630rAhM4o/OJ+WMCFxgkWxuAkvjprMgsDQuvZEJLI1Lb14CS+PSG5bA0rj0JvXbaM9JHDYlgYlMXAIT+ewaRODrxQjiElgqE5fAB6bycc+tCbxPrCDsBQOICHqhLD7IQGl+AO8CSmeQV6NeAAAAAElFTkSuQmCC";
+var overlay = "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";
+var divider = "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";
+
+// decoded images variables
+var bluePortalScaled;
+var orangePortalScaled;
+var overlayScaled;
+var dividerScaled;
 
 // item functions needed on load
 Item.setVerticalRender = function(id)
@@ -103,15 +115,96 @@ Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmo
 	}
 }
 
+// TODO update variables names
+// portal guns variables
+var blueBullet;
+var blueBulletLaunched = false;
+var orangeBullet;
+var orangeBulletLaunched = false;
+var portalWithUseItem = false;
+
+// portal guns picking variables
+var pgIsPickingEnabled = false;
+var isPortalGunPicking = false;
+var pgPickButtonFalse;
+var pgPickButtonTrue;
+var pgDropButtonFalse;
+var pgDropButtonTrue;
+var pgEntity = null;
+var pgIsBlock = false;
+var pgBlockId;
+var pgBlockData;
+
+const ID_PORTAL_GUN_BLUE = 3651;
+const PORTAL_GUN_DAMAGE = 1000;
+Item.defineItem(ID_PORTAL_GUN_BLUE, "portalgunblue", 0, "PortalGun");
+Item.setMaxDamage(ID_PORTAL_GUN_BLUE, PORTAL_GUN_DAMAGE);
+Item.addShapedRecipe(ID_PORTAL_GUN_BLUE, 1, 0, [
+	"f f",
+	" d ",
+	"f f"], ["f", 265, 0, "d", 264, 0]);
+Item.setCategory(ID_PORTAL_GUN_BLUE, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(ID_PORTAL_GUN_BLUE);
+
+const ID_PORTAL_GUN_GOLD = 3652;
+const PORTAL_GUN_GOLD_DAMAGE = 500;
+Item.defineItem(ID_PORTAL_GUN_GOLD, "portalgungold", 0, "PortalGun Gold");
+Item.setMaxDamage(ID_PORTAL_GUN_GOLD, PORTAL_GUN_GOLD_DAMAGE);
+Item.addShapedRecipe(ID_PORTAL_GUN_GOLD, 1, 0, [
+	"f f",
+	" g ",
+	"f f"], ["f", 265, 0, "g", 266, 0]);
+Item.setCategory(ID_PORTAL_GUN_GOLD, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(ID_PORTAL_GUN_GOLD);
+
+const ID_PORTAL_GUN_IRON = 3653;
+const PORTAL_GUN_IRON_DAMAGE = 250;
+Item.defineItem(ID_PORTAL_GUN_IRON, "portalguniron", 0, "PortalGun Iron");
+Item.setMaxDamage(ID_PORTAL_GUN_IRON, PORTAL_GUN_IRON_DAMAGE);
+Item.addShapedRecipe(ID_PORTAL_GUN_IRON, 1, 0, [
+	"fff",
+	"f f",
+	"fff"], ["f", 265, 0]);
+Item.setCategory(ID_PORTAL_GUN_IRON, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(ID_PORTAL_GUN_IRON);
+
+const ID_PORTAL_GUN_LAVA = 3654;
+const PORTAL_GUN_LAVA_DAMAGE = 200;
+Item.defineItem(ID_PORTAL_GUN_LAVA, "portalgunlava", 0, "PortalGun Lava");
+Item.setMaxDamage(ID_PORTAL_GUN_LAVA, PORTAL_GUN_LAVA_DAMAGE);
+Item.addShapedRecipe(ID_PORTAL_GUN_LAVA, 1, 0, [
+	"f f",
+	" a ",
+	"f f"], ["f", 265, 0, "a", 259, 0]);
+Item.setCategory(ID_PORTAL_GUN_LAVA, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(ID_PORTAL_GUN_LAVA);
+
+const ID_PORTAL_GUN_WOOD_AND_STONE = 3655;
+const PORTAL_GUN_WOOD_AND_STONE_DAMAGE = 100;
+Item.defineItem(ID_PORTAL_GUN_WOOD_AND_STONE, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
+Item.setMaxDamage(ID_PORTAL_GUN_WOOD_AND_STONE, PORTAL_GUN_WOOD_AND_STONE_DAMAGE);
+Item.addShapedRecipe(ID_PORTAL_GUN_WOOD_AND_STONE, 1, 0, [
+	"sws",
+	"s s",
+	"sws"], ["s", 98, 0, "w", 17, 0]);
+Item.setCategory(ID_PORTAL_GUN_WOOD_AND_STONE, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(ID_PORTAL_GUN_WOOD_AND_STONE);
+
+const ID_PORTAL_GUN_ORANGE = 3649;
+Item.defineItem(ID_PORTAL_GUN_ORANGE, "portalgunorange", 0, "PortalGun");
+Item.setMaxDamage(ID_PORTAL_GUN_ORANGE, PORTAL_GUN_DAMAGE);
+Item.setVerticalRender(ID_PORTAL_GUN_ORANGE);
+
 var isGravityGunPicking = false;
-var gravityGunButtonsPickingEntity = false;
 var ggShootButtonFalse;
 var ggShootButtonTrue;
 var ggDropButtonFalse;
 var ggDropButtonTrue;
 var ggEntity = null;
 var ggIsBlock = false;
-var ggShotBlocks = [];
+var ggBlockId;
+var ggBlockData;
+var ggShotBlocksToBePlaced = [];
 const GRAVITY_GUN_ID = 3656;
 const GRAVITY_GUN_MAX_DAMAGE = 400;
 Item.defineItem(GRAVITY_GUN_ID, "gravitygun", 0, "GravityGun");
@@ -141,7 +234,6 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 
 var isRadioPlaying = false;
 var radioCountdown = 0;
-const MAX_LOGARITHMIC_VOLUME = 20;
 var radioX;
 var radioY;
 var radioZ;
@@ -172,6 +264,136 @@ Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
 	}
 }
+Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, zMax)
+{
+	Block.newBlock(id, name, textureName, 0, false);
+	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
+	Block.setDestroyTime(id, 3);
+	Block.setRenderLayer(id, 3); // in 0.11 was 5
+	Block.setLightLevel(id, 3);
+	Block.setLightOpacity(id, 0.01);
+}
+
+// Type 1
+//orange z min down
+const ORANGE_Z_MIN_D = 200;
+Block.newPortal(ORANGE_Z_MIN_D, "Orange portal z-min-d", "portalorangedown", 0, 0, 1/16, 1, 1, 1/16);
+
+//orange z min up
+const ORANGE_Z_MIN_U = 201;
+Block.newPortal(ORANGE_Z_MIN_U, "Orange portal z-min-up", "portalorangeup", 0, 0, 1/16, 1, 1, 1/16)
+
+
+// Type 2
+//orange z max down
+const ORANGE_Z_MAX_D = 202;
+Block.newPortal(ORANGE_Z_MAX_D, "Orange portal z-max-d", "portalorangedown", 0, 0, 15/16, 1, 1, 15/16);
+
+//orange z max up
+const ORANGE_Z_MAX_U = 203;
+Block.newPortal(ORANGE_Z_MAX_U, "Orange portal z-max-up", "portalorangeup", 0, 0, 15/16, 1, 1, 15/16);
+
+
+// Type 3
+//orange y min down
+const ORANGE_Y_MIN_D = 204;
+Block.newPortal(ORANGE_Y_MIN_D, "Orange portal y-min-d", "portalorangedown", 0, 1/16, 0, 1, 1/16, 1);
+
+//orange y min up
+const ORANGE_Y_MIN_U = 205;
+Block.newPortal(ORANGE_Y_MIN_U, "Orange portal y-min-up", "portalorangeup", 0, 1/16, 0, 1, 1/16, 1);
+
+
+// Type 4
+//orange y max down
+const ORANGE_Y_MAX_D = 206;
+Block.newPortal(ORANGE_Y_MAX_D, "Orange portal y-max-d", "portalorangedown", 0, 15/16, 0, 1, 15/16, 1);
+
+//orange y max up
+const ORANGE_Y_MAX_U = 207;
+Block.newPortal(ORANGE_Y_MAX_U, "Orange portal y-max-up", "portalorangeup", 0, 15/16, 0, 1, 15/16, 1);
+
+
+// Type 5
+//orange x min down
+const ORANGE_X_MIN_D = 208;
+Block.newPortal(ORANGE_X_MIN_D, "Orange portal x-min-d", "portalorangedown", 1/16, 0, 0, 1/16, 1, 1);
+
+//orange x min up
+const ORANGE_X_MIN_U = 209;
+Block.newPortal(ORANGE_X_MIN_U, "Orange portal x-min-up", "portalorangeup", 1/16, 0, 0, 1/16, 1, 1);
+
+
+// Type 6
+//orange x max down
+const ORANGE_X_MAX_D = 210;
+Block.newPortal(ORANGE_X_MAX_D, "Orange portal x-max-d", "portalorangedown", 15/16, 0, 0, 15/16, 1, 1);
+
+//orange x max up
+const ORANGE_X_MAX_U = 211;
+Block.newPortal(ORANGE_X_MAX_U, "Orange portal x-max-up", "portalorangeup", 15/16, 0, 0, 15/16, 1, 1);
+
+
+// Type 1
+//blue z min down
+const BLUE_Z_MIN_D = 212;
+Block.newPortal(BLUE_Z_MIN_D, "Blue portal z-min-d", "portalbluedown", 0, 0, 1/16, 1, 1, 1/16);
+
+//blue z min up
+const BLUE_Z_MIN_U = 213;
+Block.newPortal(BLUE_Z_MIN_U, "Blue portal z-min-up", "portalblueup", 0, 0, 1/16, 1, 1, 1/16);
+
+
+// Type 2
+//blue z max down
+const BLUE_Z_MAX_D = 214;
+Block.newPortal(BLUE_Z_MAX_D, "Blue portal z-max-d", "portalbluedown", 0, 0, 15/16, 1, 1, 15/16);
+
+//blue z max up
+const BLUE_Z_MAX_U = 215;
+Block.newPortal(BLUE_Z_MAX_U, "Blue portal z-max-up", "portalblueup", 0, 0, 15/16, 1, 1, 15/16);
+
+
+// Type 3
+//blue y min down
+const BLUE_Y_MIN_D = 216;
+Block.newPortal(BLUE_Y_MIN_D, "Blue portal y-min-d", "portalbluedown", 0, 1/16, 0, 1, 1/16, 1);
+
+//blue y min up
+const BLUE_Y_MIN_U = 217;
+Block.newPortal(BLUE_Y_MIN_U, "Blue portal y-min-up", "portalblueup", 0, 1/16, 0, 1, 1/16, 1);
+
+
+// Type 4
+//blue y max down
+const BLUE_Y_MAX_D = 218;
+Block.newPortal(BLUE_Y_MAX_D, "Blue portal y-max-d", "portalbluedown", 0, 15/16, 0, 1, 15/16, 1);
+
+//blue y max up
+const BLUE_Y_MAX_U = 219;
+Block.newPortal(BLUE_Y_MAX_U, "Blue portal y-max-up", "portalblueup", 0, 15/16, 0, 1, 15/16, 1);
+
+
+// Type 5
+//blue x min down
+const BLUE_X_MIN_D = 220;
+Block.newPortal(BLUE_X_MIN_D, "Blue portal x-min-d", "portalbluedown", 1/16, 0, 0, 1/16, 1, 1);
+
+//blue x min up
+const BLUE_X_MIN_U = 221;
+Block.newPortal(BLUE_X_MIN_U, "Blue portal x-min-up", "portalblueup", 1/16, 0, 0, 1/16, 1, 1);
+
+
+// Type 6
+//blue x max down
+const BLUE_X_MAX_D = 222;
+Block.newPortal(BLUE_X_MAX_D, "Blue portal x-max-d", "portalbluedown", 15/16, 0, 0, 15/16, 1, 1);
+
+//blue x max up
+const BLUE_X_MAX_U = 223;
+Block.newPortal(BLUE_X_MAX_U, "Blue portal x-max-up", "portalblueup", 15/16, 0, 0, 15/16, 1, 1);
+
+
 
 // jumper
 const JUMPER_ID = 225;
@@ -234,6 +456,11 @@ function newLevel()
 	if(Level.getGameMode() == GameMode.CREATIVE)
 	{
 		// crashes in survival
+		Player.addItemCreativeInv(ID_PORTAL_GUN_BLUE, 1);
+		Player.addItemCreativeInv(ID_PORTAL_GUN_GOLD, 1);
+		Player.addItemCreativeInv(ID_PORTAL_GUN_IRON, 1);
+		Player.addItemCreativeInv(ID_PORTAL_GUN_LAVA, 1);
+		Player.addItemCreativeInv(ID_PORTAL_GUN_WOOD_AND_STONE, 1);
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 		Player.addItemCreativeInv(RADIO_ID, 1);
 
@@ -279,9 +506,14 @@ function leaveGame()
 	velBeforeZ = 0;
 	blockUnderPlayerBefore = 0;
 
+	// Portal Gun
+	removePortalGunUI();
+	blueBulletLaunched = false;
+	orangeBulletLaunched = false;
+
 	// Gravity Gun
 	removeGravityGunUI();
-	ggShotBlocks = [];
+	ggShotBlocksToBePlaced = [];
 
 	// radio
 	stopRadioMusic();
@@ -292,15 +524,98 @@ function leaveGame()
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
 {
+	x = Math.floor(x);
+	y = Math.floor(y);
+	z = Math.floor(z);
 	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
 
+	clientMessage("x " + x + " y " + y + " z " + z);
+
+	// PortalGun Wood & Stone
+	if(itemId == ID_PORTAL_GUN_WOOD_AND_STONE)
+	{
+		var random = Math.floor((Math.random() * 3) + 1);
+		Sound.playFromFileName("portals/portal_open" + random + ".wav");
+
+		var placeX = x, placeY = y, placeZ = z;
+		// get correct block
+		switch(side)
+		{
+			case 0: // down
+			{
+				placeY--;
+				break;
+			}
+			case 1: // up
+			{
+				placeY++;
+				break;
+			}
+			case 2:
+			{
+				placeZ--;
+				break;
+			}
+			case 3:
+			{
+				placeZ++;
+				break;
+			}
+			case 4:
+			{
+				placeX--;
+				break;
+			}
+			case 5:
+			{
+				placeX++;
+				break;
+			}
+		}
+
+		if(portalWithUseItem)
+		{
+			setPortalOrange(placeX, placeY, placeZ);
+			portalWithUseItem = false;
+		} else
+		{
+			setPortalBlue(placeX, placeY, placeZ);
+			portalWithUseItem = true;
+		}
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+			Player.damageCarriedItem();
+	}
+
+	// PortalGun picking
+	if(pgIsPickingEnabled && isItemPortalGun(itemId) && !isPortalGunPicking)
+	{
+		if(blockId != 7 && blockId != 26 && blockId != 52 && blockId != 54 && blockId != 59 && blockId != 61 && blockId != 62 && blockId != 63 && blockId != 64 && blockId != 68 && blockId != 71 && blockId != 83 && blockId != 90 && blockId != 96 && blockId != 104 && blockId != 105 && blockId != 106 && blockId != 111 && blockId != 115 && blockId != 141 && blockId != 142 && blockId != 207)
+		{
+			pickBlockPortalGun(blockId, Level.getData(x, y, z));
+			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
+
+			// prevent radio bug
+			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+				stopRadioMusic();
+		} else
+		{
+			Sound.playFromFileName("gravitygun/fail.ogg");
+			ModPE.showTipMessage("This block can't be picked");
+		}
+		return;
+	}
+
 	// GravityGun
-	if(Player.getCarriedItem() == GRAVITY_GUN_ID && !isGravityGunPicking)
+	if(itemId == GRAVITY_GUN_ID && !isGravityGunPicking)
 	{
 		if(blockId != 7 && blockId != 26 && blockId != 52 && blockId != 54 && blockId != 59 && blockId != 61 && blockId != 62 && blockId != 63 && blockId != 64 && blockId != 68 && blockId != 71 && blockId != 83 && blockId != 90 && blockId != 96 && blockId != 104 && blockId != 105 && blockId != 106 && blockId != 111 && blockId != 115 && blockId != 141 && blockId != 142 && blockId != 207)
 		{
 			pickBlockGravityGun(blockId, Level.getData(x, y, z));
 			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
+
+			// prevent radio bug
+			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+				stopRadioMusic();
 		} else
 		{
 			Sound.playFromFileName("gravitygun/fail.ogg");
@@ -327,7 +642,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		}
 	} else
 	{
-		if(Player.getCarriedItem() == RADIO_ID)
+		if(itemId == RADIO_ID)
 		{
 			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
 			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
@@ -351,7 +666,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 }
 
 function destroyBlock(x, y, z)
-{	
+{
 	// radio
 	if(isRadioPlaying)
 	{
@@ -364,13 +679,38 @@ function destroyBlock(x, y, z)
 
 function attackHook(attacker, victim)
 {
+	var itemId = Player.getCarriedItem();
+
 	if(attacker == Player.getEntity())
 	{
 		// GravityGun
-		if(Player.getCarriedItem() == GRAVITY_GUN_ID && !isGravityGunPicking)
+		if(itemId == GRAVITY_GUN_ID && !isGravityGunPicking)
 		{
 			preventDefault();
 			pickEntityGravityGun(victim);
+
+			// for turrets
+			/*for(var i = 0; i < spawnedTurretsNumber; i++)
+			{
+				if(victim == turrets[i].entity)
+				{
+					var random = Math.floor((Math.random() * 10) + 1);
+					Sound.playFromFileName("turrets/turret_pickup_" + random + ".wav");
+					if(singing)
+					{
+						ModPE.stopMusic();
+						singing = false;
+					}
+					return;
+				}
+			}*/
+		}
+
+		// PortalGun
+		if(isItemPortalGun(itemId) && !isPortalGunPicking)
+		{
+			preventDefault();
+			pickEntityPortalGun(victim);
 
 			// for turrets
 			/*for(var i = 0; i < spawnedTurretsNumber; i++)
@@ -403,6 +743,17 @@ function deathHook(murderer, victim)
 			updateEnabledGravityGunButtons();
 		}
 	}
+
+	// PortalGun
+	if(victim == pgEntity)
+	{
+		if(isPortalGunPicking)
+		{
+			isPortalGunPicking = false;
+			pgEntity = null;
+			updateDropButtonPortalGun();
+		}
+	}
 }
 
 function entityRemovedHook(entity)
@@ -417,6 +768,17 @@ function entityRemovedHook(entity)
 			updateEnabledGravityGunButtons();
 		}
 	}
+
+	// PortalGun
+	if(entity == pgEntity)
+	{
+		if(isPortalGunPicking)
+		{
+			isPortalGunPicking = false;
+			pgEntity = null;
+			updateDropButtonPortalGun();
+		}
+	}
 }
 
 function changeCarriedItemHook(currentItem, previousItem) // not really an hook
@@ -428,11 +790,31 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 		removeGravityGunUI();
 	}
 
+	// remove portal gun UI
+	if(isItemPortalGun(previousItem) && !isItemPortalGun(currentItem))
+	{
+		//
+		removePortalGunUI();
+	}
+
 	switch(currentItem)
 	{
 		case GRAVITY_GUN_ID:
 		{
 			initializeAndShowGravityGunUI();
+			break;
+		}
+
+		case ID_PORTAL_GUN_BLUE:
+		case ID_PORTAL_GUN_GOLD:
+		case ID_PORTAL_GUN_IRON:
+		case ID_PORTAL_GUN_LAVA:
+		case ID_PORTAL_GUN_ORANGE:
+		{
+			if(!isItemPortalGun(previousItem))
+				showPortalGunUI();
+			if(!((previousItem == ID_PORTAL_GUN_BLUE && currentItem == ID_PORTAL_GUN_ORANGE) || (previousItem == ID_PORTAL_GUN_ORANGE && currentItem == ID_PORTAL_GUN_BLUE)))
+				Sound.playFromFileName("portalgun/portalgun_powerup1.wav");
 			break;
 		}
 	}
@@ -454,7 +836,13 @@ function modTick()
 
 	ModTickFunctions.checkJumpHook();
 
-	ModTickFunctions.gravityGun();
+	ModTickFunctions.portalGunBullets();
+
+	ModTickFunctions.portalGunPicking(); // portal gun picking entities
+
+	ModTickFunctions.gravityGun(); // gravity gun picking entities
+
+	ModTickFunctions.placeShotBlocks(); // gravity gun picking entities
 
 	ModTickFunctions.gelBlue(blockUnderPlayer);
 
@@ -499,6 +887,99 @@ var ModTickFunctions = {
 		}
 	},
 
+	portalGunBullets: function()
+	{
+		if(blueBulletLaunched)
+		{
+			var xArrow = Entity.getX(blueBullet.entity);
+			var yArrow = Entity.getY(blueBullet.entity);
+			var zArrow = Entity.getZ(blueBullet.entity);
+			if(blueBullet.previousX == xArrow && blueBullet.previousY == yArrow && blueBullet.previousZ == zArrow)
+			{
+				clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
+
+				Entity.remove(blueBullet.entity);
+				blueBullet = null;
+				blueBulletLaunched = false;
+			} else
+			{
+				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
+				{
+					// the blueBullet hit an entity
+					clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
+
+					Entity.remove(blueBullet.entity);
+					blueBullet = null;
+					blueBulletLaunched = false;
+				} else
+				{
+					blueBullet.previousX = xArrow;
+					blueBullet.previousY = yArrow;
+					blueBullet.previousZ = zArrow;
+				}
+			}
+		}
+
+		if(orangeBulletLaunched)
+		{
+			var xArrow = Entity.getX(orangeBullet.entity);
+			var yArrow = Entity.getY(orangeBullet.entity);
+			var zArrow = Entity.getZ(orangeBullet.entity);
+			if(orangeBullet.previousX == xArrow && orangeBullet.previousY == yArrow && orangeBullet.previousZ == zArrow)
+			{
+				clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
+
+				Entity.remove(orangeBullet.entity);
+				orangeBullet = null;
+				orangeBulletLaunched = false;
+			} else
+			{
+				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
+				{
+					// the orangeBullet hit an entity
+					clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
+
+					Entity.remove(orangeBullet.entity);
+					orangeBullet = null;
+					orangeBulletLaunched = false;
+				} else
+				{
+					orangeBullet.previousX = xArrow;
+					orangeBullet.previousY = yArrow;
+					orangeBullet.previousZ = zArrow;
+				}
+			}
+		}
+	},
+
+	portalGunPicking: function()
+	{
+		if(isPortalGunPicking)
+		{
+			if(pgIsBlock)
+			{
+				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				if(pgEntity != null)
+					Entity.remove(pgEntity);
+				pgEntity = Level.dropItem(Player.getX() + (dir.x * 2), Player.getY() + (dir.y * 2.5), Player.getZ() + (dir.z * 2), 0, pgBlockId, 1, pgBlockData);
+			} else
+			{
+				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				if(Player.getX() + (dir.x * 3) - Entity.getX(pgEntity) > 0.5 ||  Player.getX() + (dir.x * 3) - Entity.getX(pgEntity) < -0.5 || Player.getY () + (dir.y * 3) - Entity.getY (pgEntity) > 0.5 ||  Player.getY () + (dir.y * 3) - Entity.getY (pgEntity) < -0.5 || Player.getZ () + (dir.z * 3) - Entity.getZ (pgEntity) > 0.5 ||  Player.getZ () + (dir.z * 3) - Entity.getZ (pgEntity) < -0.5)
+				{
+					Entity.setVelX(pgEntity, (Player.getX() + (dir.x * 3) - Entity.getX(pgEntity)) / 5)
+					Entity.setVelY(pgEntity, (Player.getY() + (dir.y * 3) - Entity.getY(pgEntity)) / 5);
+					Entity.setVelZ(pgEntity, (Player.getZ() + (dir.z * 3) - Entity.getZ(pgEntity)) / 5);
+				} else
+				{
+					Entity.setVelX(pgEntity, 0);
+					Entity.setVelY(pgEntity, 0);
+					Entity.setVelZ(pgEntity, 0);
+				}
+			}
+		}
+	},
+
 	gravityGun: function()
 	{
 		if(isGravityGunPicking)
@@ -525,24 +1006,26 @@ var ModTickFunctions = {
 				}
 			}
 		}
+	},
 
-		// place shot blocks 
-		for(var i in ggShotBlocks)
+	placeShotBlocks: function()
+	{
+		for(var i in ggShotBlocksToBePlaced)
 		{
-			var entity = ggShotBlocks[i].entity;
-			if(Entity.getX(entity) == ggShotBlocks[i].previousX && Entity.getY(entity) == ggShotBlocks[i].previousY && Entity.getZ(entity) == ggShotBlocks[i].previousZ)
+			var entity = ggShotBlocksToBePlaced[i].entity;
+			if(Entity.getX(entity) == ggShotBlocksToBePlaced[i].previousX && Entity.getY(entity) == ggShotBlocksToBePlaced[i].previousY && Entity.getZ(entity) == ggShotBlocksToBePlaced[i].previousZ)
 			{
 				if(!(Entity.getX(entity) == 0 && Entity.getY(entity) == 0 && Entity.getZ(entity) == 0)) // is entity already removed
 				{
-					Level.setTile(Math.floor(Entity.getX(entity)), Math.floor(Entity.getY(entity)), Math.floor(Entity.getZ(entity)), ggShotBlocks[i].id, ggShotBlocks[i].data);
+					Level.setTile(Math.floor(Entity.getX(entity)), Math.floor(Entity.getY(entity)), Math.floor(Entity.getZ(entity)), ggShotBlocksToBePlaced[i].id, ggShotBlocksToBePlaced[i].data);
 					Entity.remove(entity);
 				}
-				ggShotBlocks.splice(i, 1);
+				ggShotBlocksToBePlaced.splice(i, 1);
 			} else
 			{
-				ggShotBlocks[i].previousX = Entity.getX(entity);
-				ggShotBlocks[i].previousY = Entity.getY(entity);
-				ggShotBlocks[i].previousZ = Entity.getZ(entity);
+				ggShotBlocksToBePlaced[i].previousX = Entity.getX(entity);
+				ggShotBlocksToBePlaced[i].previousY = Entity.getY(entity);
+				ggShotBlocksToBePlaced[i].previousZ = Entity.getZ(entity);
 			}
 		}
 	},
@@ -678,59 +1161,1117 @@ var ModTickFunctions = {
 };
 
 
-
 //########################################################################################################################################################
 // Added functions (No GUI and No render)
 //########################################################################################################################################################
 
-//########## LONG FALl BOOTS functions ##########
-function makeLongFallBootsSound()
+//########## PORTAL GUN functions ##########
+function isItemPortalGun(itemId)
 {
-	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
+	//
+	return (itemId == ID_PORTAL_GUN_BLUE || itemId == ID_PORTAL_GUN_GOLD || itemId == ID_PORTAL_GUN_IRON || itemId == ID_PORTAL_GUN_LAVA || itemId == ID_PORTAL_GUN_ORANGE);
 }
-//########## LONG FALl BOOTS functions ##########
 
-//########## RADIO functions ##########
-function startRadioMusic()
+function showPortalGunUI()
 {
-	try
+	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
-		radioPlayer.reset();
-		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.wav");
-		radioPlayer.prepare();
-		radioPlayer.setLooping(true);
-		radioPlayer.setVolume(1.0, 1.0);
-		radioPlayer.start();
-	} catch(err)
+		run: function()
+		{
+			try
+			{
+				var layoutLeft = new android.widget.LinearLayout(currentActivity);
+				layoutLeft.setOrientation(android.widget.LinearLayout.VERTICAL);
+
+				var blueImage = scaleImageToSize(bluePortalScaled, bluePortalScaled.getWidth() * 0.166, bluePortalScaled.getHeight() * 0.166, true);
+				var blueImageView = new android.widget.ImageView(currentActivity);
+				blueImageView.setImageBitmap(blueImage);
+				blueImageView.setOnClickListener(new android.view.View.OnClickListener(
+				{
+					onClick: function()
+					{
+						shootBluePortal();
+					}
+				}));
+				layoutLeft.addView(blueImageView);
+				setMarginsLinearLayout(blueImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
+
+				// PICK BUTTONS
+				if(minecraftStyleForButtons)
+				{
+					pgPickButtonFalse = MinecraftButton(buttonsSize);
+					pgPickButtonFalse.setText("Pick");
+				} else
+				{
+					pgPickButtonFalse = defaultColoredMinecraftButton("pick", "#FF929292");
+				}
+				pgPickButtonFalse.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function(v)
+					{
+						setPickEnabledPortalGun(true);
+					}
+				});
+				pgPickButtonFalse.setSoundEffectsEnabled(false);
+
+				if(minecraftStyleForButtons)
+				{
+					pgPickButtonTrue = MinecraftButton(buttonsSize);
+					pgPickButtonTrue.setText("Pick");
+				} else
+				{
+					pgPickButtonTrue = defaultColoredMinecraftButton("pick", "#FFFFFFFF");
+				}
+				pgPickButtonTrue.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function(v)
+					{
+						setPickEnabledPortalGun(false);
+					}
+				});
+				pgPickButtonTrue.setSoundEffectsEnabled(false);
+
+				layoutLeft.addView(pgPickButtonFalse);
+				layoutLeft.addView(pgPickButtonTrue);
+				pgPickButtonTrue.setVisibility(android.view.View.GONE);
+
+				popupPortalGunPick = new android.widget.PopupWindow(layoutLeft, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+				popupPortalGunPick.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				popupPortalGunPick.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.CENTER, 0, pixelsOffsetButtons);
+				// PICK BUTTONS - END
+
+
+
+				// OVERLAY IMAGE
+				var overlayImage = scaleImageToSize(overlayScaled, overlayScaled.getWidth() * 0.5, overlayScaled.getHeight() * 0.5, true);
+				var overlayImageView = new android.widget.ImageView(currentActivity);
+				overlayImageView.setImageBitmap(overlayImage);
+
+				popupOverlay = new android.widget.PopupWindow(overlayImageView, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+				popupOverlay.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				popupOverlay.setOutsideTouchable(false);
+				popupOverlay.setFocusable(false);
+				popupOverlay.setTouchable(false);
+				popupOverlay.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.CENTER, 0, 0);
+				// OVERLAY IMAGE - END
+
+
+
+				var layoutRight = new android.widget.LinearLayout(currentActivity);
+				layoutRight.setOrientation(android.widget.LinearLayout.VERTICAL);
+
+				var orangeImage = scaleImageToSize(orangePortalScaled, orangePortalScaled.getWidth() * 0.166, orangePortalScaled.getHeight() * 0.166, true);
+				var orangeImageView = new android.widget.ImageView(currentActivity);
+				orangeImageView.setImageBitmap(orangeImage);
+				orangeImageView.setOnClickListener(new android.view.View.OnClickListener(
+				{
+					onClick: function()
+					{
+						shootOrangePortal();
+					}
+				}));
+				layoutRight.addView(orangeImageView);
+				setMarginsLinearLayout(orangeImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
+
+				// DROP BUTTONS
+				if(minecraftStyleForButtons)
+				{
+					pgDropButtonFalse = MinecraftButton(buttonsSize);
+					pgDropButtonFalse.setText("Drop");
+				} else
+				{
+					pgDropButtonFalse = defaultColoredMinecraftButton("drop", "#FF929292");
+				}
+				pgDropButtonFalse.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function(v)
+					{
+						Sound.playFromFileName("gravitygun/fail.ogg");
+						ModPE.showTipMessage("You are not picking any entity.");
+					}
+				});
+				pgDropButtonFalse.setSoundEffectsEnabled(false);
+
+				if(minecraftStyleForButtons)
+				{
+					pgDropButtonTrue = MinecraftButton(buttonsSize);
+					pgDropButtonTrue.setText("Drop");
+				} else
+				{
+					pgDropButtonTrue = defaultColoredMinecraftButton("drop", "#FFFFFFFF");
+				}
+				pgDropButtonTrue.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function(v)
+					{
+						dropPortalGun();
+					}
+				});
+				pgDropButtonTrue.setSoundEffectsEnabled(false);
+
+				layoutRight.addView(pgDropButtonFalse);
+				layoutRight.addView(pgDropButtonTrue);
+				pgDropButtonTrue.setVisibility(android.view.View.GONE);
+
+				popupPortalGunDrop = new android.widget.PopupWindow(layoutRight, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+				popupPortalGunDrop.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				popupPortalGunDrop.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, 0, pixelsOffsetButtons);
+				// DROP BUTTONS - END
+			} catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	});
+}
+
+function shootBluePortal()
+{
+	Sound.playFromFileName("portalgun/portalgun_shoot_red1.wav");
+
+	var gunShootDir = getDirection(getYaw(), getPitch());
+	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
+	var speed = getPortalGunBulletSpeed(Player.getCarriedItem());
+	Entity.setVelX(bullet, gunShootDir.x * speed);
+	Entity.setVelY(bullet, gunShootDir.y * speed);
+	Entity.setVelZ(bullet, gunShootDir.z * speed);
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+		Entity.setFireTicks(bullet, 100);
+	//Entity.setRenderType(bullet, 18);
+	
+	if(Level.getGameMode() == GameMode.SURVIVAL)
+		Player.damageCarriedItem();
+
+	changeCarriedPortalGunColor(); // change the carried item if necessary
+
+	blueBullet = new EntityClass(bullet);
+	blueBulletLaunched = true;
+}
+
+function shootOrangePortal()
+{
+	Sound.playFromFileName("portalgun/portalgun_shoot_blue1.wav");
+
+	var gunShootDir = getDirection(getYaw(), getPitch());
+	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
+	var speed = getPortalGunBulletSpeed(Player.getCarriedItem());
+	Entity.setVelX(bullet, gunShootDir.x * speed);
+	Entity.setVelY(bullet, gunShootDir.y * speed);
+	Entity.setVelZ(bullet, gunShootDir.z * speed);
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+		Entity.setFireTicks(bullet, 100);
+	//Entity.setRenderType(bullet, 18);
+	
+	if(Level.getGameMode() == GameMode.SURVIVAL)
+		Player.damageCarriedItem();
+
+	changeCarriedPortalGunColor(); // change the carried item if necessary
+
+	orangeBullet = new EntityClass(bullet);
+	orangeBulletLaunched = true;
+}
+
+function getPortalGunBulletSpeed(portalGun)
+{
+	if(portalGun == ID_PORTAL_GUN_BLUE || portalGun == ID_PORTAL_GUN_ORANGE)
+		return 3;
+	if(portalGun == ID_PORTAL_GUN_GOLD)
+		return 1.8;
+	if(portalGun == ID_PORTAL_GUN_IRON)
+		return 1.2;
+	if(portalGun == ID_PORTAL_GUN_LAVA)
+		return 1.2;
+}
+
+function changeCarriedPortalGunColor()
+{
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_BLUE || Player.getCarriedItem() == ID_PORTAL_GUN_ORANGE)
 	{
-		ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-		ModPE.log(getLogText() + "Error in startRadioMusic: " + err);
-		stopRadioMusic();
+		if(Player.getCarriedItem() == ID_PORTAL_GUN_BLUE)
+			Entity.setCarriedItem(Player.getEntity(), ID_PORTAL_GUN_ORANGE, Player.getCarriedItemCount(), Player.getCarriedItemData());
+		else
+			Entity.setCarriedItem(Player.getEntity(), ID_PORTAL_GUN_BLUE,  Player.getCarriedItemCount(), Player.getCarriedItemData());
 	}
 }
 
-function stopRadioMusic()
+function setPickEnabledPortalGun(enable)
 {
-	isRadioPlaying = false;
-	radioX = 0;
-	radioY = 0;
-	radioZ = 0;
-	radioCountdown = 0;
-	try
+	if(enable)
 	{
-		radioPlayer.reset();
-	} catch(err) { }
+		pgIsPickingEnabled = true;
+		pgPickButtonFalse.setVisibility(android.view.View.GONE);
+		pgPickButtonTrue.setVisibility(android.view.View.VISIBLE);
+	} else
+	{
+		pgIsPickingEnabled = false;
+		pgPickButtonFalse.setVisibility(android.view.View.VISIBLE);
+		pgPickButtonTrue.setVisibility(android.view.View.GONE);
+	}
 }
-//########## RADIO functions ##########
 
-//########## BLUE GEL functions ##########
-function makeBounceSound()
+function pickBlockPortalGun(id, data)
 {
-	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".wav");
+	if(!isPortalGunPicking)
+	{
+		pgIsBlock = true;
+		pgBlockId = id;
+		pgBlockData = data;
+
+		pickWithPortalGun();
+	}
 }
-//########## BLUE GEL functions ##########
+
+function pickEntityPortalGun(entity)
+{
+	if(!isPortalGunPicking)
+	{
+		pgIsBlock = false;
+		pgEntity = entity;
+		
+		pickWithPortalGun();
+	}
+}
+
+function pickWithPortalGun()
+{
+	if(!isPortalGunPicking)
+	{		
+		isPortalGunPicking = true;
+		updateDropButtonPortalGun();
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+			Player.damageCarriedItem();
+		Sound.playFromFileName("gravitygun/pickup.ogg");
+	}
+}
+
+function updateDropButtonPortalGun()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			if(isPortalGunPicking)
+			{
+				pgDropButtonFalse.setVisibility(android.view.View.GONE);
+				pgDropButtonTrue.setVisibility(android.view.View.VISIBLE);
+			} else
+			{
+				pgDropButtonFalse.setVisibility(android.view.View.VISIBLE);
+				pgDropButtonTrue.setVisibility(android.view.View.GONE);
+			}
+		}
+	}));
+}
+
+function dropPortalGun()
+{
+	if(pgIsBlock)
+	{
+		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+		var x = Player.getX() + (dir.x * 2);
+		var y = Player.getY() + (dir.y * 2.5);
+		var z = Player.getZ() + (dir.z * 2);
+		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
+		{
+			isPortalGunPicking = false;
+			Sound.playFromFileName("gravitygun/drop.ogg");
+			updateDropButtonPortalGun();
+
+			Level.setTileNotInAir(x, y, z, pgBlockId, pgBlockData);
+			Entity.remove(pgEntity);
+			pgEntity = null;
+		} else
+		{
+			Sound.playFromFileName("gravitygun/fail.ogg");
+			ModPE.showTipMessage("There is another block in this position.");
+		}
+	} else
+	{
+		isPortalGunPicking = false;
+		Sound.playFromFileName("gravitygun/drop.ogg");
+		updateDropButtonPortalGun();
+		pgEntity = null;
+	}
+}
+
+function removePortalGunUI()
+{
+	pgIsPickingEnabled = false;
+	isPortalGunPicking = false;
+	pgEntity = null;
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			try
+			{
+				popupPortalGunPick.dismiss();
+				popupPortalGunDrop.dismiss();
+				popupOverlay.dismiss();
+			} catch(err) { /* Portal Gun not in hand */ }
+		}
+	}));
+}
+//########## PORTAL GUN functions ##########
+
+//########## PORTAL functions ##########
+var orangeInformation = [];
+var blueInformation = [];
+function savePortalAndDeleteOrange(){}
+function savePortalAndDeleteBlue(){}
+
+function setPortalOrange(x, y ,z)
+{
+	var pX = Player.getX();
+	var pY = Player.getY();
+	var pZ = Player.getZ();
+
+	if(Level.getTile(x, y ,z) != 0)
+	{
+		//USE ITEM AND SNOWBALL
+		if(Level.getTile(x, y + 1, z) != 0)
+		{
+			if(Math.abs(pX - x) > Math.abs(pZ - z))
+			{
+				if(x < pX)
+				{
+					if(Level.getTile(x + 1, y ,z) == 0 && Level.getTile(x + 1, y + 1 ,z) == 0)
+					{
+
+						Level.setTile(x + 1, y, z, ORANGE_X_MIN_D, 0);
+						Level.setTile(x + 1, y + 1, z, ORANGE_X_MIN_U, 0);
+						savePortalAndDeleteOrange(x+1, y, z, x+1, y+1, z);
+						orangeInformation[6] = 5;
+					}
+				}else
+				{
+					if(Level.getTile(x - 1, y ,z) == 0 && Level.getTile(x - 1, y + 1 ,z) == 0)
+					{
+
+						Level.setTile(x - 1, y, z, ORANGE_X_MAX_D, 0);
+						Level.setTile(x - 1, y + 1, z, ORANGE_X_MAX_U, 0);
+						savePortalAndDeleteOrange(x-1, y, z, x-1, y+1, z);
+						orangeInformation[6] = 6;
+					}
+				}
+			}else
+			{
+				if(z < pZ)
+				{
+					if(Level.getTile(x, y ,z + 1) == 0 && Level.getTile(x, y + 1 ,z + 1) == 0)
+					{
+
+						Level.setTile(x, y, z + 1, ORANGE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z + 1, ORANGE_Z_MIN_U, 0);
+						savePortalAndDeleteOrange(x, y, z+1, x, y+1, z+1);
+						orangeInformation[6] = 1;
+					}
+				}else
+				{
+					if(Level.getTile(x, y ,z - 1) == 0 && Level.getTile(x, y + 1 ,z - 1) == 0)
+					{
+
+						Level.setTile(x, y, z - 1, ORANGE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z - 1, ORANGE_Z_MAX_U, 0);
+						savePortalAndDeleteOrange(x, y, z-1, x, y+1, z-1);
+						orangeInformation[6] = 2;
+					}
+				}
+			}
+		}else
+		{
+			if(Level.getTile(x, y + 1, z + 1) == 0)
+			{
+
+				Level.setTile(x, y + 1, z, ORANGE_Y_MIN_U);
+				Level.setTile(x, y + 1, z + 1, ORANGE_Y_MIN_D);
+				savePortalAndDeleteOrange(x, y+1, z, x, y+1, z+1);
+				orangeInformation[6] = 3;
+			}else
+			if(Level.getTile(x, y + 1, z - 1) == 0)
+			{
+
+				Level.setTile(x, y + 1, z, ORANGE_Y_MIN_D);
+				Level.setTile(x, y + 1, z - 1, ORANGE_Y_MIN_U);	
+				savePortalAndDeleteOrange(x, y+1, z, x, y+1, z-1);
+				orangeInformation[6] = 3;
+			}
+		}
+	}else
+	{
+		//ARROW
+		if(Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+		{
+			if(Level.getTile(x, y - 1, z) != 0)
+			{
+				Level.setTile(x, y, z, ORANGE_Y_MIN_U);
+				Level.setTile(x, y, z + 1, ORANGE_Y_MIN_D);
+				savePortalAndDeleteOrange(x, y, z, x, y, z+1);
+				orangeInformation[6] = 3;
+				return;
+			}else
+			if(Level.getTile(x, y + 1, z) != 0)
+			{
+				Level.setTile(x, y, z, ORANGE_Y_MAX_U);
+				Level.setTile(x, y, z + 1, ORANGE_Y_MAX_D);
+				savePortalAndDeleteOrange(x, y, z, x, y, z+1);
+				orangeInformation[6] = 4;
+				return;
+			}
+		}else
+		{
+			if(Level.getTile(x + 1, y, z) != 0 && Level.getTile(x - 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
+					Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+					orangeInformation[6] = 6;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
+						Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+						orangeInformation[6] = 6;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x, y, z + 1) != 0 && Level.getTile(x, y, z - 1) == 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
+					Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+					orangeInformation[6] = 2;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
+						Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+						orangeInformation[6] = 2;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x - 1, y, z) != 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
+					Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+					orangeInformation[6] = 5;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
+						Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+						orangeInformation[6] = 5;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x, y, z - 1) != 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
+					Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+					savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+					orangeInformation[6] = 1;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
+						Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+						orangeInformation[6] = 1;
+						return;
+					}
+				}
+			}
+			if(pX < x && pZ < z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 6;
+					return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 6;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 2;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 2;
+							return;
+						}
+					}
+				}
+			}
+			if(pX < x && pZ >= z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 6;
+					return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 6;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 1;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 1;
+							return;
+						}
+					}
+				}
+			}
+			if(pX >= x && pZ >= z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 5;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 5;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 1;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 1;
+							return;
+						}
+					}
+				}
+			}
+			if(pX >= x && pZ < z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 5;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 5;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+						savePortalAndDeleteOrange(x, y, z, x, y+1, z);
+						orangeInformation[6] = 2;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
+							Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+							savePortalAndDeleteOrange(x, y, z, x, y-1, z);
+							orangeInformation[6] = 2;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function setPortalBlue(x, y ,z)
+{
+	var pX = Player.getX();
+	var pY = Player.getY();
+	var pZ = Player.getZ();
+
+	if(Level.getTile(x, y ,z) != 0)
+	{
+		// USE ITEM AND SNOWBALL
+		if(Level.getTile(x, y + 1, z) != 0)
+		{
+			if(Math.abs(pX - x) > Math.abs(pZ - z))
+			{
+				if(x < pX)
+				{
+					if(Level.getTile(x + 1, y ,z) == 0 && Level.getTile(x + 1, y + 1 ,z) == 0)
+					{
+
+						Level.setTile(x + 1, y, z, BLUE_X_MIN_D, 0);
+						Level.setTile(x + 1, y + 1, z, BLUE_X_MIN_U, 0);
+						savePortalAndDeleteBlue(x+1, y, z, x+1, y+1, z);
+						blueInformation[6] = 5;
+					}
+				}else
+				{
+					if(Level.getTile(x - 1, y ,z) == 0 && Level.getTile(x - 1, y + 1 ,z) == 0)
+					{
+
+						Level.setTile(x - 1, y, z, BLUE_X_MAX_D, 0);
+						Level.setTile(x - 1, y + 1, z, BLUE_X_MAX_U, 0);
+						savePortalAndDeleteBlue(x-1, y, z, x-1, y+1, z);
+						blueInformation[6] = 6;
+					}
+				}
+			}else
+			{
+				if(z < pZ)
+				{
+					if(Level.getTile(x, y ,z + 1) == 0 && Level.getTile(x, y + 1 ,z + 1) == 0)
+					{
+
+						Level.setTile(x, y, z + 1, BLUE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z + 1, BLUE_Z_MIN_U, 0);
+						savePortalAndDeleteBlue(x, y, z+1, x, y+1, z+1);
+						blueInformation[6] = 1;
+					}
+				}else
+				{
+					if(Level.getTile(x, y ,z - 1) == 0 && Level.getTile(x, y + 1 ,z - 1) == 0)
+					{
+
+						Level.setTile(x, y, z - 1, BLUE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z - 1, BLUE_Z_MAX_U, 0);
+						savePortalAndDeleteBlue(x, y, z-1, x, y+1, z-1);
+						blueInformation[6] = 2;
+					}
+				}
+			}
+		}else
+		{
+			if(Level.getTile(x, y + 1,z + 1) == 0)
+			{
+
+				Level.setTile(x, y + 1, z, BLUE_Y_MIN_U, 0);
+				Level.setTile(x, y + 1, z + 1, BLUE_Y_MIN_D, 0);
+				savePortalAndDeleteBlue(x, y+1, z, x, y+1, z+1);
+				blueInformation[6] = 3;
+			}else
+			if(Level.getTile(x, y + 1,z - 1) == 0)
+			{
+
+				Level.setTile(x, y + 1, z, BLUE_Y_MIN_D, 0);
+				Level.setTile(x, y + 1, z - 1, BLUE_Y_MIN_U, 0);	
+				savePortalAndDeleteBlue(x, y+1, z, x, y+1, z-1);
+				blueInformation[6] = 3;
+			}
+		}
+	}else
+	{
+		//ARROW
+		if(Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+		{
+			if(Level.getTile(x, y - 1, z) != 0)
+			{
+				Level.setTile(x, y, z, BLUE_Y_MIN_U);
+				Level.setTile(x, y, z + 1, BLUE_Y_MIN_D);
+				savePortalAndDeleteBlue(x, y, z, x, y, z+1);
+				blueInformation[6] = 3;
+			return;
+			}else
+			if(Level.getTile(x, y + 1, z) != 0)
+			{
+				Level.setTile(x, y, z, BLUE_Y_MAX_U);
+				Level.setTile(x, y, z + 1, BLUE_Y_MAX_D);
+				savePortalAndDeleteBlue(x, y, z, x, y, z+1);
+				blueInformation[6] = 4;
+				return;
+			}
+		}else
+		{
+			if(Level.getTile(x + 1, y, z) != 0 && Level.getTile(x - 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
+					Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+					blueInformation[6] = 6;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
+						Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+						blueInformation[6] = 6;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x, y, z + 1) != 0 && Level.getTile(x, y, z - 1) == 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
+					Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+					blueInformation[6] = 2;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
+						Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+						blueInformation[6] = 2;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x - 1, y, z) != 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x, y, z - 1) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
+					Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+					blueInformation[6] = 5;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
+						Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+						blueInformation[6] = 5;
+						return;
+					}
+				}
+			}
+			if(Level.getTile(x, y, z - 1) != 0 && Level.getTile(x, y, z + 1) == 0 && Level.getTile(x + 1, y, z) == 0 && Level.getTile(x - 1, y, z) == 0)
+			{
+
+				if(Level.getTile(x, y + 1, z) == 0)
+				{
+					Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
+					Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+					savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+					blueInformation[6] = 1;
+					return;
+				}else
+				{
+					if(Level.getTile(x, y - 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
+						Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+						blueInformation[6] = 1;
+						return;
+					}
+				}
+			}
+			if(pX < x && pZ < z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 6;
+					return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 6;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 2;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 2;
+							return;
+						}
+					}
+				}
+			}
+			if(pX < x && pZ >= z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 6;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 6;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 1;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 1;
+							return;
+						}
+					}
+				}
+			}
+			if(pX >= x && pZ >= z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 5;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 5;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 1;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 1;
+							return;
+						}
+					}
+				}
+			}
+			if(pX >= x && pZ < z)
+			{
+				if(Math.abs(pX - x) > Math.abs(pZ - z))
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 5;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 5;
+							return;
+						}
+					}
+				}else
+				{
+
+					if(Level.getTile(x, y + 1, z) == 0)
+					{
+						Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
+						Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+						savePortalAndDeleteBlue(x, y, z, x, y+1, z);
+						blueInformation[6] = 2;
+						return;
+					}else
+					{
+						if(Level.getTile(x, y - 1, z) == 0)
+						{
+							Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
+							Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+							savePortalAndDeleteBlue(x, y, z, x, y-1, z);
+							blueInformation[6] = 2;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+//########## PORTAL functions ##########
 
 //########## GRAVITY GUN functions ##########
 function initializeAndShowGravityGunUI()
@@ -760,7 +2301,7 @@ function initializeAndShowGravityGunUI()
 					onClick: function(v)
 					{
 						Sound.playFromFileName("gravitygun/fail.ogg");
-						ModPE.showTipMessage("You can shoot a mob only when you are picking it.");
+						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
 				ggShootButtonFalse.setSoundEffectsEnabled(false);
@@ -809,7 +2350,7 @@ function initializeAndShowGravityGunUI()
 					onClick: function(v)
 					{
 						Sound.playFromFileName("gravitygun/fail.ogg");
-						ModPE.showTipMessage("You can drop a mob only when you are picking it.");
+						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
 				ggDropButtonFalse.setSoundEffectsEnabled(false);
@@ -861,7 +2402,7 @@ function shootGravityGun()
 		Entity.setVelY(ggEntity, dir.y * 1.5);
 		Entity.setVelZ(ggEntity, dir.z * 1.5);
 
-		ggShotBlocks.push(new DroppedItemClass(ggEntity, ggBlockId, ggBlockData));
+		ggShotBlocksToBePlaced.push(new DroppedItemClass(ggEntity, ggBlockId, ggBlockData));
 	} else
 	{
 		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
@@ -968,7 +2509,6 @@ function pickWithGravityGun()
 function removeGravityGunUI()
 {
 	isGravityGunPicking = false;
-	gravityGunButtonsPickingEntity = false;
 	ggEntity = null;
 	currentActivity.runOnUiThread(new java.lang.Runnable(
 	{
@@ -983,6 +2523,55 @@ function removeGravityGunUI()
 	}));
 }
 //########## GRAVITY GUN functions - END ##########
+
+//########## LONG FALl BOOTS functions ##########
+function makeLongFallBootsSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
+}
+//########## LONG FALl BOOTS functions ##########
+
+//########## RADIO functions ##########
+function startRadioMusic()
+{
+	try
+	{
+		radioPlayer.reset();
+		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.wav");
+		radioPlayer.prepare();
+		radioPlayer.setLooping(true);
+		radioPlayer.setVolume(1.0, 1.0);
+		radioPlayer.start();
+	} catch(err)
+	{
+		ModPE.showTipMessage(getLogText() + "Sounds not installed!");
+		ModPE.log(getLogText() + "Error in startRadioMusic: " + err);
+		stopRadioMusic();
+	}
+}
+
+function stopRadioMusic()
+{
+	isRadioPlaying = false;
+	radioX = 0;
+	radioY = 0;
+	radioZ = 0;
+	radioCountdown = 0;
+	try
+	{
+		radioPlayer.reset();
+	} catch(err) { }
+}
+//########## RADIO functions ##########
+
+//########## BLUE GEL functions ##########
+function makeBounceSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".wav");
+}
+//########## BLUE GEL functions ##########
 
 //########## SOUND functions ##########
 var sound1;
@@ -1113,31 +2702,6 @@ var Sound = {
 			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
 			ModPE.log(getLogText() + "Error in playSoundFromFile: " + err);
 		}
-	},
-
-	loadSoundPoolFromPath: function(path)
-	{
-		try
-		{
-			soundPool = new android.media.SoundPool(5, android.media.AudioManager.STREAM_MUSIC, 0);
-			soundID = soundPool.load(path, 1);
-		} catch(err)
-		{
-			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-			ModPE.log(getLogText() + "Error in loadSoundPoolFromPath: " + err);
-		}
-	},
-
-	playLoadedSoundPool: function(volume)
-	{
-		if(volume == null)
-			volume = 1.0;
-
-		try
-		{
-			volume = volume * generalVolume;
-			soundPool.play(soundID, volume, volume, 1, 0, 1.0);
-		} catch(e) { /* probably sounds not installed error */ }
 	}
 };
 //########## SOUND functions - END ##########
@@ -1148,6 +2712,16 @@ Player.damageCarriedItem = function()
 	var maxDamage;
 	if(Player.getCarriedItem() == GRAVITY_GUN_ID)
 		maxDamage = GRAVITY_GUN_MAX_DAMAGE;
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_ORANGE || Player.getCarriedItem() == ID_PORTAL_GUN_BLUE)
+		maxDamage = PORTAL_GUN_DAMAGE;
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_GOLD)
+		maxDamage = PORTAL_GUN_GOLD_DAMAGE;
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_IRON)
+		maxDamage = PORTAL_GUN_IRON_DAMAGE;
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+		maxDamage = PORTAL_GUN_LAVA_DAMAGE;
+	if(Player.getCarriedItem() == ID_PORTAL_GUN_WOOD_AND_STONE)
+		maxDamage = PORTAL_GUN_WOOD_AND_STONE_DAMAGE;
 
 	if(Player.getCarriedItemData() < maxDamage)
 		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount(), Player.getCarriedItemData() + 1);
@@ -1296,6 +2870,52 @@ function getDirection(yaw, pitch)
 }
 //########## DIRECTION functions - END ##########
 
+//########## IMAGE functions ##########
+function createImages()
+{
+	var bluePortalDecoded = decodeImageFromBase64(bluePortal);
+	bluePortalScaled = scaleImageToDensity(bluePortalDecoded);
+	bluePortal = null;
+
+	var orangePortalDecoded = decodeImageFromBase64(orangePortal);
+	orangePortalScaled = scaleImageToDensity(orangePortalDecoded);
+	orangePortal = null;
+
+	var overlayDecoded = decodeImageFromBase64(overlay);
+	overlayScaled = scaleImageToDensity(overlayDecoded);
+	overlay = null;
+
+	var dividerDecoded = decodeImageFromBase64(divider);
+	dividerScaled = scaleImageToDensity(dividerDecoded);
+	divider = null;
+}
+
+function decodeImageFromBase64(base64String)
+{
+	if(base64String != null)
+	{
+		var byteArray = android.util.Base64.decode(base64String, 0);
+		return android.graphics.BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+	}else
+	{
+		throw getLogText() + "decodeImageFromBase64 has found a null string.";
+	}
+}
+
+function scaleImageToDensity(image)
+{
+	//
+	return scaleImageToSize(image, Math.round(image.getWidth() * deviceDensity), Math.round(image.getHeight() * deviceDensity));
+}
+
+function scaleImageToSize(image, width, height, filter)
+{
+	if(filter == null)
+		filter = false;
+	return android.graphics.Bitmap.createScaledBitmap(image, Math.round(width), Math.round(height), filter);
+}
+//########## IMAGE functions - END ##########
+
 //########## UTILS OF UIs functions ##########
 function convertDpToPixel(dp)
 {
@@ -1351,10 +2971,10 @@ function getLogText()
 
 function normalizeAngle(angle)
 {
-    var newAngle = angle;
-    while (newAngle < 0) newAngle += 360;
-    while (newAngle > 360) newAngle -= 360;
-    return newAngle;
+	var newAngle = angle;
+	while (newAngle < 0) newAngle += 360;
+	while (newAngle > 360) newAngle -= 360;
+	return newAngle;
 }
 
 function DroppedItemClass(entity, id, data)
@@ -1362,6 +2982,14 @@ function DroppedItemClass(entity, id, data)
 	this.entity = entity;
 	this.id = id;
 	this.data = data;
+	this.previousX = 0;
+	this.previousY = 0;
+	this.previousZ = 0;
+}
+
+function EntityClass(entity)
+{
+	this.entity = entity;
 	this.previousX = 0;
 	this.previousY = 0;
 	this.previousZ = 0;
@@ -1563,6 +3191,27 @@ function pleaseInstallTextureUI()
 		}
 	});
 }
+
+
+//########################################################################################################################################################
+// Things to do at startup
+//########################################################################################################################################################
+
+// create images from base64
+new java.lang.Thread(new java.lang.Runnable()
+{
+	run: function()
+	{
+		try
+		{
+			createImages();
+		} catch(e)
+		{
+			print("Error " + e);
+		}
+	}
+}).start();
+
 
 //########################################################################################################################################################
 // MINECRAFT BUTTON LIBRARY

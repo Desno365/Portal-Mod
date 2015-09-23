@@ -654,6 +654,14 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			// prevent radio bug
 			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
 				stopRadioMusic();
+
+			// prevent jukebox bug
+			if(blockId == JUKEBOX_ID)
+			{
+				var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+				if(checkBlockJukebox != -1)
+					checkBlockJukebox.stopJukebox();
+			}
 		} else
 		{
 			Sound.playFromFileName("gravitygun/fail.ogg");
@@ -673,6 +681,14 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			// prevent radio bug
 			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
 				stopRadioMusic();
+
+			// prevent jukebox bug
+			if(blockId == JUKEBOX_ID)
+			{
+				var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+				if(checkBlockJukebox != -1)
+					checkBlockJukebox.stopJukebox();
+			}
 		} else
 		{
 			Sound.playFromFileName("gravitygun/fail.ogg");

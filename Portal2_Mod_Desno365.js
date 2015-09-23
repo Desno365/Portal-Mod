@@ -152,65 +152,65 @@ var pgIsBlock = false;
 var pgBlockId;
 var pgBlockData;
 
-const ID_PORTAL_GUN_BLUE = 3651;
+const PORTAL_GUN_BLUE_ID = 3651;
 const PORTAL_GUN_DAMAGE = 1000;
-Item.defineItem(ID_PORTAL_GUN_BLUE, "portalgunblue", 0, "PortalGun");
-Item.setMaxDamage(ID_PORTAL_GUN_BLUE, PORTAL_GUN_DAMAGE);
-Item.addShapedRecipe(ID_PORTAL_GUN_BLUE, 1, 0, [
+Item.defineItem(PORTAL_GUN_BLUE_ID, "portalgunblue", 0, "PortalGun");
+Item.setMaxDamage(PORTAL_GUN_BLUE_ID, PORTAL_GUN_DAMAGE);
+Item.addShapedRecipe(PORTAL_GUN_BLUE_ID, 1, 0, [
 	"f f",
 	" d ",
 	"f f"], ["f", 265, 0, "d", 264, 0]);
-Item.setCategory(ID_PORTAL_GUN_BLUE, ITEM_CATEGORY_TOOL);
-Item.setVerticalRender(ID_PORTAL_GUN_BLUE);
+Item.setCategory(PORTAL_GUN_BLUE_ID, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(PORTAL_GUN_BLUE_ID);
 
-const ID_PORTAL_GUN_GOLD = 3652;
+const PORTAL_GUN_GOLD_ID = 3652;
 const PORTAL_GUN_GOLD_DAMAGE = 500;
-Item.defineItem(ID_PORTAL_GUN_GOLD, "portalgungold", 0, "PortalGun Gold");
-Item.setMaxDamage(ID_PORTAL_GUN_GOLD, PORTAL_GUN_GOLD_DAMAGE);
-Item.addShapedRecipe(ID_PORTAL_GUN_GOLD, 1, 0, [
+Item.defineItem(PORTAL_GUN_GOLD_ID, "portalgungold", 0, "PortalGun Gold");
+Item.setMaxDamage(PORTAL_GUN_GOLD_ID, PORTAL_GUN_GOLD_DAMAGE);
+Item.addShapedRecipe(PORTAL_GUN_GOLD_ID, 1, 0, [
 	"f f",
 	" g ",
 	"f f"], ["f", 265, 0, "g", 266, 0]);
-Item.setCategory(ID_PORTAL_GUN_GOLD, ITEM_CATEGORY_TOOL);
-Item.setVerticalRender(ID_PORTAL_GUN_GOLD);
+Item.setCategory(PORTAL_GUN_GOLD_ID, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(PORTAL_GUN_GOLD_ID);
 
-const ID_PORTAL_GUN_IRON = 3653;
+const PORTAL_GUN_IRON_ID = 3653;
 const PORTAL_GUN_IRON_DAMAGE = 250;
-Item.defineItem(ID_PORTAL_GUN_IRON, "portalguniron", 0, "PortalGun Iron");
-Item.setMaxDamage(ID_PORTAL_GUN_IRON, PORTAL_GUN_IRON_DAMAGE);
-Item.addShapedRecipe(ID_PORTAL_GUN_IRON, 1, 0, [
+Item.defineItem(PORTAL_GUN_IRON_ID, "portalguniron", 0, "PortalGun Iron");
+Item.setMaxDamage(PORTAL_GUN_IRON_ID, PORTAL_GUN_IRON_DAMAGE);
+Item.addShapedRecipe(PORTAL_GUN_IRON_ID, 1, 0, [
 	"fff",
 	"f f",
 	"fff"], ["f", 265, 0]);
-Item.setCategory(ID_PORTAL_GUN_IRON, ITEM_CATEGORY_TOOL);
-Item.setVerticalRender(ID_PORTAL_GUN_IRON);
+Item.setCategory(PORTAL_GUN_IRON_ID, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(PORTAL_GUN_IRON_ID);
 
-const ID_PORTAL_GUN_LAVA = 3654;
+const PORTAL_GUN_LAVA_ID = 3654;
 const PORTAL_GUN_LAVA_DAMAGE = 200;
-Item.defineItem(ID_PORTAL_GUN_LAVA, "portalgunlava", 0, "PortalGun Lava");
-Item.setMaxDamage(ID_PORTAL_GUN_LAVA, PORTAL_GUN_LAVA_DAMAGE);
-Item.addShapedRecipe(ID_PORTAL_GUN_LAVA, 1, 0, [
+Item.defineItem(PORTAL_GUN_LAVA_ID, "portalgunlava", 0, "PortalGun Lava");
+Item.setMaxDamage(PORTAL_GUN_LAVA_ID, PORTAL_GUN_LAVA_DAMAGE);
+Item.addShapedRecipe(PORTAL_GUN_LAVA_ID, 1, 0, [
 	"f f",
 	" a ",
 	"f f"], ["f", 265, 0, "a", 259, 0]);
-Item.setCategory(ID_PORTAL_GUN_LAVA, ITEM_CATEGORY_TOOL);
-Item.setVerticalRender(ID_PORTAL_GUN_LAVA);
+Item.setCategory(PORTAL_GUN_LAVA_ID, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(PORTAL_GUN_LAVA_ID);
 
-const ID_PORTAL_GUN_WOOD_AND_STONE = 3655;
+const PORTAL_GUN_WOOD_AND_STONE_ID = 3655;
 const PORTAL_GUN_WOOD_AND_STONE_DAMAGE = 100;
-Item.defineItem(ID_PORTAL_GUN_WOOD_AND_STONE, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
-Item.setMaxDamage(ID_PORTAL_GUN_WOOD_AND_STONE, PORTAL_GUN_WOOD_AND_STONE_DAMAGE);
-Item.addShapedRecipe(ID_PORTAL_GUN_WOOD_AND_STONE, 1, 0, [
+Item.defineItem(PORTAL_GUN_WOOD_AND_STONE_ID, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
+Item.setMaxDamage(PORTAL_GUN_WOOD_AND_STONE_ID, PORTAL_GUN_WOOD_AND_STONE_DAMAGE);
+Item.addShapedRecipe(PORTAL_GUN_WOOD_AND_STONE_ID, 1, 0, [
 	"sws",
 	"s s",
 	"sws"], ["s", 98, 0, "w", 17, 0]);
-Item.setCategory(ID_PORTAL_GUN_WOOD_AND_STONE, ITEM_CATEGORY_TOOL);
-Item.setVerticalRender(ID_PORTAL_GUN_WOOD_AND_STONE);
+Item.setCategory(PORTAL_GUN_WOOD_AND_STONE_ID, ITEM_CATEGORY_TOOL);
+Item.setVerticalRender(PORTAL_GUN_WOOD_AND_STONE_ID);
 
-const ID_PORTAL_GUN_ORANGE = 3649;
-Item.defineItem(ID_PORTAL_GUN_ORANGE, "portalgunorange", 0, "PortalGun");
-Item.setMaxDamage(ID_PORTAL_GUN_ORANGE, PORTAL_GUN_DAMAGE);
-Item.setVerticalRender(ID_PORTAL_GUN_ORANGE);
+const PORTAL_GUN_ORANGE_ID = 3649;
+Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGun");
+Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
+Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
 
 var isGravityGunPicking = false;
 var ggShootButtonFalse;
@@ -478,11 +478,11 @@ function newLevel()
 	if(Level.getGameMode() == GameMode.CREATIVE)
 	{
 		// crashes in survival
-		Player.addItemCreativeInv(ID_PORTAL_GUN_BLUE, 1);
-		Player.addItemCreativeInv(ID_PORTAL_GUN_GOLD, 1);
-		Player.addItemCreativeInv(ID_PORTAL_GUN_IRON, 1);
-		Player.addItemCreativeInv(ID_PORTAL_GUN_LAVA, 1);
-		Player.addItemCreativeInv(ID_PORTAL_GUN_WOOD_AND_STONE, 1);
+		Player.addItemCreativeInv(PORTAL_GUN_BLUE_ID, 1);
+		Player.addItemCreativeInv(PORTAL_GUN_GOLD_ID, 1);
+		Player.addItemCreativeInv(PORTAL_GUN_IRON_ID, 1);
+		Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
+		Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 		Player.addItemCreativeInv(RADIO_ID, 1);
 
@@ -551,10 +551,10 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	z = Math.floor(z);
 	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
 
-	clientMessage("x " + x + " y " + y + " z " + z);
+	//clientMessage("x " + x + " y " + y + " z " + z);
 
 	// PortalGun Wood & Stone
-	if(itemId == ID_PORTAL_GUN_WOOD_AND_STONE)
+	if(itemId == PORTAL_GUN_WOOD_AND_STONE_ID)
 	{
 		var random = Math.floor((Math.random() * 3) + 1);
 		Sound.playFromFileName("portals/portal_open" + random + ".wav");
@@ -867,15 +867,15 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 			break;
 		}
 
-		case ID_PORTAL_GUN_BLUE:
-		case ID_PORTAL_GUN_GOLD:
-		case ID_PORTAL_GUN_IRON:
-		case ID_PORTAL_GUN_LAVA:
-		case ID_PORTAL_GUN_ORANGE:
+		case PORTAL_GUN_BLUE_ID:
+		case PORTAL_GUN_GOLD_ID:
+		case PORTAL_GUN_IRON_ID:
+		case PORTAL_GUN_LAVA_ID:
+		case PORTAL_GUN_ORANGE_ID:
 		{
 			if(!isItemPortalGun(previousItem))
 				showPortalGunUI();
-			if(!((previousItem == ID_PORTAL_GUN_BLUE && currentItem == ID_PORTAL_GUN_ORANGE) || (previousItem == ID_PORTAL_GUN_ORANGE && currentItem == ID_PORTAL_GUN_BLUE)))
+			if(!((previousItem == PORTAL_GUN_BLUE_ID && currentItem == PORTAL_GUN_ORANGE_ID) || (previousItem == PORTAL_GUN_ORANGE_ID && currentItem == PORTAL_GUN_BLUE_ID)))
 				Sound.playFromFileName("portalgun/portalgun_powerup1.wav");
 			break;
 		}
@@ -977,7 +977,6 @@ var ModTickFunctions = {
 			var zArrow = Entity.getZ(blueBullet.entity);
 			if(blueBullet.previousX == xArrow && blueBullet.previousY == yArrow && blueBullet.previousZ == zArrow)
 			{
-				clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
 				setPortalBlue(Math.floor(xArrow), Math.floor(yArrow), Math.floor(zArrow));
 
 				Entity.remove(blueBullet.entity);
@@ -988,8 +987,6 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the blueBullet hit an entity
-					clientMessage("x " + Math.floor(blueBullet.previousX) + " y " + Math.floor(blueBullet.previousY) + " z " + Math.floor(blueBullet.previousZ));
-
 					Entity.remove(blueBullet.entity);
 					blueBullet = null;
 					blueBulletLaunched = false;
@@ -1009,7 +1006,6 @@ var ModTickFunctions = {
 			var zArrow = Entity.getZ(orangeBullet.entity);
 			if(orangeBullet.previousX == xArrow && orangeBullet.previousY == yArrow && orangeBullet.previousZ == zArrow)
 			{
-				clientMessage("x " + Math.floor(xArrow) + " y " + Math.floor(yArrow) + " z " + Math.floor(zArrow));
 				setPortalOrange(Math.floor(xArrow), Math.floor(yArrow), Math.floor(zArrow));
 
 				Entity.remove(orangeBullet.entity);
@@ -1020,8 +1016,6 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the orangeBullet hit an entity
-					clientMessage("x " + Math.floor(orangeBullet.previousX) + " y " + Math.floor(orangeBullet.previousY) + " z " + Math.floor(orangeBullet.previousZ));
-
 					Entity.remove(orangeBullet.entity);
 					orangeBullet = null;
 					orangeBulletLaunched = false;
@@ -1252,7 +1246,7 @@ var ModTickFunctions = {
 function isItemPortalGun(itemId)
 {
 	//
-	return (itemId == ID_PORTAL_GUN_BLUE || itemId == ID_PORTAL_GUN_GOLD || itemId == ID_PORTAL_GUN_IRON || itemId == ID_PORTAL_GUN_LAVA || itemId == ID_PORTAL_GUN_ORANGE);
+	return (itemId == PORTAL_GUN_BLUE_ID || itemId == PORTAL_GUN_GOLD_ID || itemId == PORTAL_GUN_IRON_ID || itemId == PORTAL_GUN_LAVA_ID || itemId == PORTAL_GUN_ORANGE_ID);
 }
 
 function showPortalGunUI()
@@ -1273,6 +1267,12 @@ function showPortalGunUI()
 				{
 					onClick: function()
 					{
+						if(blueBulletLaunched)
+						{
+							Entity.remove(blueBullet.entity);
+							blueBullet = null;
+							blueBulletLaunched = false;
+						}
 						shootBluePortal();
 					}
 				}));
@@ -1341,6 +1341,12 @@ function showPortalGunUI()
 				{
 					onClick: function()
 					{
+						if(orangeBulletLaunched)
+						{
+							Entity.remove(orangeBullet.entity);
+							orangeBullet = null;
+							orangeBulletLaunched = false;
+						}
 						shootOrangePortal();
 					}
 				}));
@@ -1409,7 +1415,7 @@ function shootBluePortal()
 	Entity.setVelX(bullet, gunShootDir.x * speed);
 	Entity.setVelY(bullet, gunShootDir.y * speed);
 	Entity.setVelZ(bullet, gunShootDir.z * speed);
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+	if(Player.getCarriedItem() == PORTAL_GUN_LAVA_ID)
 		Entity.setFireTicks(bullet, 100);
 	//Entity.setRenderType(bullet, 18);
 	
@@ -1432,7 +1438,7 @@ function shootOrangePortal()
 	Entity.setVelX(bullet, gunShootDir.x * speed);
 	Entity.setVelY(bullet, gunShootDir.y * speed);
 	Entity.setVelZ(bullet, gunShootDir.z * speed);
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+	if(Player.getCarriedItem() == PORTAL_GUN_LAVA_ID)
 		Entity.setFireTicks(bullet, 100);
 	//Entity.setRenderType(bullet, 18);
 	
@@ -1447,24 +1453,24 @@ function shootOrangePortal()
 
 function getPortalGunBulletSpeed(portalGun)
 {
-	if(portalGun == ID_PORTAL_GUN_BLUE || portalGun == ID_PORTAL_GUN_ORANGE)
+	if(portalGun == PORTAL_GUN_BLUE_ID || portalGun == PORTAL_GUN_ORANGE_ID)
 		return 3;
-	if(portalGun == ID_PORTAL_GUN_GOLD)
+	if(portalGun == PORTAL_GUN_GOLD_ID)
 		return 1.8;
-	if(portalGun == ID_PORTAL_GUN_IRON)
+	if(portalGun == PORTAL_GUN_IRON_ID)
 		return 1.2;
-	if(portalGun == ID_PORTAL_GUN_LAVA)
+	if(portalGun == PORTAL_GUN_LAVA_ID)
 		return 1.2;
 }
 
 function changeCarriedPortalGunColor()
 {
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_BLUE || Player.getCarriedItem() == ID_PORTAL_GUN_ORANGE)
+	if(Player.getCarriedItem() == PORTAL_GUN_BLUE_ID || Player.getCarriedItem() == PORTAL_GUN_ORANGE_ID)
 	{
-		if(Player.getCarriedItem() == ID_PORTAL_GUN_BLUE)
-			Entity.setCarriedItem(Player.getEntity(), ID_PORTAL_GUN_ORANGE, Player.getCarriedItemCount(), Player.getCarriedItemData());
+		if(Player.getCarriedItem() == PORTAL_GUN_BLUE_ID)
+			Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_ORANGE_ID, Player.getCarriedItemCount(), Player.getCarriedItemData());
 		else
-			Entity.setCarriedItem(Player.getEntity(), ID_PORTAL_GUN_BLUE,  Player.getCarriedItemCount(), Player.getCarriedItemData());
+			Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_BLUE_ID,  Player.getCarriedItemCount(), Player.getCarriedItemData());
 	}
 }
 
@@ -3358,15 +3364,15 @@ Player.damageCarriedItem = function()
 	var maxDamage;
 	if(Player.getCarriedItem() == GRAVITY_GUN_ID)
 		maxDamage = GRAVITY_GUN_MAX_DAMAGE;
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_ORANGE || Player.getCarriedItem() == ID_PORTAL_GUN_BLUE)
+	if(Player.getCarriedItem() == PORTAL_GUN_ORANGE_ID || Player.getCarriedItem() == PORTAL_GUN_BLUE_ID)
 		maxDamage = PORTAL_GUN_DAMAGE;
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_GOLD)
+	if(Player.getCarriedItem() == PORTAL_GUN_GOLD_ID)
 		maxDamage = PORTAL_GUN_GOLD_DAMAGE;
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_IRON)
+	if(Player.getCarriedItem() == PORTAL_GUN_IRON_ID)
 		maxDamage = PORTAL_GUN_IRON_DAMAGE;
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_LAVA)
+	if(Player.getCarriedItem() == PORTAL_GUN_LAVA_ID)
 		maxDamage = PORTAL_GUN_LAVA_DAMAGE;
-	if(Player.getCarriedItem() == ID_PORTAL_GUN_WOOD_AND_STONE)
+	if(Player.getCarriedItem() == PORTAL_GUN_WOOD_AND_STONE_ID)
 		maxDamage = PORTAL_GUN_WOOD_AND_STONE_DAMAGE;
 
 	if(Player.getCarriedItemData() < maxDamage)

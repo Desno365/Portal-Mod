@@ -262,6 +262,18 @@ Item.addShapedRecipe(RADIO_ID, 1, 0, [
 	"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
 Item.setCategory(RADIO_ID, ITEM_CATEGORY_MATERIAL);
 
+const STILL_ALIVE_DISC_ID = 3662;
+Item.defineItem(STILL_ALIVE_DISC_ID, "portalradio", 0, "Still Alive Disc");
+Item.setCategory(STILL_ALIVE_DISC_ID, ITEM_CATEGORY_TOOL);
+
+const WANT_YOU_GONE_DISC_ID = 3663;
+Item.defineItem(WANT_YOU_GONE_DISC_ID, "portalradio", 0, "Want You Gone Disc");
+Item.setCategory(WANT_YOU_GONE_DISC_ID, ITEM_CATEGORY_TOOL);
+
+const CARA_MIA_ADDIO_DISC_ID = 3664;
+Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "portalradio", 0, "Cara Mia Addio Disc");
+Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ITEM_CATEGORY_TOOL);
+
 //########################################################################################################################################################
 // Blocks
 //########################################################################################################################################################
@@ -412,6 +424,16 @@ Block.newPortal(BLUE_X_MAX_U, "Blue portal x-max-up", "portalblueup", 15/16, 0, 
 
 
 
+// jukebox
+const MAX_LOGARITHMIC_VOLUME_JUKEBOX = 65;
+var nowPlayingMessage = "";
+var currentColor = 0;
+var jukeboxes = [];
+const JUKEBOX_ID = 84;
+Block.defineBlock(JUKEBOX_ID, "Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]], 17);
+Block.setDestroyTime(JUKEBOX_ID, 2);
+Block.setExplosionResistance(JUKEBOX_ID, 30);
+
 // jumper
 const JUMPER_ID = 225;
 Block.newBlock(JUMPER_ID, "Jumper", "jumper");
@@ -485,7 +507,11 @@ function newLevel()
 		Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 		Player.addItemCreativeInv(RADIO_ID, 1);
+		Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
+		Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
+		Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
 
+		Player.addItemCreativeInv(JUKEBOX_ID, 1);
 		Player.addItemCreativeInv(JUMPER_ID, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
@@ -542,6 +568,15 @@ function leaveGame()
 
 	// orange gel
 	speedMultiplier = SPEED_MULTIPLIER_MIN;
+
+	// jukebox
+	for(var i in jukeboxes)
+		jukeboxes[i].player.reset();
+
+	jukeboxes = [];
+
+	nowPlayingMessage = "";
+	currentColor = 0;
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
@@ -685,6 +720,37 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		}
 	}
+
+	// jukebox
+	if(blockId == JUKEBOX_ID)
+	{
+		preventDefault();
+
+		// is block a playing jukebox?
+		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+		if(checkBlockJukebox != -1)
+		{
+			checkBlockJukebox.stopJukebox();
+			return;
+		}
+
+		//is the player carrying a disc?
+		if(itemId == STILL_ALIVE_DISC_ID || itemId == WANT_YOU_GONE_DISC_ID || itemId == CARA_MIA_ADDIO_DISC_ID)
+		{
+			//jukebox: start playing
+			try
+			{
+				jukeboxes.push(new JukeboxClass(Math.floor(x) + 0.5, Math.floor(y), Math.floor(z) + 0.5, itemId));
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Player.decreaseByOneCarriedItem();
+			}
+			catch(err)
+			{
+				ModPE.showTipMessage("Portal Mod: Sounds not installed!");
+				clientMessage(err);
+			}
+		}
+	}
 }
 
 function destroyBlock(x, y, z)
@@ -737,6 +803,11 @@ function destroyBlock(x, y, z)
 			// TODO save portals
 		}
 	}
+
+	// jukebox
+	var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+	if(checkBlockJukebox != -1)
+		checkBlockJukebox.stopJukebox();
 }
 
 function attackHook(attacker, victim)
@@ -911,6 +982,8 @@ function modTick()
 	ModTickFunctions.gelBlue(blockUnderPlayer);
 
 	ModTickFunctions.gelOrange(blockUnderPlayer);
+
+	ModTickFunctions.jukebox();
 
 	ModTickFunctions.jumper(blockUnderPlayer);
 
@@ -1149,6 +1222,28 @@ var ModTickFunctions = {
 		{
 			if(speedMultiplier != SPEED_MULTIPLIER_MIN)
 				speedMultiplier = SPEED_MULTIPLIER_MIN;
+		}
+	},
+
+	jukebox: function()
+	{
+		for(var i in jukeboxes)
+		{
+			jukeboxes[i].countdown++;
+			if(jukeboxes[i].countdown >= 10)
+			{
+				jukeboxes[i].countdown = 0;
+				var distancePJ = Math.sqrt( (Math.pow(jukeboxes[i].x - Player.getX(), 2)) + (Math.pow(jukeboxes[i].y - Player.getY(), 2)) + (Math.pow(jukeboxes[i].z - Player.getZ(), 2) ));
+				if(distancePJ > MAX_LOGARITHMIC_VOLUME_JUKEBOX)
+				{
+					jukeboxes[i].player.setVolume(0.0, 0.0);
+				}
+				else
+				{
+					var volume = 1 - (Math.log(distancePJ) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
+					jukeboxes[i].player.setVolume(volume, volume);
+				}
+			}
 		}
 	},
 
@@ -3178,7 +3273,7 @@ function makeLongFallBootsSound()
 	var random = Math.floor((Math.random() * 2) + 1);
 	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
 }
-//########## LONG FALl BOOTS functions ##########
+//########## LONG FALl BOOTS functions - END ##########
 
 
 //########## RADIO functions ##########
@@ -3212,7 +3307,114 @@ function stopRadioMusic()
 		radioPlayer.reset();
 	} catch(err) { }
 }
-//########## RADIO functions ##########
+//########## RADIO functions - END ##########
+
+
+//########## JUKEBOX functions ##########
+function JukeboxClass(x, y, z, disc)
+{
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	this.countdown = 0;
+	this.disc = disc;
+
+	this.player = new android.media.MediaPlayer();
+	this.player.reset();
+	this.player.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + getFileNameFromDiscId(disc));
+	this.player.prepare();
+	this.player.setVolume(1.0, 1.0);
+	this.player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
+	{
+		onCompletion: function()
+		{
+			var jukebox = getJukeboxObjectFromXYZ(x, y, z);
+			if(jukebox != -1)
+				jukebox.stopJukebox();
+		}
+	});
+	this.player.start();
+
+	nowPlayingMessage = "Now playing: " + Item.getName(disc, 0, false);
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			for(var ms = 0; ms < 17; ms++) // executed 17 times, 16 different colors, the last one to stop the effect
+			{
+				if(ms < 16)
+				{
+					new android.os.Handler().postDelayed(new java.lang.Runnable(
+					{
+						run: function()
+						{
+							ModPE.showTipMessage("§" + currentColor.toString(16) + nowPlayingMessage);
+							if(currentColor == 15)
+								currentColor = 0;
+							else
+								currentColor++;
+						}
+					}), ms * 250 + 1);
+				} else
+				{
+					new android.os.Handler().postDelayed(new java.lang.Runnable(
+					{
+						run: function()
+						{
+							ModPE.showTipMessage(" ");
+							currentColor = 0;
+						}
+					}), ms * 250 + 1);
+				}
+			}
+		}
+	}));
+
+
+	this.stopJukebox = function()
+	{
+		this.ejectDisc();
+		this.player.reset();
+		jukeboxes.splice(jukeboxes.indexOf(this), 1);
+	}
+
+	this.ejectDisc = function()
+	{
+		Level.dropItem(this.x, this.y + 1, this.z, 0, this.disc, 1, 0);
+	}
+}
+
+function getJukeboxObjectFromXYZ(x, y, z)
+{
+	for(var i in jukeboxes)
+		if(Math.floor(jukeboxes[i].x) == Math.floor(x) && Math.floor(jukeboxes[i].y) == Math.floor(y) && Math.floor(jukeboxes[i].z) == Math.floor(z))
+			return jukeboxes[i];
+	return -1;
+}
+
+function getFileNameFromDiscId(discId)
+{
+	switch(discId)
+	{
+		case STILL_ALIVE_DISC_ID:
+		{
+			return "music/portal_still_alive.mp3";
+		}
+		case WANT_YOU_GONE_DISC_ID:
+		{
+			return "music/portal_want_you_gone.mp3";
+		}
+		case CARA_MIA_ADDIO_DISC_ID:
+		{
+			return "music/portal_turret_song.mp3";
+		}
+		default:
+		{
+			throw "Not A Disc";
+		}
+	}
+}
+//########## JUKEBOX functions - END ##########
 
 
 //########## BLUE GEL functions ##########
@@ -3221,7 +3423,7 @@ function makeBounceSound()
 	var random = Math.floor((Math.random() * 2) + 1);
 	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".wav");
 }
-//########## BLUE GEL functions ##########
+//########## BLUE GEL functions - END ##########
 
 
 //########## SOUND functions ##########

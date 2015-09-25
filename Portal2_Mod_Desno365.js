@@ -46,8 +46,7 @@ var deviceDensity = metrics.density;
 metrics = null;
 
 // sounds variables
-var radioPlayer = new android.media.MediaPlayer();
-const MAX_LOGARITHMIC_VOLUME = 20;
+const MAX_LOGARITHMIC_VOLUME = 30;
 
 // settings for audio
 var generalVolume = 1;
@@ -61,6 +60,9 @@ const BUTTONS_SIZE_DEFAULT = 24;
 var buttonsSize = BUTTONS_SIZE_DEFAULT;
 var pixelsOffsetButtons = 0;
 var minecraftStyleForButtons = false;
+
+// all the entities array
+var entities = [];
 
 // player interactions variables
 var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
@@ -121,7 +123,6 @@ Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmo
 	}
 }
 
-// TODO update constant variables names
 // portal guns variables
 var blueBullet;
 var blueBulletLaunched = false;
@@ -249,6 +250,8 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 	"   ",
 	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
 
+const MAX_LOGARITHMIC_VOLUME_RADIO = 25;
+var radioPlayer = new android.media.MediaPlayer();
 var isRadioPlaying = false;
 var radioCountdown = 0;
 var radioX;
@@ -263,16 +266,20 @@ Item.addShapedRecipe(RADIO_ID, 1, 0, [
 Item.setCategory(RADIO_ID, ITEM_CATEGORY_MATERIAL);
 
 const STILL_ALIVE_DISC_ID = 3662;
-Item.defineItem(STILL_ALIVE_DISC_ID, "portalradio", 0, "Still Alive Disc");
+Item.defineItem(STILL_ALIVE_DISC_ID, "discstillalive", 0, "Still Alive Disc");
 Item.setCategory(STILL_ALIVE_DISC_ID, ITEM_CATEGORY_TOOL);
 
 const WANT_YOU_GONE_DISC_ID = 3663;
-Item.defineItem(WANT_YOU_GONE_DISC_ID, "portalradio", 0, "Want You Gone Disc");
+Item.defineItem(WANT_YOU_GONE_DISC_ID, "discwantyougone", 0, "Want You Gone Disc");
 Item.setCategory(WANT_YOU_GONE_DISC_ID, ITEM_CATEGORY_TOOL);
 
 const CARA_MIA_ADDIO_DISC_ID = 3664;
-Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "portalradio", 0, "Cara Mia Addio Disc");
+Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "disccaramiaaddio", 0, "Cara Mia Addio Disc");
 Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ITEM_CATEGORY_TOOL);
+
+const JUMPER_ITEM_ID = 3665;
+Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
+Item.setCategory(JUMPER_ITEM_ID, ITEM_CATEGORY_MATERIAL);
 
 //########################################################################################################################################################
 // Blocks
@@ -435,6 +442,10 @@ Block.setDestroyTime(JUKEBOX_ID, 2);
 Block.setExplosionResistance(JUKEBOX_ID, 30);
 
 // jumper
+const JUMPER_DIRECTION_ID = 224;
+Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection");
+Block.setDestroyTime(JUMPER_DIRECTION_ID, 1);
+
 const JUMPER_ID = 225;
 Block.newBlock(JUMPER_ID, "Jumper", "jumper");
 Block.setDestroyTime(JUMPER_ID, 1);
@@ -512,12 +523,30 @@ function newLevel()
 		Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
 
 		Player.addItemCreativeInv(JUKEBOX_ID, 1);
-		Player.addItemCreativeInv(JUMPER_ID, 1);
+		Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 		Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
 		Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
 	}
+
+	// things to do when the world is completely loaded
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			new android.os.Handler().postDelayed(new java.lang.Runnable(
+			{
+				run: function()
+				{
+					if(isInGame)
+					{
+						loadPortalsAndDeleteThem();
+					}
+				}
+			}), 500);
+		}
+	}));
 
 	new java.lang.Thread(new java.lang.Runnable()
 	{
@@ -539,6 +568,10 @@ function newLevel()
 			}
 		}
 	}).start();
+
+	clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
+
+	Sound.playFromFileName("game-entry1.mp3");
 }
 
 function leaveGame()
@@ -553,6 +586,9 @@ function leaveGame()
 	velBeforeY = 0;
 	velBeforeZ = 0;
 	blockUnderPlayerBefore = 0;
+
+	// entities container
+	entities = [];
 
 	// Portal Gun
 	removePortalGunUI();
@@ -572,9 +608,7 @@ function leaveGame()
 	// jukebox
 	for(var i in jukeboxes)
 		jukeboxes[i].player.reset();
-
 	jukeboxes = [];
-
 	nowPlayingMessage = "";
 	currentColor = 0;
 }
@@ -592,7 +626,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	if(itemId == PORTAL_GUN_WOOD_AND_STONE_ID)
 	{
 		var random = Math.floor((Math.random() * 3) + 1);
-		Sound.playFromFileName("portals/portal_open" + random + ".wav");
+		Sound.playFromFileName("portals/portal_open" + random + ".mp3");
 
 		var placeX = x, placeY = y, placeZ = z;
 		// get correct block
@@ -697,6 +731,47 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		return;
 	}
 
+	// jumper
+	if(itemId == JUMPER_ITEM_ID)
+	{
+		if(side == 0 || side == 1)
+		{
+			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
+
+			var y1 = y;
+			if(side == 1)
+				y1++;
+			if(side == 0)
+				y1--;
+			var x2 = x;
+			var z2 = z;
+
+			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+			{
+				z2++;
+			}
+			if(angle >= 45 && angle < 135)
+			{
+				x2--;
+			}
+			if(angle >= 135 && angle < 225)
+			{
+				z2--;
+			}
+			if(angle >= 225 && angle < 315)
+			{
+				x2++;
+			}
+
+			Level.setTile(x, y1, z, JUMPER_ID);
+			if(Level.getTile(x2, y1, z2) == 0)
+			{
+				// also the jumper direction can be placed
+				Level.setTile(x2, y1, z2, JUMPER_DIRECTION_ID);
+			}
+		}
+	}
+
 	// radio
 	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
 	{
@@ -720,19 +795,19 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
 			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
 			{
-				Level.placeBlockFromItem(x, y, z, side, 229);
+				Level.placeBlockFromItem(x, y, z, side, 227);
 			}
 			if(angle >= 45 && angle < 135)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 226);
+				Level.placeBlockFromItem(x, y, z, side, 228);
 			}
 			if(angle >= 135 && angle < 225)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 227);
+				Level.placeBlockFromItem(x, y, z, side, 229);
 			}
 			if(angle >= 225 && angle < 315)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 228);
+				Level.placeBlockFromItem(x, y, z, side, 226);
 			}
 		}
 	}
@@ -792,14 +867,14 @@ function destroyBlock(x, y, z)
 			orangePortalCreated = false;
 			updateOverlay();
 			Level.setTile(orangePortal.x2, orangePortal.y2, orangePortal.z2, 0);
-			// TODO save portals
+			savePortalsToDelete();
 		}
 		if(x == orangePortal.x2 && y == orangePortal.y2 && z == orangePortal.z2)
 		{
 			orangePortalCreated = false;
 			updateOverlay();
 			Level.setTile(orangePortal.x1, orangePortal.y1, orangePortal.z1, 0);
-			// TODO save portals
+			savePortalsToDelete();
 		}
 	}
 	if(bluePortalCreated)
@@ -809,14 +884,14 @@ function destroyBlock(x, y, z)
 			bluePortalCreated = false;
 			updateOverlay();
 			Level.setTile(bluePortal.x2, bluePortal.y2, bluePortal.z2, 0);
-			// TODO save portals
+			savePortalsToDelete();
 		}
 		if(x == bluePortal.x2 && y == bluePortal.y2 && z == bluePortal.z2)
 		{
 			bluePortalCreated = false;
 			updateOverlay();
 			Level.setTile(bluePortal.x1, bluePortal.y1, bluePortal.z1, 0);
-			// TODO save portals
+			savePortalsToDelete();
 		}
 	}
 
@@ -844,7 +919,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					Sound.playFromFileName("turrets/turret_pickup_" + random + ".wav");
+					Sound.playFromFileName("turrets/turret_pickup_" + random + ".mp3");
 					if(singing)
 					{
 						ModPE.stopMusic();
@@ -856,7 +931,7 @@ function attackHook(attacker, victim)
 		}
 
 		// PortalGun
-		if(isItemPortalGun(itemId) && !isPortalGunPicking)
+		if(isItemPortalGun(itemId) && !isPortalGunPicking && pgIsPickingEnabled)
 		{
 			preventDefault();
 			pickEntityPortalGun(victim);
@@ -867,7 +942,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					Sound.playFromFileName("turrets/turret_pickup_" + random + ".wav");
+					Sound.playFromFileName("turrets/turret_pickup_" + random + ".mp3");
 					if(singing)
 					{
 						ModPE.stopMusic();
@@ -905,8 +980,39 @@ function deathHook(murderer, victim)
 	}
 }
 
+function entityAddedHook(entity)
+{
+	// needed for mobs support for portal and jumper
+	var entityId = Entity.getEntityTypeId(entity);
+	if(entityId != 0 && entityId != EntityType.ARROW && entityId != EntityType.EGG && entityId != EntityType.EXPERIENCE_ORB && entityId != EntityType.EXPERIENCE_POTION && entityId != EntityType.FIREBALL && entityId != EntityType.FISHING_HOOK && entityId != EntityType.LIGHTNING_BOLT && entityId != EntityType.PAINTING && entityId != EntityType.PAINTING && entityId != EntityType.SMALL_FIREBALL && entityId != EntityType.SNOWBALL && entityId != EntityType.THROWN_POTION)
+		entities.push(entity);
+
+	// debug entities size
+	if(DEBUG)
+	{
+		var array = [];
+		for(var i in entities)
+		{
+			if(array[Entity.getEntityTypeId(entities[i])] == null)
+				array[Entity.getEntityTypeId(entities[i])] = 0;
+			array[Entity.getEntityTypeId(entities[i])]++;
+		}
+		clientMessage("entities " + array.toString());
+	}
+}
+
 function entityRemovedHook(entity)
 {
+	removeThisEntityFromContainer:
+	for(var i in entities)
+	{
+		if(entities[i] == entity)
+		{
+			entities.splice(i, 1);
+			break removeThisEntityFromContainer;
+		}
+	}
+
 	// GravityGun
 	if(entity == ggEntity)
 	{
@@ -963,7 +1069,13 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 			if(!isItemPortalGun(previousItem))
 				showPortalGunUI();
 			if(!((previousItem == PORTAL_GUN_BLUE_ID && currentItem == PORTAL_GUN_ORANGE_ID) || (previousItem == PORTAL_GUN_ORANGE_ID && currentItem == PORTAL_GUN_BLUE_ID)))
-				Sound.playFromFileName("portalgun/portalgun_powerup1.wav");
+				Sound.playFromFileName("portalgun/portalgun_powerup1.mp3");
+			break;
+		}
+
+		case PORTAL_GUN_WOOD_AND_STONE_ID:
+		{
+			ModPE.showTipMessage("Tap on a block to place a Portal.");
 			break;
 		}
 	}
@@ -985,7 +1097,7 @@ function modTick()
 
 	ModTickFunctions.checkJumpHook();
 
-	ModTickFunctions.portalsPlayer();
+	ModTickFunctions.portals();
 
 	ModTickFunctions.portalGunBullets();
 
@@ -1040,7 +1152,7 @@ var ModTickFunctions = {
 		}
 	},
 
-	portalsPlayer: function()
+	portals: function()
 	{
 		// player is in portal?
 		if(bluePortalCreated && orangePortalCreated)
@@ -1054,6 +1166,13 @@ var ModTickFunctions = {
 				entityIsInPortalBlue(Player.getEntity(), Player.getX(), Player.getY(), Player.getZ());
 			else
 				entityIsInPortalBlue(Player.getEntity(), Player.getX(), Player.getY() - 1, Player.getZ());
+
+			for(var i in entities)
+			{
+				var entity = entities[i];
+				entityIsInPortalOrange(entity, Entity.getX(entity), Entity.getY(entity) + 0.1, Entity.getZ(entity));
+				entityIsInPortalBlue(entity, Entity.getX(entity), Entity.getY(entity) + 0.1, Entity.getZ(entity));
+			}
 		}
 	},
 
@@ -1233,7 +1352,7 @@ var ModTickFunctions = {
 						}
 					}), ((speedMultiplier - SPEED_MULTIPLIER_MIN) * 1000));
 				}
-			}));		
+			}));
 		}else
 		{
 			if(speedMultiplier != SPEED_MULTIPLIER_MIN)
@@ -1267,13 +1386,21 @@ var ModTickFunctions = {
 	{
 		if(blockUnderPlayer == JUMPER_ID)
 		{
-			var random = Math.floor((Math.random() * 4) + 3);
-			Sound.playFromFileName("jumper/alyx_gun_fire" + random + ".wav");
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()), JUMPER_DIRECTION_ID);
+			if(angle == null)
+				angle = getYaw();
 
-			var jumperDir = getDirection(getYaw(), 0);
-			Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
-			Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
-			Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
+			makeJumperJump(angle);
+		}
+		if(blockUnderPlayer == JUMPER_DIRECTION_ID && blockUnderPlayerBefore != JUMPER_ID)
+		{
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()), JUMPER_ID);
+			if(angle == null)
+				angle = getYaw();
+			else
+				angle += 180;
+
+			makeJumperJump(angle);
 		}
 	},
 
@@ -1335,12 +1462,12 @@ var ModTickFunctions = {
 			{
 				radioCountdown = 0;
 				var distancePR = Math.sqrt( (Math.pow(radioX - Player.getX(), 2)) + (Math.pow(radioY - Player.getY(), 2)) + (Math.pow(radioZ - Player.getZ(), 2) ));
-				if(distancePR > MAX_LOGARITHMIC_VOLUME)
+				if(distancePR > MAX_LOGARITHMIC_VOLUME_RADIO)
 				{
 					stopRadioMusic();
 				}else
 				{
-					radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME));
+					radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
 					radioPlayer.setVolume(radioVolume, radioVolume);
 				}
 			}
@@ -1518,7 +1645,7 @@ function showPortalGunUI()
 
 function shootBluePortal()
 {
-	Sound.playFromFileName("portalgun/portalgun_shoot_red1.wav");
+	Sound.playFromFileName("portalgun/portalgun_shoot_red1.mp3");
 
 	var gunShootDir = getDirection(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
@@ -1541,7 +1668,7 @@ function shootBluePortal()
 
 function shootOrangePortal()
 {
-	Sound.playFromFileName("portalgun/portalgun_shoot_blue1.wav");
+	Sound.playFromFileName("portalgun/portalgun_shoot_blue1.mp3");
 
 	var gunShootDir = getDirection(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
@@ -1801,10 +1928,11 @@ function dropPortalGun()
 // WARNING: the following code is crap, I wrote it when I was 16 but now I'm too lazy to rewrite it. Sorry!
 function entityIsInPortalOrange(entity, x, y, z)
 {
-	if((x > orangePortal.x1 && x < (orangePortal.x1 + 1) && y > orangePortal.y1 && y < (orangePortal.y1 + 1) && z > orangePortal.z1 && z < (orangePortal.z1 + 1)) || (x > orangePortal.x2 && x < (orangePortal.x2 + 1) && y > orangePortal.y2 && y < (orangePortal.y2 + 1) && z > orangePortal.z2 && z < (orangePortal.z2 + 1)))
+	if(Math.floor(x) == orangePortal.x1 && Math.floor(y) == orangePortal.y1 && Math.floor(z) == orangePortal.z1 || Math.floor(x) == orangePortal.x2 && Math.floor(y) == orangePortal.y2 && Math.floor(z) == orangePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromFileName("portals/portal_exit" + random + ".wav");
+		Sound.playFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
+
 		if(orangePortal.type == 2)
 		{
 			if(bluePortal.type == 2)
@@ -2110,10 +2238,11 @@ function entityIsInPortalOrange(entity, x, y, z)
 
 function entityIsInPortalBlue(entity, x, y, z)
 {
-	if((x > bluePortal.x1 && x < (bluePortal.x1 + 1) && y > bluePortal.y1 && y < (bluePortal.y1 + 1) && z > bluePortal.z1 && z < (bluePortal.z1 + 1)) || (x > bluePortal.x2 && x < (bluePortal.x2 + 1) && y > bluePortal.y2 && y < (bluePortal.y2 + 1) && z > bluePortal.z2 && z < (bluePortal.z2 + 1)))
+	if(Math.floor(x) == bluePortal.x1 && Math.floor(y) == bluePortal.y1 && Math.floor(z) == bluePortal.z1 || Math.floor(x) == bluePortal.x2 && Math.floor(y) == bluePortal.y2 && Math.floor(z) == bluePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromFileName("portals/portal_exit" + random + ".wav");
+		Sound.playFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
+
 		if(bluePortal.type == 2)
 		{
 			if(orangePortal.type == 2)
@@ -2985,19 +3114,19 @@ function setPortalBlue(x, y ,z)
 function savePortalAndDeleteOrange(x1, y1, z1, x2, y2, z2, type)
 {
 	deleteOrangePortal();
-	orangePortal = new PortalClass(x1, y1, z1, x2, y2, z2, type);
+	orangePortal = new PortalClass(Math.floor(x1), Math.floor(y1), Math.floor(z1), Math.floor(x2), Math.floor(y2), Math.floor(z2), type);
 	orangePortalCreated = true;
 	updateOverlay();
-	// TODO save portals on sdcard
+	savePortalsToDelete();
 }
 
 function savePortalAndDeleteBlue(x1, y1, z1, x2, y2, z2, type)
 {
 	deleteBluePortal();
-	bluePortal = new PortalClass(x1, y1, z1, x2, y2, z2, type);
+	bluePortal = new PortalClass(Math.floor(x1), Math.floor(y1), Math.floor(z1), Math.floor(x2), Math.floor(y2), Math.floor(z2), type);
 	bluePortalCreated = true;
 	updateOverlay();
-	// TODO save portals on sdcard
+	savePortalsToDelete();
 }
 
 function deleteBluePortal()
@@ -3018,6 +3147,107 @@ function deleteOrangePortal()
 		Level.setTile(orangePortal.x2, orangePortal.y2, orangePortal.z2, 0);
 	}
 	orangePortalCreated = false;
+}
+
+function loadPortalsAndDeleteThem()
+{
+	try
+	{
+		var loadFile = java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
+		if(loadFile.exists())
+		{
+			// load streams
+			var streamInput = new java.io.FileInputStream(loadFile);
+			var streamReader = new java.io.InputStreamReader(streamInput);
+
+			var properties = new java.util.Properties();
+			properties.load(streamReader);
+
+			orangePortalCreated = stringToBoolean(properties.getProperty("orange", "0"));
+			if(orangePortalCreated)
+			{
+				var x1 = parseInt(properties.getProperty("orange_x_1"));
+				var y1 = parseInt(properties.getProperty("orange_y_1"));
+				var z1 = parseInt(properties.getProperty("orange_z_1"));
+				var x2 = parseInt(properties.getProperty("orange_x_2"));
+				var y2 = parseInt(properties.getProperty("orange_y_2"));
+				var z2 = parseInt(properties.getProperty("orange_z_2"));
+				orangePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
+				deleteOrangePortal();
+			}
+
+			bluePortalCreated = stringToBoolean(properties.getProperty("blue", "0"));
+			if(bluePortalCreated)
+			{
+				var x1 = parseInt(properties.getProperty("blue_x_1"));
+				var y1 = parseInt(properties.getProperty("blue_y_1"));
+				var z1 = parseInt(properties.getProperty("blue_z_1"));
+				var x2 = parseInt(properties.getProperty("blue_x_2"));
+				var y2 = parseInt(properties.getProperty("blue_y_2"));
+				var z2 = parseInt(properties.getProperty("blue_z_2"));
+				bluePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
+				deleteBluePortal();
+			}
+
+			// close streams
+			streamReader.close();
+			streamInput.close();
+		}
+	}catch(err)
+	{
+		clientMessage("Error: " + err);
+	}
+}
+
+function savePortalsToDelete()
+{
+	try
+	{
+		// create folders
+		var saveFolder = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod");
+		saveFolder.mkdirs();
+
+		// create file
+		var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
+		if(saveFile.exists())
+			saveFile.delete();
+		saveFile.createNewFile();
+
+		// load streams
+		var streamOutput = new java.io.FileOutputStream(saveFile);
+		var streamWriter = new java.io.OutputStreamWriter(streamOutput);
+		
+		var properties = new java.util.Properties();
+
+		properties.setProperty("orange", String(orangePortalCreated));
+		if(orangePortalCreated)
+		{
+			properties.setProperty("orange_x_1", orangePortal.x1);
+			properties.setProperty("orange_y_1", orangePortal.y1);
+			properties.setProperty("orange_z_1", orangePortal.z1);
+			properties.setProperty("orange_x_2", orangePortal.x2);
+			properties.setProperty("orange_y_2", orangePortal.y2);
+			properties.setProperty("orange_z_2", orangePortal.z2);
+		}
+
+		properties.setProperty("blue", String(bluePortalCreated));
+		if(bluePortalCreated)
+		{
+			properties.setProperty("blue_x_1", bluePortal.x1);
+			properties.setProperty("blue_y_1", bluePortal.y1);
+			properties.setProperty("blue_z_1", bluePortal.z1);
+			properties.setProperty("blue_x_2", bluePortal.x2);
+			properties.setProperty("blue_y_2", bluePortal.y2);
+			properties.setProperty("blue_z_2", bluePortal.z2);
+		}
+
+		properties.store(streamWriter, "Portal 2 Mod by Desno365");
+		streamWriter.close();
+		streamOutput.close();
+	}catch(err)
+	{
+		clientMessage("Error: " + err);
+	}
 }
 //########## PORTAL functions - END ##########
 
@@ -3154,7 +3384,6 @@ function shootGravityGun()
 
 	if(ggIsBlock)
 	{
-		// TODO check if it is inside a block
 		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 		Entity.setVelX(ggEntity, dir.x * 1.5);
 		Entity.setVelY(ggEntity, dir.y * 1.5);
@@ -3287,7 +3516,7 @@ function removeGravityGunUI()
 function makeLongFallBootsSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".wav");
+	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
 }
 //########## LONG FALl BOOTS functions - END ##########
 
@@ -3298,7 +3527,7 @@ function startRadioMusic()
 	try
 	{
 		radioPlayer.reset();
-		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.wav");
+		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.mp3");
 		radioPlayer.prepare();
 		radioPlayer.setLooping(true);
 		radioPlayer.setVolume(1.0, 1.0);
@@ -3437,9 +3666,22 @@ function getFileNameFromDiscId(discId)
 function makeBounceSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".wav");
+	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
 }
 //########## BLUE GEL functions - END ##########
+
+//########## JUMPER functions ##########
+function makeJumperJump(angle)
+{
+	var random = Math.floor((Math.random() * 3) + 4);
+	Sound.playFromFileName("jumper/alyx_gun_fire" + random + ".mp3");
+
+	var jumperDir = getDirection(angle, 0);
+	Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
+	Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
+	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
+}
+//########## JUMPER functions - END ##########
 
 
 //########## SOUND functions ##########
@@ -3857,12 +4099,48 @@ function getLogText()
 	return("Portal Mod: ");
 }
 
+function stringToBoolean(string)
+{
+	switch(string.toLowerCase())
+	{
+		case "true":
+		case "yes":
+		case "1":
+			return true;
+		case "false":
+		case "no":
+		case "0":
+		case null:
+			return false;
+		default:
+			return Boolean(string);
+	}
+}
+
 function normalizeAngle(angle)
 {
 	var newAngle = angle;
 	while (newAngle < 0) newAngle += 360;
 	while (newAngle > 360) newAngle -= 360;
 	return newAngle;
+}
+
+function getAngleOfNearBlockId(x, y, z, blockId)
+{
+	x = Math.floor(x);
+	y = Math.floor(y);
+	z = Math.floor(z);
+
+	if(Level.getTile(x + 1, y, z) == blockId)
+		return 270;
+	if(Level.getTile(x, y, z + 1) == blockId)
+		return 0;
+	if(Level.getTile(x - 1, y, z) == blockId)
+		return 90;
+	if(Level.getTile(x, y, z - 1) == blockId)
+		return 180;
+
+	return null;
 }
 
 function DroppedItemClass(entity, id, data)

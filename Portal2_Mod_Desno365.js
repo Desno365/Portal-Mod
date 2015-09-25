@@ -443,11 +443,11 @@ Block.setExplosionResistance(JUKEBOX_ID, 30);
 
 // jumper
 const JUMPER_DIRECTION_ID = 224;
-Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection");
+Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0);
 Block.setDestroyTime(JUMPER_DIRECTION_ID, 1);
 
 const JUMPER_ID = 225;
-Block.newBlock(JUMPER_ID, "Jumper", "jumper");
+Block.newBlock(JUMPER_ID, "Jumper", "jumper", 0);
 Block.setDestroyTime(JUMPER_ID, 1);
 
 // radio
@@ -769,6 +769,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 				// also the jumper direction can be placed
 				Level.setTile(x2, y1, z2, JUMPER_DIRECTION_ID);
 			}
+
+			if(Level.getGameMode() == GameMode.SURVIVAL)
+				Player.decreaseByOneCarriedItem();
 		}
 	}
 
@@ -849,6 +852,7 @@ function destroyBlock(x, y, z)
 	x = Math.floor(x);
 	y = Math.floor(y);
 	z = Math.floor(z);
+	var tile = Level.getTile(x, y, z);
 
 	// radio
 	if(isRadioPlaying)
@@ -895,10 +899,25 @@ function destroyBlock(x, y, z)
 		}
 	}
 
+	// jumper
+	if(tile == JUMPER_ID)
+	{
+		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
+	}
+
+	// radio
+	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B || tile == PORTAL_RADIO_C || tile == PORTAL_RADIO_D)
+	{
+		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
+	}
+
 	// jukebox
-	var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
-	if(checkBlockJukebox != -1)
-		checkBlockJukebox.stopJukebox();
+	if(tile == JUKEBOX_ID)
+	{
+		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+		if(checkBlockJukebox != -1)
+			checkBlockJukebox.stopJukebox();
+	}
 }
 
 function attackHook(attacker, victim)
@@ -3840,19 +3859,19 @@ Player.damageCarriedItem = function()
 	else
 	{
 		Level.playSoundEnt(Player.getEntity(), "random.break", 100, 30);
-		if(Player.getCarriedItemCount() == 1)
-			Player.clearInventorySlot(Player.getSelectedSlotId());
-		else
-			Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
+		/*if(Player.getCarriedItemCount() == 1)
+			Player.clearInventorySlot(Player.getSelectedSlotId()); // crashes in 0.12.1
+		else*/
+		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
 	}
 }
 
 Player.decreaseByOneCarriedItem = function()
 {
-	if(Player.getCarriedItemCount() == 1)
-		Player.clearInventorySlot(Player.getSelectedSlotId());
-	else
-		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
+	/*if(Player.getCarriedItemCount() == 1)
+		Player.clearInventorySlot(Player.getSelectedSlotId()); // crashes on 0.12.1
+	else*/
+	Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
 }
 //########## PLAYER functions - END ##########
 
@@ -3928,7 +3947,11 @@ Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
 		}
 	}
 	if(canBePlaced)
+	{
 		Level.setTile(x, y, z, blockId);
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+			Player.decreaseByOneCarriedItem();
+	}
 }
 //########## LEVEL functions - END ##########
 

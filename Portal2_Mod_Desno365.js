@@ -234,6 +234,21 @@ Item.addShapedRecipe(GRAVITY_GUN_ID, 1, 0, [
 Item.setCategory(GRAVITY_GUN_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(GRAVITY_GUN_ID);
 
+var turrets = [];
+var areTurretsSinging = false;
+var turretSoundPlayer;
+var turretsSongCountdown = 0;
+var turretsSongX;
+var turretsSongY;
+var turretsSongZ;
+const ID_TURRET_OPTIONS = 3657;
+Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
+Item.setCategory(ID_TURRET_OPTIONS, ITEM_CATEGORY_TOOL);
+
+const ID_TURRET = 3658;
+Item.defineItem(ID_TURRET, "turret", 0, "Turret");
+Item.setCategory(ID_TURRET, ITEM_CATEGORY_TOOL);
+
 const LONG_FALL_BOOT_ID = 3659;
 Item.defineItem(LONG_FALL_BOOT_ID, "longfallboot", 0, "Long Fall Boot");
 Item.addShapedRecipe(LONG_FALL_BOOT_ID, 1, 0, [
@@ -518,6 +533,8 @@ function newLevel()
 		Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 		Player.addItemCreativeInv(RADIO_ID, 1);
+		Player.addItemCreativeInv(ID_TURRET, 1);
+		Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
 		Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
 		Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
 		Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
@@ -592,6 +609,7 @@ function leaveGame()
 
 	// Portal Gun
 	removePortalGunUI();
+	pgIsPickingEnabled = false;
 	blueBulletLaunched = false;
 	orangeBulletLaunched = false;
 
@@ -611,6 +629,10 @@ function leaveGame()
 	jukeboxes = [];
 	nowPlayingMessage = "";
 	currentColor = 0;
+
+	// turrets
+	turrets = [];
+	turretsStopSinging();
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
@@ -845,6 +867,45 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		}
 	}
+
+	//
+	if(itemId == ID_TURRET)
+	{
+		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
+
+		var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
+		Entity.setHealth(turret, 1);
+		Entity.setRenderType(turret, TurretRenderType.renderType);
+		var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+		Entity.rideAnimal(turret, container);
+		Entity.setRenderType(container, 4); // dropped item render
+		Entity.setCollisionSize(container, 0, 0);
+
+		turrets.push(new TurretClass(turret, container));
+		turrets[turrets.length - 1].x = Entity.getX(turret);
+		turrets[turrets.length - 1].y = Entity.getY(turret);
+		turrets[turrets.length - 1].z = Entity.getZ(turret);
+		//saveTurrets(); // TODO
+		
+		if(turrets[turrets.length - 1].isThereTurretAtDistance(1))
+		{
+			if(turrets[turrets.length - 1].isThereTurretAtDistance(2))
+			{
+				if(turrets[turrets.length - 1].isThereTurretAtDistance(3))
+				{
+					turrets[turrets.length - 1].playSound("music/portal_turret_song.mp3");
+					ModPE.showTipMessage("Singing...");
+					turretsSongX = Entity.getX(turret);
+					turretsSongY = Entity.getY(turret);
+					turretsSongZ = Entity.getZ(turret);
+					areTurretsSinging = true;
+				}
+			}
+		}
+
+		if(turrets.length >= 20)
+			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+	}
 }
 
 function destroyBlock(x, y, z)
@@ -922,54 +983,94 @@ function destroyBlock(x, y, z)
 
 function attackHook(attacker, victim)
 {
-	var itemId = Player.getCarriedItem();
-
 	if(attacker == Player.getEntity())
 	{
+		var itemId = Player.getCarriedItem();
+
 		// GravityGun
 		if(itemId == GRAVITY_GUN_ID && !isGravityGunPicking)
 		{
+			var pickEntity = victim;
 			preventDefault();
-			pickEntityGravityGun(victim);
 
 			// for turrets
-			/*for(var i = 0; i < spawnedTurretsNumber; i++)
+			turretsLoop:
+			for(var i in turrets)
 			{
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					Sound.playFromFileName("turrets/turret_pickup_" + random + ".mp3");
-					if(singing)
-					{
-						ModPE.stopMusic();
-						singing = false;
-					}
-					return;
+					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					pickEntity = turrets[i].container;
+
+					if(areTurretsSinging)
+						turretsStopSinging();
+					break turretsLoop;
 				}
-			}*/
+				if(victim == turrets[i].container)
+				{
+					var random = Math.floor((Math.random() * 10) + 1);
+					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+
+					if(areTurretsSinging)
+						turretsStopSinging();
+					break turretsLoop;
+				}
+			}
+
+			// pick the correct entity
+			pickEntityGravityGun(pickEntity);
+			return;
 		}
 
 		// PortalGun
 		if(isItemPortalGun(itemId) && !isPortalGunPicking && pgIsPickingEnabled)
 		{
+			var pickEntity = victim;
 			preventDefault();
-			pickEntityPortalGun(victim);
 
 			// for turrets
-			/*for(var i = 0; i < spawnedTurretsNumber; i++)
+			turretsLoop:
+			for(var i in turrets)
 			{
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					Sound.playFromFileName("turrets/turret_pickup_" + random + ".mp3");
-					if(singing)
-					{
-						ModPE.stopMusic();
-						singing = false;
-					}
-					return;
+					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					pickEntity = turrets[i].container;
+
+					if(areTurretsSinging)
+						turretsStopSinging();
+					break turretsLoop;
 				}
-			}*/
+				if(victim == turrets[i].container)
+				{
+					var random = Math.floor((Math.random() * 10) + 1);
+					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+
+					if(areTurretsSinging)
+						turretsStopSinging();
+					break turretsLoop;
+				}
+			}
+
+			// pick the correct entity
+			pickEntityPortalGun(pickEntity);
+			return;
+		}
+
+		// turrets options
+		for(var i in turrets)
+		{
+			if(victim == turrets[i].entity || victim == turrets[i].container)
+			{
+				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
+					turrets[i].aggressive = !turrets[i].aggressive;
+				else
+					ModPE.showTipMessage("You can't hit a turret.");
+				preventDefault();
+				return;
+			}
 		}
 	}
 }
@@ -995,6 +1096,27 @@ function deathHook(murderer, victim)
 			isPortalGunPicking = false;
 			pgEntity = null;
 			updateDropButtonPortalGun();
+		}
+	}
+
+	// turrets
+	for(var i in turrets)
+	{
+		if(victim == turrets[i].entity || victim == turrets[i].container)
+		{
+			if(victim == turrets[i].entity)
+				Entity.remove(turrets[i].container);
+			if(victim == turrets[i].container)
+				Entity.remove(turrets[i].entity);
+
+			var random = Math.floor((Math.random() * 9) + 1);
+			turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
+
+			turrets.splice(i, 1);
+			//saveTurrets(); TODO
+			
+			if(areTurretsSinging)
+				turretsStopSinging();
 		}
 	}
 }
@@ -1137,6 +1259,10 @@ function modTick()
 	ModTickFunctions.longFallBoots(blockUnderPlayer);
 
 	ModTickFunctions.radio();
+
+	ModTickFunctions.turretsAI();
+
+	ModTickFunctions.turretsSong();
 
 	// player interactions
 	velBeforeX = Entity.getVelX(Player.getEntity());
@@ -1486,8 +1612,80 @@ var ModTickFunctions = {
 					stopRadioMusic();
 				}else
 				{
-					radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
+					var radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
 					radioPlayer.setVolume(radioVolume, radioVolume);
+				}
+			}
+		}
+	},
+
+	turretsAI: function()
+	{
+		//turrets
+		turretsLoopModTick:
+		for(var i in turrets)
+		{
+			Entity.setRot(turrets[i].entity, 0, 0);
+
+			if(turrets[i].aggressive)
+			{
+				if(checkProximity(Player.getEntity(), turrets[i].entity, 10, 3))
+				{
+					turrets[i].countdownToAttack++;
+					if(turrets[i].countdownToAttack == 1)
+					{
+						Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
+						var random = Math.floor((Math.random() * 9) + 1);
+						turrets[i].playSound("turrets/turret_active_" + random + ".mp3");
+						turrets[i].countdownToAttack += 5;
+					}
+					if(turrets[i].countdownToAttack == 10)
+						Entity.setRenderType(turrets[i].entity, TurretShooting2RenderType.renderType);
+					if(turrets[i].countdownToAttack % 15 == 0 && turrets[i].countdownToAttack >= 30)
+						turrets[i].shoot(Player.getEntity());
+				}else
+				{
+					if(turrets[i].countdownToAttack != 0)
+					{
+						if(turrets[i].countdownToAttack == 1)
+						{
+							Entity.setRenderType(turrets[i].entity, TurretLaserRenderType.renderType);
+							turrets[i].countdownToAttack = 0;
+							var random = Math.floor((Math.random() * 3) + 1);
+							turrets[i].playSound("turrets/turret_search_" + random + ".mp3");
+						}else
+						{
+							Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
+							if(turrets[i].countdownToAttack > 10)
+								turrets[i].countdownToAttack = 10;
+							turrets[i].countdownToAttack--;
+						}
+					}
+				}
+			}else
+			{
+				if(turrets[i].countdownToAttack != 0)
+					turrets[i].countdownToAttack = 0;
+			}
+		}
+	},
+
+	turretsSong: function()
+	{
+		if(areTurretsSinging)
+		{
+			turretsSongCountdown++;
+			if(turretsSongCountdown >= 10)
+			{
+				turretsSongCountdown = 0;
+				var distance = Math.sqrt( (Math.pow(turretsSongX - Player.getX(), 2)) + (Math.pow(turretsSongY - Player.getY(), 2)) + (Math.pow(turretsSongZ - Player.getZ(), 2) ));
+				if(distance > MAX_LOGARITHMIC_VOLUME_JUKEBOX)
+				{
+					turretSoundPlayer.setVolume(0.0, 0.0);
+				}else
+				{
+					var volume = 1 - (Math.log(distance) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
+					turretSoundPlayer.setVolume(volume, volume);
 				}
 			}
 		}
@@ -1679,7 +1877,7 @@ function shootBluePortal()
 	if(Level.getGameMode() == GameMode.SURVIVAL)
 		Player.damageCarriedItem();
 
-	changeCarriedPortalGunColor(); // change the carried item if necessary
+	changeCarriedPortalGunColorToBlue(); // change the carried item if necessary
 
 	blueBullet = new EntityClass(bullet);
 	blueBulletLaunched = true;
@@ -1702,7 +1900,7 @@ function shootOrangePortal()
 	if(Level.getGameMode() == GameMode.SURVIVAL)
 		Player.damageCarriedItem();
 
-	changeCarriedPortalGunColor(); // change the carried item if necessary
+	changeCarriedPortalGunColorToOrange(); // change the carried item if necessary
 
 	orangeBullet = new EntityClass(bullet);
 	orangeBulletLaunched = true;
@@ -1720,20 +1918,24 @@ function getPortalGunBulletSpeed(portalGun)
 		return 1.2;
 }
 
-function changeCarriedPortalGunColor()
+function changeCarriedPortalGunColorToBlue()
 {
-	if(Player.getCarriedItem() == PORTAL_GUN_BLUE_ID || Player.getCarriedItem() == PORTAL_GUN_ORANGE_ID)
+	if(Player.getCarriedItem() == PORTAL_GUN_ORANGE_ID)
 	{
-		if(Player.getCarriedItem() == PORTAL_GUN_BLUE_ID)
-			Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_ORANGE_ID, Player.getCarriedItemCount(), Player.getCarriedItemData());
-		else
-			Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_BLUE_ID,  Player.getCarriedItemCount(), Player.getCarriedItemData());
+		Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_BLUE_ID,  Player.getCarriedItemCount(), Player.getCarriedItemData());
+	}
+}
+
+function changeCarriedPortalGunColorToOrange()
+{
+	if(Player.getCarriedItem() == PORTAL_GUN_BLUE_ID)
+	{
+		Entity.setCarriedItem(Player.getEntity(), PORTAL_GUN_ORANGE_ID,  Player.getCarriedItemCount(), Player.getCarriedItemData());
 	}
 }
 
 function removePortalGunUI()
 {
-	pgIsPickingEnabled = false;
 	isPortalGunPicking = false;
 	pgEntity = null;
 	showingOverlayID = 0;
@@ -3415,6 +3617,17 @@ function shootGravityGun()
 		Entity.setVelX(ggEntity, dir.x * 3.3);
 		Entity.setVelY(ggEntity, dir.y * 3.3);
 		Entity.setVelZ(ggEntity, dir.z * 3.3);
+
+		turretsLoop:
+		for(var i in turrets)
+		{
+			if(turrets[i].container == ggEntity)
+			{
+				var random = Math.floor((Math.random() * 8) + 1);
+				turrets[i].playSound("turrets/turret_launched_" + random + ".mp3");
+				break turretsLoop;
+			}
+		}
 	}
 
 	ggEntity = null;
@@ -3538,6 +3751,120 @@ function makeLongFallBootsSound()
 	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
 }
 //########## LONG FALl BOOTS functions - END ##########
+
+
+//########## TURRETS functions ##########
+function TurretClass(turret, container)
+{
+	this.entity = turret;
+	this.container = container;
+	this.x = 0;
+	this.y = 0;
+	this.z = 0;
+	this.aggressive = false;
+	this.countdownToAttack = 0;
+
+	this.shoot = function(victim)
+	{
+		var shotYaw = Math.atan2((Entity.getZ(this.entity) - Entity.getZ(victim)), (Entity.getX(this.entity) - Entity.getX(victim)));
+		var turretShot = getDirection((java.lang.Math.toDegrees(shotYaw) - 90), 0);
+		var shotArrow = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
+		Entity.setVelX(shotArrow, -turretShot.x * 2);
+		Entity.setVelY(shotArrow, turretShot.y * 2);
+		Entity.setVelZ(shotArrow, -turretShot.z * 2);
+		Level.playSoundEnt(this.entity, "random.bow", 1000, 0);
+	}
+
+	this.isThereTurretAtDistance = function(distance)
+	{
+		distance = Math.floor(distance);
+		for(var i in turrets)
+		{
+			if((Math.floor(Entity.getY(this.entity))) == (Math.floor(Entity.getY(turrets[i].entity))))
+			{
+				if((Math.floor(Entity.getX(this.entity)) - distance) == (Math.floor(Entity.getX(turrets[i].entity))))
+					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
+						return true;
+
+				if((Math.floor(Entity.getX(this.entity)) + distance) == (Math.floor(Entity.getX(turrets[i].entity))))
+					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
+						return true;
+
+				if((Math.floor(Entity.getZ(this.entity)) - distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
+					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
+						return true;
+
+				if((Math.floor(Entity.getZ(this.entity)) + distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
+					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
+						return true;
+			}
+		}
+		return false;
+	}
+
+	this.playSound = function(fileName)
+	{
+		var volume = 1.0;
+
+		// change volume based on distance from source
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
+		if(distance > MAX_LOGARITHMIC_VOLUME)
+			volume = 0.0;
+		else
+		{
+			volume = 1 - (Math.log(distance) / Math.log(MAX_LOGARITHMIC_VOLUME));
+		}
+
+		// apply general volume
+		volume = volume * generalVolume;
+
+		// play sound
+		try
+		{
+			if(turretSoundPlayer == null)
+				turretSoundPlayer = new android.media.MediaPlayer();
+			turretSoundPlayer.reset();
+			turretSoundPlayer.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
+			turretSoundPlayer.setVolume(volume, volume);
+			turretSoundPlayer.prepare();
+			turretSoundPlayer.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
+			{
+				onCompletion: function(mp)
+				{
+					turretSoundPlayer.release();
+					turretSoundPlayer = null;
+					turretsStopSinging();
+				}
+			});
+			turretSoundPlayer.start();
+		} catch(err)
+		{
+			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
+			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
+		}
+	}
+}
+
+function checkProximity(entity1, entity2, distanceXZ, distanceY)
+{
+	if(!(Math.abs(Entity.getX(entity1) - Entity.getX(entity2)) <= distanceXZ))
+		return false;
+	if(!(Math.abs(Entity.getY(entity1) - Entity.getY(entity2)) <= distanceY))
+		return false;
+	if(!(Math.abs(Entity.getZ(entity1) - Entity.getZ(entity2)) <= distanceXZ))
+		return false;
+	return true;
+}
+
+function turretsStopSinging()
+{
+	areTurretsSinging = false;
+	try
+	{
+		turretSoundPlayer.reset();
+	} catch(e) { }
+}
+//########## TURRETS functions - END ##########
 
 
 //########## RADIO functions ##########
@@ -3858,7 +4185,7 @@ Player.damageCarriedItem = function()
 		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount(), Player.getCarriedItemData() + 1);
 	else
 	{
-		Level.playSoundEnt(Player.getEntity(), "random.break", 100, 30);
+		Level.playSoundEnt(Player.getEntity(), "random.break", 100, 0);
 		/*if(Player.getCarriedItemCount() == 1)
 			Player.clearInventorySlot(Player.getSelectedSlotId()); // crashes in 0.12.1
 		else*/
@@ -4394,6 +4721,270 @@ function pleaseInstallTextureUI()
 
 
 //########################################################################################################################################################
+// Render
+//########################################################################################################################################################
+
+function addTurretRenderType(renderer)
+{
+	var model = renderer.getModel();
+
+	var head = model.getPart("head");
+	var body = model.getPart("body");
+	var rArm = model.getPart("rightArm");
+	var lArm = model.getPart("leftArm");
+	var rLeg = model.getPart("rightLeg");
+	var lLeg = model.getPart("leftLeg");
+
+	head.clear();
+
+	body.clear();
+	body.setTextureOffset(25,15);
+	body.addBox(0,0,0,3,11,6);
+	body.setTextureOffset(54,0);	
+	body.addBox(-1,1,1,1,9,4);
+	body.setTextureOffset(54,0);	
+	body.addBox(3,1,1,1,9,4);
+	body.setTextureOffset(44,30);	
+	body.addBox(1,5,-0.5,1,1,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(3,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(3,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(2.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(3,13,-3,1,6,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(-1,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(-1.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,13,-3,1,6,1);
+
+	// arm
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,5,1,1,5);
+	body.setTextureOffset(25,21);
+	body.addBox(0.5,10,6,2,1,4);
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,9,1,8,1);
+
+	lLeg.clear();
+	rLeg.clear();
+	rArm.clear();
+	lArm.clear();
+}
+var TurretRenderType = Renderer.createHumanoidRenderer();
+addTurretRenderType(TurretRenderType);
+
+function addTurretLaserRenderType(renderer)
+{
+	var model = renderer.getModel();
+
+	var head = model.getPart("head");
+	var body = model.getPart("body");
+	var rArm = model.getPart("rightArm");
+	var lArm = model.getPart("leftArm");
+	var rLeg = model.getPart("rightLeg");
+	var lLeg = model.getPart("leftLeg");
+
+	head.clear();
+
+	body.clear();
+	body.setTextureOffset(25,15);
+	body.addBox(0,0,0,3,11,6);
+	body.setTextureOffset(54,0);	
+	body.addBox(-1,1,1,1,9,4);
+	body.setTextureOffset(54,0);	
+	body.addBox(3,1,1,1,9,4);
+	for(var i = 0; i < 160; i++)
+	{
+		body.setTextureOffset(44,30);	
+		body.addBox(1,5,0 - i,1,1,1);
+	}
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(3,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(3,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(2.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(3,13,-3,1,6,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(-1,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(-1.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,13,-3,1,6,1);
+
+	// arm
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,5,1,1,5);
+	body.setTextureOffset(25,21);
+	body.addBox(0.5,10,6,2,1,4);
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,9,1,8,1);
+
+	lLeg.clear();
+	rLeg.clear();
+	rArm.clear();
+	lArm.clear();
+}
+var TurretLaserRenderType = Renderer.createHumanoidRenderer();
+addTurretLaserRenderType(TurretLaserRenderType);
+
+function addTurretShooting1RenderType(renderer)
+{
+	var model = renderer.getModel();
+
+	var head = model.getPart("head");
+	var body = model.getPart("body");
+	var rArm = model.getPart("rightArm");
+	var lArm = model.getPart("leftArm");
+	var rLeg = model.getPart("rightLeg");
+	var lLeg = model.getPart("leftLeg");
+
+	head.clear();
+
+	body.clear();
+	body.setTextureOffset(25,15);
+	body.addBox(0,0,0,3,11,6);
+
+	body.setTextureOffset(49,17);
+	body.addBox(-1,4,2,1,1,2);
+	body.setTextureOffset(49,17);
+	body.addBox(3,4,2,1,1,2);
+	body.setTextureOffset(51,19);
+	body.addBox(-1,6,2,1,1,2);
+	body.setTextureOffset(51,19);
+	body.addBox(3,6,2,1,1,2);
+
+	body.setTextureOffset(54,0);	
+	body.addBox(-2,1,1,1,9,4);
+	body.setTextureOffset(54,0);	
+	body.addBox(4,1,1,1,9,4);
+	body.setTextureOffset(44,30);	
+	body.addBox(1,5,-0.5,1,1,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(3,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(3,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(2.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(3,13,-3,1,6,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(-1,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(-1.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,13,-3,1,6,1);
+
+	// arm
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,5,1,1,5);
+	body.setTextureOffset(25,21);
+	body.addBox(0.5,10,6,2,1,4);
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,9,1,8,1);
+
+	lLeg.clear();
+	rLeg.clear();
+	rArm.clear();
+	lArm.clear();
+}
+var TurretShooting1RenderType = Renderer.createHumanoidRenderer();
+addTurretShooting1RenderType(TurretShooting1RenderType);
+
+function addTurretShooting2RenderType(renderer)
+{
+	var model = renderer.getModel();
+
+	var head = model.getPart("head");
+	var body = model.getPart("body");
+	var rArm = model.getPart("rightArm");
+	var lArm = model.getPart("leftArm");
+	var rLeg = model.getPart("rightLeg");
+	var lLeg = model.getPart("leftLeg");
+
+	head.clear();
+
+	body.clear();
+	body.setTextureOffset(25,15);
+	body.addBox(0,0,0,3,11,6);
+
+	body.setTextureOffset(49,17);
+	body.addBox(-2,4,2,2,1,2);
+	body.setTextureOffset(49,17);
+	body.addBox(3,4,2,2,1,2);
+	body.setTextureOffset(51,19);
+	body.addBox(-2,6,2,2,1,2);
+	body.setTextureOffset(51,19);
+	body.addBox(3,6,2,2,1,2);
+
+	body.setTextureOffset(54,0);	
+	body.addBox(-3,1,1,1,9,4);
+	body.setTextureOffset(54,0);	
+	body.addBox(5,1,1,1,9,4);
+	body.setTextureOffset(44,30);	
+	body.addBox(1,5,-0.5,1,1,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(3,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(3,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(2.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(3,13,-3,1,6,1);
+
+	// leg
+	body.setTextureOffset(49,17);
+	body.addBox(-1,10,3,1,2,1);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,12,0,1,1,4);
+	body.setTextureOffset(25,21);
+	body.addBox(-1.5,12,-3,2,1,3);
+	body.setTextureOffset(49,17);
+	body.addBox(-1,13,-3,1,6,1);
+
+	// arm
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,5,1,1,5);
+	body.setTextureOffset(25,21);
+	body.addBox(0.5,10,6,2,1,4);
+	body.setTextureOffset(49,17);
+	body.addBox(1,11,9,1,8,1);
+
+	lLeg.clear();
+	rLeg.clear();
+	rArm.clear();
+	lArm.clear();
+}
+var TurretShooting2RenderType = Renderer.createHumanoidRenderer();
+addTurretShooting2RenderType(TurretShooting2RenderType);
+
+
+//########################################################################################################################################################
 // Things to do at startup
 //########################################################################################################################################################
 
@@ -4547,7 +5138,7 @@ MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound)
 
 			// play sound
 			if(enableSound)
-				Level.playSoundEnt(Player.getEntity(), "random.click", 100, 30);
+				Level.playSoundEnt(Player.getEntity(), "random.click", 100, 0);
 		}
 	}
 	if(action == android.view.MotionEvent.ACTION_MOVE)

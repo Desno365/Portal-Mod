@@ -234,6 +234,10 @@ Item.addShapedRecipe(GRAVITY_GUN_ID, 1, 0, [
 Item.setCategory(GRAVITY_GUN_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(GRAVITY_GUN_ID);
 
+const ID_TURRET_OPTIONS = 3657;
+Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
+Item.setCategory(ID_TURRET_OPTIONS, ITEM_CATEGORY_TOOL);
+
 var turrets = [];
 var areTurretsSinging = false;
 var turretSoundPlayer;
@@ -241,13 +245,14 @@ var turretsSongCountdown = 0;
 var turretsSongX;
 var turretsSongY;
 var turretsSongZ;
-const ID_TURRET_OPTIONS = 3657;
-Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
-Item.setCategory(ID_TURRET_OPTIONS, ITEM_CATEGORY_TOOL);
-
 const ID_TURRET = 3658;
 Item.defineItem(ID_TURRET, "turret", 0, "Turret");
 Item.setCategory(ID_TURRET, ITEM_CATEGORY_TOOL);
+
+var turretsDefective = [];
+const ID_TURRET_DEFECTIVE = 3666;
+Item.defineItem(ID_TURRET_DEFECTIVE, "turretdefective", 0, "Turret Defective");
+Item.setCategory(ID_TURRET_DEFECTIVE, ITEM_CATEGORY_TOOL);
 
 const LONG_FALL_BOOT_ID = 3659;
 Item.defineItem(LONG_FALL_BOOT_ID, "longfallboot", 0, "Long Fall Boot");
@@ -534,6 +539,7 @@ function newLevel()
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 		Player.addItemCreativeInv(RADIO_ID, 1);
 		Player.addItemCreativeInv(ID_TURRET, 1);
+		Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
 		Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
 		Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
 		Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
@@ -633,6 +639,7 @@ function leaveGame()
 	// turrets
 	turrets = [];
 	turretsStopSinging();
+	turretsDefective = [];
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage)
@@ -868,7 +875,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		}
 	}
 
-	//
+	// turrets
 	if(itemId == ID_TURRET)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
@@ -904,6 +911,32 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		}
 
 		if(turrets.length >= 20)
+			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+	}
+
+	// defective turrets
+	if(itemId == ID_TURRET_DEFECTIVE)
+	{
+		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
+
+		var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
+		Entity.setHealth(turret, 1);
+		Entity.setRenderType(turret, TurretRenderType.renderType);
+		var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+		Entity.rideAnimal(turret, container);
+		Entity.setRenderType(container, 4); // dropped item render
+		Entity.setCollisionSize(container, 0, 0);
+
+		turretsDefective.push(new TurretDefectiveClass(turret, container));
+		turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
+		turretsDefective[turretsDefective.length - 1].y = Entity.getY(turret);
+		turretsDefective[turretsDefective.length - 1].z = Entity.getZ(turret);
+		//saveTurrets(); // TODO
+
+		var random = Math.floor((Math.random() * 16) + 1);
+		turretsDefective[turretsDefective.length - 1].playSound("turrets_defective/turret_defective_spawn_" + random + ".wav");
+
+		if(turretsDefective.length >= 20)
 			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
 	}
 }
@@ -1018,6 +1051,25 @@ function attackHook(attacker, victim)
 				}
 			}
 
+			// for defective turrets
+			turretsDefectiveLoop:
+			for(var i in turretsDefective)
+			{
+				if(victim == turretsDefective[i].entity)
+				{
+					var random = Math.floor((Math.random() * 4) + 1);
+					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					pickEntity = turretsDefective[i].container;
+					break turretsDefectiveLoop;
+				}
+				if(victim == turretsDefective[i].container)
+				{
+					var random = Math.floor((Math.random() * 4) + 1);
+					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					break turretsDefectiveLoop;
+				}
+			}
+
 			// pick the correct entity
 			pickEntityGravityGun(pickEntity);
 			return;
@@ -1054,18 +1106,51 @@ function attackHook(attacker, victim)
 				}
 			}
 
+			// for defective turrets
+			turretsDefectiveLoop:
+			for(var i in turretsDefective)
+			{
+				if(victim == turretsDefective[i].entity)
+				{
+					var random = Math.floor((Math.random() * 4) + 1);
+					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					pickEntity = turretsDefective[i].container;
+					break turretsDefectiveLoop;
+				}
+				if(victim == turretsDefective[i].container)
+				{
+					var random = Math.floor((Math.random() * 4) + 1);
+					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					break turretsDefectiveLoop;
+				}
+			}
+
 			// pick the correct entity
 			pickEntityPortalGun(pickEntity);
 			return;
 		}
 
-		// turrets options
+		// turrets options, normal turrets
 		for(var i in turrets)
 		{
 			if(victim == turrets[i].entity || victim == turrets[i].container)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
 					turrets[i].aggressive = !turrets[i].aggressive;
+				else
+					ModPE.showTipMessage("You can't hit a turret.");
+				preventDefault();
+				return;
+			}
+		}
+
+		// turrets options, defective turrets
+		for(var i in turretsDefective)
+		{
+			if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
+			{
+				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
+					turretsDefective[i].aggressive = !turretsDefective[i].aggressive;
 				else
 					ModPE.showTipMessage("You can't hit a turret.");
 				preventDefault();
@@ -1117,6 +1202,24 @@ function deathHook(murderer, victim)
 			
 			if(areTurretsSinging)
 				turretsStopSinging();
+		}
+	}
+
+	// defective turrets
+	for(var i in turretsDefective)
+	{
+		if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
+		{
+			if(victim == turretsDefective[i].entity)
+				Entity.remove(turretsDefective[i].container);
+			if(victim == turretsDefective[i].container)
+				Entity.remove(turretsDefective[i].entity);
+
+			var random = Math.floor((Math.random() * 7) + 1);
+			turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
+
+			turretsDefective.splice(i, 1);
+			//saveTurrets(); TODO
 		}
 	}
 }
@@ -1217,6 +1320,12 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 		case PORTAL_GUN_WOOD_AND_STONE_ID:
 		{
 			ModPE.showTipMessage("Tap on a block to place a Portal.");
+			break;
+		}
+
+		case ID_TURRET_OPTIONS:
+		{
+			ModPE.showTipMessage("Hit a turret to display options.");
 			break;
 		}
 	}
@@ -1621,11 +1730,10 @@ var ModTickFunctions = {
 
 	turretsAI: function()
 	{
-		//turrets
-		turretsLoopModTick:
+		// normal turrets
 		for(var i in turrets)
 		{
-			Entity.setRot(turrets[i].entity, 0, 0);
+			//Entity.setRot(turrets[i].entity, 0, 0);
 
 			if(turrets[i].aggressive)
 			{
@@ -1637,7 +1745,6 @@ var ModTickFunctions = {
 						Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
 						var random = Math.floor((Math.random() * 9) + 1);
 						turrets[i].playSound("turrets/turret_active_" + random + ".mp3");
-						turrets[i].countdownToAttack += 5;
 					}
 					if(turrets[i].countdownToAttack == 10)
 						Entity.setRenderType(turrets[i].entity, TurretShooting2RenderType.renderType);
@@ -1666,6 +1773,49 @@ var ModTickFunctions = {
 			{
 				if(turrets[i].countdownToAttack != 0)
 					turrets[i].countdownToAttack = 0;
+			}
+		}
+
+		// defective turrets
+		for(var i in turretsDefective)
+		{
+			//Entity.setRot(turretsDefective[i].entity, 0, 0);
+
+			if(turretsDefective[i].aggressive)
+			{
+				if(checkProximity(Player.getEntity(), turretsDefective[i].entity, 8, 3))
+				{
+					turretsDefective[i].countdownToAttack++;
+					if(turretsDefective[i].countdownToAttack == 1)
+					{
+						Entity.setRenderType(turretsDefective[i].entity, TurretShooting1RenderType.renderType);
+					}
+					if(turretsDefective[i].countdownToAttack == 10)
+					{
+						Entity.setRenderType(turretsDefective[i].entity, TurretShooting2RenderType.renderType);
+						turretsDefective[i].shootDefective();
+					}
+				}else
+				{
+					if(turretsDefective[i].countdownToAttack != 0)
+					{
+						if(turretsDefective[i].countdownToAttack == 1)
+						{
+							Entity.setRenderType(turretsDefective[i].entity, TurretRenderType.renderType);
+							turretsDefective[i].countdownToAttack = 0;
+						}else
+						{
+							Entity.setRenderType(turretsDefective[i].entity, TurretShooting1RenderType.renderType);
+							if(turretsDefective[i].countdownToAttack > 10)
+								turretsDefective[i].countdownToAttack = 10;
+							turretsDefective[i].countdownToAttack--;
+						}
+					}
+				}
+			}else
+			{
+				if(turretsDefective[i].countdownToAttack != 0)
+					turretsDefective[i].countdownToAttack = 0;
 			}
 		}
 	},
@@ -3804,6 +3954,10 @@ function TurretClass(turret, container)
 
 	this.playSound = function(fileName)
 	{
+		if(areTurretsSinging)
+			turretsStopSinging();
+
+
 		var volume = 1.0;
 
 		// change volume based on distance from source
@@ -3843,6 +3997,68 @@ function TurretClass(turret, container)
 			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
 		}
 	}
+}
+
+function TurretDefectiveClass(turret, container)
+{
+	var turretObject = new TurretClass(turret, container);
+
+	turretObject.shootDefective = function()
+	{
+		var volume = 1.0;
+
+		// change volume based on distance from source
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
+		if(distance > MAX_LOGARITHMIC_VOLUME)
+			volume = 0.0;
+		else
+		{
+			volume = 1 - (Math.log(distance) / Math.log(MAX_LOGARITHMIC_VOLUME));
+		}
+
+		// apply general volume
+		volume = volume * generalVolume;
+
+		// play shooting sound
+		try
+		{
+			var random = Math.floor((Math.random() * 5) + 1);
+
+			var soundPlayer = new android.media.MediaPlayer();
+			soundPlayer.reset();
+			soundPlayer.setDataSource(sdcard + "/games/com.mojang/portal-sounds/turrets_defective/turret_defective_shoot_" + random + ".wav");
+			soundPlayer.setVolume(volume, volume);
+			soundPlayer.prepare();
+			soundPlayer.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
+			{
+				onCompletion: function(mp)
+				{
+					var random = Math.floor((Math.random() * 20) + 1);
+
+					mp.reset();
+					mp.setDataSource(sdcard + "/games/com.mojang/portal-sounds/turrets_defective/turret_defective_after_shoot_" + random + ".wav");
+					mp.setVolume(volume, volume);
+					mp.prepare();
+					mp.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
+					{
+						onCompletion: function(mp)
+						{
+							mp.release();
+							mp = null;
+						}
+					});
+					mp.start();
+				}
+			});
+			soundPlayer.start();
+		} catch(err)
+		{
+			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
+			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
+		}
+	}
+
+	return turretObject;
 }
 
 function checkProximity(entity1, entity2, distanceXZ, distanceY)

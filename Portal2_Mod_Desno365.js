@@ -1946,9 +1946,9 @@ function showPortalGunUI()
 					{
 						if(blueBulletLaunched)
 						{
+							blueBulletLaunched = false;
 							Entity.remove(blueBullet.entity);
 							blueBullet = null;
-							blueBulletLaunched = false;
 						}
 						shootBluePortal();
 					}
@@ -2020,9 +2020,9 @@ function showPortalGunUI()
 					{
 						if(orangeBulletLaunched)
 						{
+							orangeBulletLaunched = false;
 							Entity.remove(orangeBullet.entity);
 							orangeBullet = null;
-							orangeBulletLaunched = false;
 						}
 						shootOrangePortal();
 					}
@@ -2997,7 +2997,7 @@ function setPortalOrange(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		clientMessage("error bullet in a block");
+		Sound.playFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW
@@ -3279,7 +3279,7 @@ function setPortalBlue(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		clientMessage("error bullet in a block");
+		Sound.playFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW

@@ -58,6 +58,7 @@ var previousSlotId = 0;
 // buttons UI settings variables
 const BUTTONS_SIZE_DEFAULT = 24;
 var buttonsSize = BUTTONS_SIZE_DEFAULT;
+var imageSize = 1;
 var pixelsOffsetButtons = 0;
 var minecraftStyleForButtons = false;
 var playWelcomeSoundAtStartup = true;
@@ -598,6 +599,10 @@ function newLevel()
 	var bSizeTest = ModPE.readData("pref_portal_buttons_size");
 	if(bSizeTest != "" && bSizeTest != null && bSizeTest != undefined)
 		buttonsSize = parseFloat(bSizeTest);
+
+	var imageSizeTest = ModPE.readData("pref_portal_image_buttons_size");
+	if(imageSizeTest != "" && imageSizeTest != null && imageSizeTest != undefined)
+		imageSize = parseFloat(imageSizeTest);
 
 	var mButtonsTest = ModPE.readData("pref_portal_y_offset");
 	if(mButtonsTest != "" && mButtonsTest != null && mButtonsTest != undefined)
@@ -1929,8 +1934,6 @@ function showPortalGunUI()
 		{
 			try
 			{
-				var imageSize = (buttonsSize - 9) / 13;
-
 				var layoutLeft = new android.widget.LinearLayout(currentActivity);
 				layoutLeft.setOrientation(android.widget.LinearLayout.VERTICAL);
 
@@ -5443,7 +5446,7 @@ function settingsOtherUI()
 				layout.addView(dividerText());
 
 				var sizeText = new android.widget.TextView(currentActivity);
-				sizeText.setText("Select the preferred size of buttons (default is " + BUTTONS_SIZE_DEFAULT + ")");
+				sizeText.setText("Select the preferred size of text buttons (default is " + BUTTONS_SIZE_DEFAULT + ")");
 				sizeText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				sizeText.setPadding(padding, 0, padding, 0);
 				layout.addView(sizeText);
@@ -5471,6 +5474,41 @@ function settingsOtherUI()
 				sizeText1.setTextColor(android.graphics.Color.parseColor("#FFC0C0C0"));
 				sizeText1.setPadding(padding * 2, 0, padding * 2, 0);
 				layout.addView(sizeText1);
+
+				layout.addView(dividerText());
+
+
+
+				var imageButtonsSizeText = new android.widget.TextView(currentActivity);
+				imageButtonsSizeText.setText("Select the preferred size of Portals buttons (default is 10)");
+				imageButtonsSizeText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				imageButtonsSizeText.setPadding(padding, 0, padding, 0);
+				layout.addView(imageButtonsSizeText);
+
+				var imageButtonsSizeChooser = new android.widget.SeekBar(currentActivity);
+				imageButtonsSizeChooser.setMax(19);
+				imageButtonsSizeChooser.setProgress((imageSize * 10));
+				imageButtonsSizeChooser.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+				{
+					onProgressChanged: function()
+					{
+						imageSize = (imageButtonsSizeChooser.getProgress() + 1) / 10;
+						imageButtonsSizeText1.setText("Size: " + (imageButtonsSizeChooser.getProgress() + 1) + "/" + (imageButtonsSizeChooser.getMax() + 1));
+					},
+					onStopTrackingTouch: function()
+					{
+						clientMessage("size " + imageSize);
+						ModPE.saveData("pref_portal_buttons_image_ buttons_size", imageSize);
+					}
+				});
+				imageButtonsSizeChooser.setPadding(padding * 2, 0, padding * 2, 0);
+				layout.addView(imageButtonsSizeChooser);
+
+				var imageButtonsSizeText1 = new android.widget.TextView(currentActivity);
+				imageButtonsSizeText1.setText("Size: " + (imageSize * 10) + "/" + (imageButtonsSizeChooser.getMax() + 1));
+				imageButtonsSizeText1.setTextColor(android.graphics.Color.parseColor("#FFC0C0C0"));
+				imageButtonsSizeText1.setPadding(padding * 2, 0, padding * 2, 0);
+				layout.addView(imageButtonsSizeText1);
 
 				layout.addView(dividerText());
 
@@ -5599,7 +5637,7 @@ function settingsOtherUI()
 				{
 					onClick: function()
 					{
-						infoDesnoGunsMod();
+						settingsUI();
 						popup.dismiss();
 					}
 				});

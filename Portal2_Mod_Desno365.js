@@ -43,6 +43,12 @@ currentActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 var displayHeight = metrics.heightPixels;
 var displayWidth = metrics.widthPixels;
 var deviceDensity = metrics.density;
+if(displayHeight > displayWidth) // fix auto-rotation disabled bug
+{
+	var x = displayHeight;
+	displayHeight = displayWidth;
+	displayWidth = x;
+}
 metrics = null;
 
 // sounds variables
@@ -60,8 +66,13 @@ const BUTTONS_SIZE_DEFAULT = 24;
 var buttonsSize = BUTTONS_SIZE_DEFAULT;
 var imageSize = 1;
 var pixelsOffsetButtons = 0;
+
+// general settings
 var minecraftStyleForButtons = false;
 var playWelcomeSoundAtStartup = true;
+
+// map-makers settings
+var indestructibleBlocks = false;
 
 // all the entities array
 var entities = [];
@@ -156,7 +167,9 @@ var bluePortal = null;
 var bluePortalCreated = false;
 var orangePortal = null;
 var orangePortalCreated = false;
-var entitiesSupportForPortals = true;
+
+var ENTITIES_SUPPORT_DEFAULT = android.os.Build.VERSION.SDK_INT <= 15 ? false : true; // 15 = ICS
+var entitiesSupportForPortals = ENTITIES_SUPPORT_DEFAULT;
 
 var overlayImageView;
 var showingOverlayID = 0;
@@ -596,6 +609,8 @@ function newLevel()
 		}
 	}));
 
+	loadMapOptions();
+
 	var bSizeTest = ModPE.readData("pref_portal_buttons_size");
 	if(bSizeTest != "" && bSizeTest != null && bSizeTest != undefined)
 		buttonsSize = parseFloat(bSizeTest);
@@ -618,7 +633,7 @@ function newLevel()
 	// getSavedBoolean(name, defaultValue, debug);
 	minecraftStyleForButtons = getSavedBoolean("pref_portal_buttons_style", false);
 	playWelcomeSoundAtStartup = getSavedBoolean("pref_portal_welcome_sound", true);
-	entitiesSupportForPortals = getSavedBoolean("pref_portal_entities_support", true);
+	entitiesSupportForPortals = getSavedBoolean("pref_portal_entities_support", ENTITIES_SUPPORT_DEFAULT);
 
 	new java.lang.Thread(new java.lang.Runnable()
 	{
@@ -662,6 +677,20 @@ function leaveGame()
 
 	// entities container
 	entities = [];
+
+	// settings only for maps
+	indestructibleBlocks = false;
+
+	// stop sounds
+	try {
+		sound1.reset();
+	} catch(e) {}
+	try {
+		sound2.reset();
+	} catch(e) {}
+	try {
+		sound3.reset();
+	} catch(e) {}
 
 	// info item
 	removeInfoItemUI();
@@ -1003,6 +1032,12 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 
 function destroyBlock(x, y, z)
 {
+	if(indestructibleBlocks && Level.getGameMode() == GameMode.SURVIVAL)
+	{
+		preventDefault();
+		return;
+	}
+
 	x = Math.floor(x);
 	y = Math.floor(y);
 	z = Math.floor(z);
@@ -1056,6 +1091,7 @@ function destroyBlock(x, y, z)
 	// jumper
 	if(tile == JUMPER_ID)
 	{
+		//
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
 	}
 
@@ -3605,103 +3641,115 @@ function deleteOrangePortal()
 
 function loadPortalsAndDeleteThem()
 {
-	try
+	currentActivity.runOnUiThread(new java.lang.Runnable(
 	{
-		var loadFile = java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
-		if(loadFile.exists())
+		run: function()
 		{
-			// load streams
-			var streamInput = new java.io.FileInputStream(loadFile);
-			var streamReader = new java.io.InputStreamReader(streamInput);
-
-			var properties = new java.util.Properties();
-			properties.load(streamReader);
-
-			orangePortalCreated = stringToBoolean(properties.getProperty("orange", "0"));
-			if(orangePortalCreated)
+			try
 			{
-				var x1 = parseInt(properties.getProperty("orange_x_1"));
-				var y1 = parseInt(properties.getProperty("orange_y_1"));
-				var z1 = parseInt(properties.getProperty("orange_z_1"));
-				var x2 = parseInt(properties.getProperty("orange_x_2"));
-				var y2 = parseInt(properties.getProperty("orange_y_2"));
-				var z2 = parseInt(properties.getProperty("orange_z_2"));
-				orangePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
-				deleteOrangePortal();
-			}
+				var loadFile = java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
+				if(loadFile.exists())
+				{
+					// load streams
+					var streamInput = new java.io.FileInputStream(loadFile);
+					var streamReader = new java.io.InputStreamReader(streamInput);
 
-			bluePortalCreated = stringToBoolean(properties.getProperty("blue", "0"));
-			if(bluePortalCreated)
+					var properties = new java.util.Properties();
+					properties.load(streamReader);
+
+					orangePortalCreated = stringToBoolean(properties.getProperty("orange", "0"));
+					if(orangePortalCreated)
+					{
+						var x1 = parseInt(properties.getProperty("orange_x_1"));
+						var y1 = parseInt(properties.getProperty("orange_y_1"));
+						var z1 = parseInt(properties.getProperty("orange_z_1"));
+						var x2 = parseInt(properties.getProperty("orange_x_2"));
+						var y2 = parseInt(properties.getProperty("orange_y_2"));
+						var z2 = parseInt(properties.getProperty("orange_z_2"));
+						orangePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
+						deleteOrangePortal();
+					}
+
+					bluePortalCreated = stringToBoolean(properties.getProperty("blue", "0"));
+					if(bluePortalCreated)
+					{
+						var x1 = parseInt(properties.getProperty("blue_x_1"));
+						var y1 = parseInt(properties.getProperty("blue_y_1"));
+						var z1 = parseInt(properties.getProperty("blue_z_1"));
+						var x2 = parseInt(properties.getProperty("blue_x_2"));
+						var y2 = parseInt(properties.getProperty("blue_y_2"));
+						var z2 = parseInt(properties.getProperty("blue_z_2"));
+						bluePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
+						deleteBluePortal();
+					}
+
+					// close streams
+					streamReader.close();
+					streamInput.close();
+				}
+			}catch(err)
 			{
-				var x1 = parseInt(properties.getProperty("blue_x_1"));
-				var y1 = parseInt(properties.getProperty("blue_y_1"));
-				var z1 = parseInt(properties.getProperty("blue_z_1"));
-				var x2 = parseInt(properties.getProperty("blue_x_2"));
-				var y2 = parseInt(properties.getProperty("blue_y_2"));
-				var z2 = parseInt(properties.getProperty("blue_z_2"));
-				bluePortal = new PortalClass(x1, y1, z1, x2, y2, z2, null);
-				deleteBluePortal();
+				clientMessage("Error: " + err);
 			}
-
-			// close streams
-			streamReader.close();
-			streamInput.close();
 		}
-	}catch(err)
-	{
-		clientMessage("Error: " + err);
-	}
+	}));
 }
 
 function savePortalsToDelete()
 {
-	try
+	currentActivity.runOnUiThread(new java.lang.Runnable(
 	{
-		// create folders
-		var saveFolder = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod");
-		saveFolder.mkdirs();
-
-		// create file
-		var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
-		if(saveFile.exists())
-			saveFile.delete();
-		saveFile.createNewFile();
-
-		// load streams
-		var streamOutput = new java.io.FileOutputStream(saveFile);
-		var streamWriter = new java.io.OutputStreamWriter(streamOutput);
-		
-		var properties = new java.util.Properties();
-
-		properties.setProperty("orange", String(orangePortalCreated));
-		if(orangePortalCreated)
+		run: function()
 		{
-			properties.setProperty("orange_x_1", orangePortal.x1);
-			properties.setProperty("orange_y_1", orangePortal.y1);
-			properties.setProperty("orange_z_1", orangePortal.z1);
-			properties.setProperty("orange_x_2", orangePortal.x2);
-			properties.setProperty("orange_y_2", orangePortal.y2);
-			properties.setProperty("orange_z_2", orangePortal.z2);
-		}
+			try
+			{
+				// create folders
+				var saveFolder = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod");
+				saveFolder.mkdirs();
 
-		properties.setProperty("blue", String(bluePortalCreated));
-		if(bluePortalCreated)
-		{
-			properties.setProperty("blue_x_1", bluePortal.x1);
-			properties.setProperty("blue_y_1", bluePortal.y1);
-			properties.setProperty("blue_z_1", bluePortal.z1);
-			properties.setProperty("blue_x_2", bluePortal.x2);
-			properties.setProperty("blue_y_2", bluePortal.y2);
-			properties.setProperty("blue_z_2", bluePortal.z2);
-		}
+				// create file
+				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
+				if(saveFile.exists())
+					saveFile.delete();
+				saveFile.createNewFile();
 
-		properties.store(streamWriter, "Portal 2 Mod by Desno365");
-		streamWriter.close();
-		streamOutput.close();
-	}catch(err)
-	{
-		clientMessage("Error: " + err);
-	}
+				// load streams
+				var streamOutput = new java.io.FileOutputStream(saveFile);
+				var streamWriter = new java.io.OutputStreamWriter(streamOutput);
+				
+				var properties = new java.util.Properties();
+
+				properties.setProperty("orange", String(orangePortalCreated));
+				if(orangePortalCreated)
+				{
+					properties.setProperty("orange_x_1", orangePortal.x1);
+					properties.setProperty("orange_y_1", orangePortal.y1);
+					properties.setProperty("orange_z_1", orangePortal.z1);
+					properties.setProperty("orange_x_2", orangePortal.x2);
+					properties.setProperty("orange_y_2", orangePortal.y2);
+					properties.setProperty("orange_z_2", orangePortal.z2);
+				}
+
+				properties.setProperty("blue", String(bluePortalCreated));
+				if(bluePortalCreated)
+				{
+					properties.setProperty("blue_x_1", bluePortal.x1);
+					properties.setProperty("blue_y_1", bluePortal.y1);
+					properties.setProperty("blue_z_1", bluePortal.z1);
+					properties.setProperty("blue_x_2", bluePortal.x2);
+					properties.setProperty("blue_y_2", bluePortal.y2);
+					properties.setProperty("blue_z_2", bluePortal.z2);
+				}
+
+				properties.store(streamWriter, "Portal 2 Mod by Desno365");
+				streamWriter.close();
+				streamOutput.close();
+			}catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	}));
 }
 //########## PORTAL functions - END ##########
 
@@ -4315,6 +4363,7 @@ function makeBounceSound()
 }
 //########## BLUE GEL functions - END ##########
 
+
 //########## JUMPER functions ##########
 function makeJumperJump(angle)
 {
@@ -4327,6 +4376,78 @@ function makeJumperJump(angle)
 	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
 }
 //########## JUMPER functions - END ##########
+
+
+//########## MAP OPTIONS functions ##########
+function saveMapOptions()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			try
+			{
+				// create folders
+				var saveFolder = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod");
+				saveFolder.mkdirs();
+
+				// create file
+				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portal-mod-options.dat");
+				if(saveFile.exists())
+					saveFile.delete();
+				saveFile.createNewFile();
+
+				// load streams
+				var streamOutput = new java.io.FileOutputStream(saveFile);
+				var streamWriter = new java.io.OutputStreamWriter(streamOutput);
+				
+				var properties = new java.util.Properties();
+
+				properties.setProperty("indestructible_blocks", String(indestructibleBlocks));
+
+				properties.store(streamWriter, "Portal 2 Mod by Desno365");
+				streamWriter.close();
+				streamOutput.close();
+			}catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	}));
+}
+
+function loadMapOptions()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			try
+			{
+				var loadFile = java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portal-mod-options.dat");
+				if(loadFile.exists())
+				{
+					// load streams
+					var streamInput = new java.io.FileInputStream(loadFile);
+					var streamReader = new java.io.InputStreamReader(streamInput);
+
+					var properties = new java.util.Properties();
+					properties.load(streamReader);
+
+					indestructibleBlocks = stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
+
+					// close streams
+					streamReader.close();
+					streamInput.close();
+				}
+			}catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	}));
+}
+//########## MAP OPTIONS functions - END ##########
 
 
 //########## SOUND functions ##########
@@ -4923,6 +5044,8 @@ function getLogText()
 
 function stringToBoolean(string)
 {
+	if(typeof string != "string")
+		string = String(string);
 	switch(string.toLowerCase())
 	{
 		case "true":
@@ -5389,7 +5512,7 @@ function settingsUI()
 				{
 					onClick: function()
 					{
-						//settingsMapMakersUI();
+						settingsMapMakersUI();
 						popup.dismiss();
 					}
 				});
@@ -5657,6 +5780,87 @@ function settingsGeneralUI()
 				});
 				switchWelcomeSound.setPadding(padding, 0, padding, 0);
 				layout.addView(switchWelcomeSound);
+
+				layout.addView(dividerText());
+
+
+
+				var backButton = MinecraftButton();
+				backButton.setText("Back");
+				backButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						settingsUI();
+						popup.dismiss();
+					}
+				});
+				layout.addView(backButton);
+				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+				var exitButton = MinecraftButton();
+				exitButton.setText("Close");
+				exitButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						popup.dismiss();
+					}
+				});
+				layout.addView(exitButton);
+				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+
+				var popup = defaultPopup(layout);
+				popup.show();
+
+			} catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	});
+}
+
+function settingsMapMakersUI()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			try
+			{
+				var layout;
+				layout = defaultLayout("Map-makers settings");
+
+				var padding = convertDpToPixel(8);
+
+
+				var text = defaultContentTextView("Every option you change here is saved in the folder of the map you're playing.<br>You can share this map online and everyone will get the options you've selected.");
+				layout.addView(text);
+				setMarginsLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+
+
+				var title = defaultSubTitle("World interactions");
+				layout.addView(title);
+
+				layout.addView(dividerText());
+
+
+				var switchButtonsStyle = new android.widget.Switch(currentActivity);
+				switchButtonsStyle.setChecked(indestructibleBlocks);
+				switchButtonsStyle.setText("Indestructible blocks in survival");
+				switchButtonsStyle.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				switchButtonsStyle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
+				{
+					onCheckedChanged: function()
+					{
+						indestructibleBlocks = !indestructibleBlocks;
+						saveMapOptions();
+					}
+				});
+				switchButtonsStyle.setPadding(padding, 0, padding, 0);
+				layout.addView(switchButtonsStyle);
 
 				layout.addView(dividerText());
 

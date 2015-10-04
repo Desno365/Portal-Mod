@@ -616,6 +616,7 @@ function newLevel()
 
 	// load saved boolean settings
 	// getSavedBoolean(name, defaultValue, debug);
+	minecraftStyleForButtons = getSavedBoolean("pref_portal_buttons_style", false);
 	playWelcomeSoundAtStartup = getSavedBoolean("pref_portal_welcome_sound", true);
 	entitiesSupportForPortals = getSavedBoolean("pref_portal_entities_support", true);
 
@@ -1493,11 +1494,13 @@ var ModTickFunctions = {
 			else
 				entityIsInPortalBlue(Player.getEntity(), Player.getX(), Player.getY() - 1, Player.getZ());
 
-			for(var i in entities)
+			if(entitiesSupportForPortals)
 			{
-				var entity = entities[i];
-				entityIsInPortalOrange(entity, Entity.getX(entity), Entity.getY(entity) + 0.1, Entity.getZ(entity));
-				entityIsInPortalBlue(entity, Entity.getX(entity), Entity.getY(entity) + 0.1, Entity.getZ(entity));
+				for(var i in entities)
+				{
+					entityIsInPortalOrange(entities[i], Entity.getX(entities[i]), Entity.getY(entities[i]) + 0.1, Entity.getZ(entities[i]));
+					entityIsInPortalBlue(entities[i], Entity.getX(entities[i]), Entity.getY(entities[i]) + 0.1, Entity.getZ(entities[i]));
+				}
 			}
 		}
 	},
@@ -1524,6 +1527,8 @@ var ModTickFunctions = {
 					Entity.remove(blueBullet.entity);
 					blueBullet = null;
 					blueBulletLaunched = false;
+
+					Sound.playFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
 				} else
 				{
 					blueBullet.previousX = xArrow;
@@ -1553,6 +1558,8 @@ var ModTickFunctions = {
 					Entity.remove(orangeBullet.entity);
 					orangeBullet = null;
 					orangeBulletLaunched = false;
+
+					Sound.playFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
 				} else
 				{
 					orangeBullet.previousX = xArrow;
@@ -1702,7 +1709,7 @@ var ModTickFunctions = {
 				else
 				{
 					var volume = 1 - (Math.log(distancePJ) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
-					jukeboxes[i].player.setVolume(volume, volume);
+					jukeboxes[i].player.setVolume(volume * generalVolume, volume * generalVolume);
 				}
 			}
 		}
@@ -1794,7 +1801,7 @@ var ModTickFunctions = {
 				}else
 				{
 					var radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
-					radioPlayer.setVolume(radioVolume, radioVolume);
+					radioPlayer.setVolume(radioVolume * generalVolume, radioVolume * generalVolume);
 				}
 			}
 		}
@@ -1907,7 +1914,7 @@ var ModTickFunctions = {
 				}else
 				{
 					var volume = 1 - (Math.log(distance) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
-					turretSoundPlayer.setVolume(volume, volume);
+					turretSoundPlayer.setVolume(volume * generalVolume, volume * generalVolume);
 				}
 			}
 		}
@@ -1969,6 +1976,8 @@ function showPortalGunUI()
 				{
 					onClick: function(v)
 					{
+						if(minecraftStyleForButtons)
+							ModPE.showTipMessage("Pick enabled");
 						setPickEnabledPortalGun(true);
 					}
 				});
@@ -1986,6 +1995,8 @@ function showPortalGunUI()
 				{
 					onClick: function(v)
 					{
+						if(minecraftStyleForButtons)
+							ModPE.showTipMessage("Pick disabled");
 						setPickEnabledPortalGun(false);
 					}
 				});
@@ -2033,7 +2044,7 @@ function showPortalGunUI()
 				// DROP BUTTONS
 				if(minecraftStyleForButtons)
 				{
-					pgDropButtonFalse = MinecraftButton(buttonsSize);
+					pgDropButtonFalse = MinecraftButton(buttonsSize, false);
 					pgDropButtonFalse.setText("Drop");
 				} else
 				{
@@ -2051,7 +2062,7 @@ function showPortalGunUI()
 
 				if(minecraftStyleForButtons)
 				{
-					pgDropButtonTrue = MinecraftButton(buttonsSize);
+					pgDropButtonTrue = MinecraftButton(buttonsSize, false);
 					pgDropButtonTrue.setText("Drop");
 				} else
 				{
@@ -3721,7 +3732,7 @@ function initializeAndShowGravityGunUI()
 
 				if(minecraftStyleForButtons)
 				{
-					ggShootButtonFalse = MinecraftButton(buttonsSize);
+					ggShootButtonFalse = MinecraftButton(buttonsSize, false);
 					ggShootButtonFalse.setText("Shoot");
 				} else
 				{
@@ -3739,7 +3750,7 @@ function initializeAndShowGravityGunUI()
 
 				if(minecraftStyleForButtons)
 				{
-					ggShootButtonTrue = MinecraftButton(buttonsSize);
+					ggShootButtonTrue = MinecraftButton(buttonsSize, false);
 					ggShootButtonTrue.setText("Shoot");
 				} else
 				{
@@ -3770,7 +3781,7 @@ function initializeAndShowGravityGunUI()
 
 				if(minecraftStyleForButtons)
 				{
-					ggDropButtonFalse = MinecraftButton(buttonsSize);
+					ggDropButtonFalse = MinecraftButton(buttonsSize, false);
 					ggDropButtonFalse.setText("Drop");
 				} else
 				{
@@ -3788,7 +3799,7 @@ function initializeAndShowGravityGunUI()
 
 				if(minecraftStyleForButtons)
 				{
-					ggDropButtonTrue = MinecraftButton(buttonsSize);
+					ggDropButtonTrue = MinecraftButton(buttonsSize, false);
 					ggDropButtonTrue.setText("Drop");
 				} else
 				{
@@ -4164,7 +4175,7 @@ function startRadioMusic()
 		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.mp3");
 		radioPlayer.prepare();
 		radioPlayer.setLooping(true);
-		radioPlayer.setVolume(1.0, 1.0);
+		radioPlayer.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
 		radioPlayer.start();
 	} catch(err)
 	{
@@ -4202,7 +4213,7 @@ function JukeboxClass(x, y, z, disc)
 	this.player.reset();
 	this.player.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + getFileNameFromDiscId(disc));
 	this.player.prepare();
-	this.player.setVolume(1.0, 1.0);
+	this.player.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
 	this.player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
 	{
 		onCompletion: function()
@@ -5359,6 +5370,19 @@ function settingsUI()
 			{
 				var layout = defaultLayout("Settings");
 
+				var settingsButton = MinecraftButton();
+				settingsButton.setText("General settings");
+				settingsButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						settingsGeneralUI();
+						popup.dismiss();
+					}
+				});
+				layout.addView(settingsButton);
+				setMarginsLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
 				var mapMakersSettingsButton = MinecraftButton();
 				mapMakersSettingsButton.setText("Map-makers settings");
 				mapMakersSettingsButton.setOnClickListener(new android.view.View.OnClickListener()
@@ -5371,19 +5395,6 @@ function settingsUI()
 				});
 				layout.addView(mapMakersSettingsButton);
 				setMarginsLinearLayout(mapMakersSettingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
-
-				var settingsButton = MinecraftButton();
-				settingsButton.setText("Other settings");
-				settingsButton.setOnClickListener(new android.view.View.OnClickListener()
-				{
-					onClick: function()
-					{
-						settingsOtherUI();
-						popup.dismiss();
-					}
-				});
-				layout.addView(settingsButton);
-				setMarginsLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				layout.addView(portalDivider());
@@ -5426,7 +5437,7 @@ function settingsUI()
 	});
 }
 
-function settingsOtherUI()
+function settingsGeneralUI()
 {
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
@@ -5435,7 +5446,7 @@ function settingsOtherUI()
 			try
 			{
 				var layout;
-				layout = defaultLayout("Other settings");
+				layout = defaultLayout("General settings");
 
 				var padding = convertDpToPixel(8);
 
@@ -5444,6 +5455,7 @@ function settingsOtherUI()
 				layout.addView(title);
 
 				layout.addView(dividerText());
+
 
 				var sizeText = new android.widget.TextView(currentActivity);
 				sizeText.setText("Select the preferred size of text buttons (default is " + BUTTONS_SIZE_DEFAULT + ")");
@@ -5478,7 +5490,6 @@ function settingsOtherUI()
 				layout.addView(dividerText());
 
 
-
 				var imageButtonsSizeText = new android.widget.TextView(currentActivity);
 				imageButtonsSizeText.setText("Select the preferred size of Portals buttons (default is 10)");
 				imageButtonsSizeText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
@@ -5511,7 +5522,6 @@ function settingsOtherUI()
 				layout.addView(imageButtonsSizeText1);
 
 				layout.addView(dividerText());
-
 
 
 				var moveButtonsText = new android.widget.TextView(currentActivity);
@@ -5550,11 +5560,30 @@ function settingsOtherUI()
 				layout.addView(dividerText());
 
 
+				var switchButtonsStyle = new android.widget.Switch(currentActivity);
+				switchButtonsStyle.setChecked(minecraftStyleForButtons);
+				switchButtonsStyle.setText("Enable Minecraft style for text buttons");
+				switchButtonsStyle.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				switchButtonsStyle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
+				{
+					onCheckedChanged: function()
+					{
+						minecraftStyleForButtons = !minecraftStyleForButtons;
+						ModPE.saveData("pref_portal_buttons_style", minecraftStyleForButtons);
+					}
+				});
+				switchButtonsStyle.setPadding(padding, 0, padding, 0);
+				layout.addView(switchButtonsStyle);
+
+				layout.addView(dividerText());
+
+
 
 				var title = defaultSubTitle("Mod features");
 				layout.addView(title);
 
 				layout.addView(dividerText());
+
 
 				var switchEntitiesSupportPortals = new android.widget.Switch(currentActivity);
 				switchEntitiesSupportPortals.setChecked(entitiesSupportForPortals);
@@ -5579,6 +5608,7 @@ function settingsOtherUI()
 				layout.addView(title);
 
 				layout.addView(dividerText());
+
 
 				var audioText = new android.widget.TextView(currentActivity);
 				audioText.setText("Set the sound volume of the mod (default is " + 10 + ")");
@@ -5611,6 +5641,7 @@ function settingsOtherUI()
 				layout.addView(audioText1);
 
 				layout.addView(dividerText());
+
 
 				var switchWelcomeSound = new android.widget.Switch(currentActivity);
 				switchWelcomeSound.setChecked(playWelcomeSoundAtStartup);

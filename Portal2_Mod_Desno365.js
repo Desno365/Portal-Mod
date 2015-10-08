@@ -1001,6 +1001,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 
 		if(turrets.length >= 20)
 			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+			Player.decreaseByOneCarriedItem();
 	}
 
 	// defective turrets
@@ -1027,6 +1030,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 
 		if(turretsDefective.length >= 20)
 			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+			Player.decreaseByOneCarriedItem();
 	}
 }
 
@@ -1050,6 +1056,12 @@ function destroyBlock(x, y, z)
 		{
 			stopRadioMusic();
 		}
+	}
+
+	// radio
+	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B || tile == PORTAL_RADIO_C || tile == PORTAL_RADIO_D)
+	{
+		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
 	}
 
 	// portals
@@ -1093,12 +1105,6 @@ function destroyBlock(x, y, z)
 	{
 		//
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
-	}
-
-	// radio
-	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B || tile == PORTAL_RADIO_C || tile == PORTAL_RADIO_D)
-	{
-		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
 	}
 
 	// jukebox
@@ -1560,11 +1566,11 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the blueBullet hit an entity
+					Sound.playFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
+
 					Entity.remove(blueBullet.entity);
 					blueBullet = null;
 					blueBulletLaunched = false;
-
-					Sound.playFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
 				} else
 				{
 					blueBullet.previousX = xArrow;
@@ -1591,11 +1597,11 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the orangeBullet hit an entity
+					Sound.playFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
+
 					Entity.remove(orangeBullet.entity);
 					orangeBullet = null;
 					orangeBulletLaunched = false;
-
-					Sound.playFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
 				} else
 				{
 					orangeBullet.previousX = xArrow;
@@ -4049,11 +4055,25 @@ function TurretClass(turret, container)
 	{
 		var shotYaw = Math.atan2((Entity.getZ(this.entity) - Entity.getZ(victim)), (Entity.getX(this.entity) - Entity.getX(victim)));
 		var turretShot = getDirection((java.lang.Math.toDegrees(shotYaw) - 90), 0);
-		var shotArrow = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
-		Entity.setVelX(shotArrow, -turretShot.x * 2);
-		Entity.setVelY(shotArrow, turretShot.y * 2);
-		Entity.setVelZ(shotArrow, -turretShot.z * 2);
 		Level.playSoundEnt(this.entity, "random.bow", 1000, 0);
+
+		if(Level.getGameMode() == GameMode.SURVIVAL)
+		{
+			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 80);
+
+			// fix bouncing bullets
+			var skelly = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 34);
+			Entity.setRenderType(skelly, 4); // dropped item render
+			Entity.rideAnimal(skelly, bullet);
+			Entity.remove(skelly);
+		} else
+		{
+			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
+		}
+
+		Entity.setVelX(bullet, -turretShot.x * 1.5);
+		Entity.setVelY(bullet, turretShot.y * 1.5);
+		Entity.setVelZ(bullet, -turretShot.z * 1.5);
 	}
 
 	this.isThereTurretAtDistance = function(distance)
@@ -5062,6 +5082,24 @@ function stringToBoolean(string)
 	}
 }
 
+function stringToIntArray(string)
+{
+	string = String(string);
+	string = string.replace(/ /g, "");
+
+	var stringArray = string.split(",");
+	var intArray = [];
+
+	for(var i in stringArray)
+	{
+		var value = parseInt(stringArray[i]);
+		if(value > 0)
+			intArray.push(value);
+	}
+
+	return intArray;
+}
+
 function getSavedBoolean(name, defaultValue, debug)
 {
 	var savedDataTest = ModPE.readData(name);
@@ -5861,6 +5899,49 @@ function settingsMapMakersUI()
 				});
 				switchButtonsStyle.setPadding(padding, 0, padding, 0);
 				layout.addView(switchButtonsStyle);
+
+				layout.addView(dividerText());
+
+
+
+				var title = defaultSubTitle("Pick blacklist");
+				layout.addView(title);
+
+				layout.addView(dividerText());
+
+
+				var pickBlacklistText = new android.widget.TextView(currentActivity);
+				pickBlacklistText.setText("Type the IDs of the blocks that the player can't pick with the GravityGun or the PortalGun (default is: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ")");
+				pickBlacklistText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				pickBlacklistText.setPadding(padding, 0, padding, 0);
+				layout.addView(pickBlacklistText);
+
+				var layoutH = new android.widget.LinearLayout(currentActivity);
+				layoutH.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+				layoutH.setPadding(padding * 2, 0, padding * 2, 0);
+
+				var inputText1 = new android.widget.EditText(currentActivity);
+				inputText1.setHint("Example: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID);
+				inputText1.setText(pickBlocksBlacklist.toString());
+				inputText1.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 7));
+				layoutH.addView(inputText1);
+
+				var button1 = MinecraftButton();
+				button1.setText("Save");
+				button1.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						pickBlocksBlacklist = stringToIntArray(String(inputText1.getText()));
+						saveMapOptions();
+						print("saved " + pickBlocksBlacklist.toString()); // use toast
+						// TODO actually save it
+					}
+				});
+				button1.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 3));
+				layoutH.addView(button1);
+
+				layout.addView(layoutH);
 
 				layout.addView(dividerText());
 

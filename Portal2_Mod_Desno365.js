@@ -965,7 +965,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// turrets
-	if(itemId == ID_TURRET)
+	if(itemId == ID_TURRET && Level.getTile(x, y + 1, z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
@@ -976,6 +976,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		Entity.rideAnimal(turret, container);
 		Entity.setRenderType(container, 4); // dropped item render
 		Entity.setCollisionSize(container, 0, 0);
+		Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
 
 		turrets.push(new TurretClass(turret, container));
 		turrets[turrets.length - 1].x = Entity.getX(turret);
@@ -1007,7 +1008,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// defective turrets
-	if(itemId == ID_TURRET_DEFECTIVE)
+	if(itemId == ID_TURRET_DEFECTIVE && Level.getTile(x, y + 1, z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
@@ -1018,6 +1019,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		Entity.rideAnimal(turret, container);
 		Entity.setRenderType(container, 4); // dropped item render
 		Entity.setCollisionSize(container, 0, 0);
+		Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
 
 		turretsDefective.push(new TurretDefectiveClass(turret, container));
 		turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
@@ -6290,45 +6292,47 @@ function addTurretRenderType(renderer)
 	var rLeg = model.getPart("rightLeg");
 	var lLeg = model.getPart("leftLeg");
 
+	var yOffset = 6;
+
 	head.clear();
 
 	body.clear();
 	body.setTextureOffset(25,15);
-	body.addBox(0,0,0,3,11,6);
+	body.addBox(0,0 + yOffset,0,3,11,6);
 	body.setTextureOffset(54,0);	
-	body.addBox(-1,1,1,1,9,4);
+	body.addBox(-1,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(54,0);	
-	body.addBox(3,1,1,1,9,4);
+	body.addBox(3,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(44,30);	
-	body.addBox(1,5,-0.5,1,1,1);
+	body.addBox(1,5 + yOffset,-0.5,1,1,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(3,10,3,1,2,1);
+	body.addBox(3,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(3,12,0,1,1,4);
+	body.addBox(3,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(2.5,12,-3,2,1,3);
+	body.addBox(2.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(3,13,-3,1,6,1);
+	body.addBox(3,13 + yOffset,-3,1,6,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(-1,10,3,1,2,1);
+	body.addBox(-1,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,12,0,1,1,4);
+	body.addBox(-1,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(-1.5,12,-3,2,1,3);
+	body.addBox(-1.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,13,-3,1,6,1);
+	body.addBox(-1,13 + yOffset,-3,1,6,1);
 
 	// arm
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,5,1,1,5);
+	body.addBox(1,11 + yOffset,5,1,1,5);
 	body.setTextureOffset(25,21);
-	body.addBox(0.5,10,6,2,1,4);
+	body.addBox(0.5,10 + yOffset,6,2,1,4);
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,9,1,8,1);
+	body.addBox(1,11 + yOffset,9,1,8,1);
 
 	lLeg.clear();
 	rLeg.clear();
@@ -6349,48 +6353,50 @@ function addTurretLaserRenderType(renderer)
 	var rLeg = model.getPart("rightLeg");
 	var lLeg = model.getPart("leftLeg");
 
+	var yOffset = 6;
+
 	head.clear();
 
 	body.clear();
 	body.setTextureOffset(25,15);
-	body.addBox(0,0,0,3,11,6);
+	body.addBox(0,0 + yOffset,0,3,11,6);
 	body.setTextureOffset(54,0);	
-	body.addBox(-1,1,1,1,9,4);
+	body.addBox(-1,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(54,0);	
-	body.addBox(3,1,1,1,9,4);
+	body.addBox(3,1 + yOffset,1,1,9,4);
 	for(var i = 0; i < 160; i++)
 	{
 		body.setTextureOffset(44,30);	
-		body.addBox(1,5,0 - i,1,1,1);
+		body.addBox(1,5 + yOffset,0 - i,1,1,1);
 	}
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(3,10,3,1,2,1);
+	body.addBox(3,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(3,12,0,1,1,4);
+	body.addBox(3,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(2.5,12,-3,2,1,3);
+	body.addBox(2.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(3,13,-3,1,6,1);
+	body.addBox(3,13 + yOffset,-3,1,6,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(-1,10,3,1,2,1);
+	body.addBox(-1,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,12,0,1,1,4);
+	body.addBox(-1,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(-1.5,12,-3,2,1,3);
+	body.addBox(-1.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,13,-3,1,6,1);
+	body.addBox(-1,13 + yOffset,-3,1,6,1);
 
 	// arm
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,5,1,1,5);
+	body.addBox(1,11 + yOffset,5,1,1,5);
 	body.setTextureOffset(25,21);
-	body.addBox(0.5,10,6,2,1,4);
+	body.addBox(0.5,10 + yOffset,6,2,1,4);
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,9,1,8,1);
+	body.addBox(1,11 + yOffset,9,1,8,1);
 
 	lLeg.clear();
 	rLeg.clear();
@@ -6411,55 +6417,57 @@ function addTurretShooting1RenderType(renderer)
 	var rLeg = model.getPart("rightLeg");
 	var lLeg = model.getPart("leftLeg");
 
+	var yOffset = 6;
+
 	head.clear();
 
 	body.clear();
 	body.setTextureOffset(25,15);
-	body.addBox(0,0,0,3,11,6);
+	body.addBox(0,0 + yOffset,0,3,11,6);
 
 	body.setTextureOffset(49,17);
-	body.addBox(-1,4,2,1,1,2);
+	body.addBox(-1,4 + yOffset,2,1,1,2);
 	body.setTextureOffset(49,17);
-	body.addBox(3,4,2,1,1,2);
+	body.addBox(3,4 + yOffset,2,1,1,2);
 	body.setTextureOffset(51,19);
-	body.addBox(-1,6,2,1,1,2);
+	body.addBox(-1,6 + yOffset,2,1,1,2);
 	body.setTextureOffset(51,19);
-	body.addBox(3,6,2,1,1,2);
+	body.addBox(3,6 + yOffset,2,1,1,2);
 
 	body.setTextureOffset(54,0);	
-	body.addBox(-2,1,1,1,9,4);
+	body.addBox(-2,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(54,0);	
-	body.addBox(4,1,1,1,9,4);
+	body.addBox(4,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(44,30);	
-	body.addBox(1,5,-0.5,1,1,1);
+	body.addBox(1,5 + yOffset,-0.5,1,1,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(3,10,3,1,2,1);
+	body.addBox(3,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(3,12,0,1,1,4);
+	body.addBox(3,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(2.5,12,-3,2,1,3);
+	body.addBox(2.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(3,13,-3,1,6,1);
+	body.addBox(3,13 + yOffset,-3,1,6,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(-1,10,3,1,2,1);
+	body.addBox(-1,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,12,0,1,1,4);
+	body.addBox(-1,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(-1.5,12,-3,2,1,3);
+	body.addBox(-1.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,13,-3,1,6,1);
+	body.addBox(-1,13 + yOffset,-3,1,6,1);
 
 	// arm
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,5,1,1,5);
+	body.addBox(1,11 + yOffset,5,1,1,5);
 	body.setTextureOffset(25,21);
-	body.addBox(0.5,10,6,2,1,4);
+	body.addBox(0.5,10 + yOffset,6,2,1,4);
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,9,1,8,1);
+	body.addBox(1,11 + yOffset,9,1,8,1);
 
 	lLeg.clear();
 	rLeg.clear();
@@ -6480,55 +6488,57 @@ function addTurretShooting2RenderType(renderer)
 	var rLeg = model.getPart("rightLeg");
 	var lLeg = model.getPart("leftLeg");
 
+	var yOffset = 6;
+
 	head.clear();
 
 	body.clear();
 	body.setTextureOffset(25,15);
-	body.addBox(0,0,0,3,11,6);
+	body.addBox(0,0 + yOffset,0,3,11,6);
 
 	body.setTextureOffset(49,17);
-	body.addBox(-2,4,2,2,1,2);
+	body.addBox(-2,4 + yOffset,2,2,1,2);
 	body.setTextureOffset(49,17);
-	body.addBox(3,4,2,2,1,2);
+	body.addBox(3,4 + yOffset,2,2,1,2);
 	body.setTextureOffset(51,19);
-	body.addBox(-2,6,2,2,1,2);
+	body.addBox(-2,6 + yOffset,2,2,1,2);
 	body.setTextureOffset(51,19);
-	body.addBox(3,6,2,2,1,2);
+	body.addBox(3,6 + yOffset,2,2,1,2);
 
 	body.setTextureOffset(54,0);	
-	body.addBox(-3,1,1,1,9,4);
+	body.addBox(-3,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(54,0);	
-	body.addBox(5,1,1,1,9,4);
+	body.addBox(5,1 + yOffset,1,1,9,4);
 	body.setTextureOffset(44,30);	
-	body.addBox(1,5,-0.5,1,1,1);
+	body.addBox(1,5 + yOffset,-0.5,1,1,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(3,10,3,1,2,1);
+	body.addBox(3,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(3,12,0,1,1,4);
+	body.addBox(3,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(2.5,12,-3,2,1,3);
+	body.addBox(2.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(3,13,-3,1,6,1);
+	body.addBox(3,13 + yOffset,-3,1,6,1);
 
 	// leg
 	body.setTextureOffset(49,17);
-	body.addBox(-1,10,3,1,2,1);
+	body.addBox(-1,10 + yOffset,3,1,2,1);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,12,0,1,1,4);
+	body.addBox(-1,12 + yOffset,0,1,1,4);
 	body.setTextureOffset(25,21);
-	body.addBox(-1.5,12,-3,2,1,3);
+	body.addBox(-1.5,12 + yOffset,-3,2,1,3);
 	body.setTextureOffset(49,17);
-	body.addBox(-1,13,-3,1,6,1);
+	body.addBox(-1,13 + yOffset,-3,1,6,1);
 
 	// arm
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,5,1,1,5);
+	body.addBox(1,11 + yOffset,5,1,1,5);
 	body.setTextureOffset(25,21);
-	body.addBox(0.5,10,6,2,1,4);
+	body.addBox(0.5,10 + yOffset,6,2,1,4);
 	body.setTextureOffset(49,17);
-	body.addBox(1,11,9,1,8,1);
+	body.addBox(1,11 + yOffset,9,1,8,1);
 
 	lLeg.clear();
 	rLeg.clear();

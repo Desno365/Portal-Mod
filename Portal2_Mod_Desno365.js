@@ -306,6 +306,7 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 	"   ",
 	"   ",
 	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
+Item.setCategory(LONG_FALL_BOOTS_ID, ITEM_CATEGORY_TOOL);
 
 const MAX_LOGARITHMIC_VOLUME_RADIO = 25;
 var radioPlayer = new android.media.MediaPlayer();
@@ -532,24 +533,24 @@ Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
 // blue gel
 const REPULSION_GEL_ID = 230;
 Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
-Block.setDestroyTime(REPULSION_GEL_ID, 5);
+Block.setDestroyTime(REPULSION_GEL_ID, 1);
 
 // orange gel
-const SPEED_MULTIPLIER_MIN = 1.3;
+const SPEED_MULTIPLIER_MIN = 1.35;
 const SPEED_MULTIPLIER_MAX = 1.65;
 var speedMultiplier = SPEED_MULTIPLIER_MIN;
 const PROPULSION_GEL_ID = 231;
 Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
-Block.setDestroyTime(PROPULSION_GEL_ID, 5);
+Block.setDestroyTime(PROPULSION_GEL_ID, 1);
 
 // cubes
 const CUBE_NORMAL_ID = 232;
 Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
-Block.setDestroyTime(CUBE_NORMAL_ID, 3);
+Block.setDestroyTime(CUBE_NORMAL_ID, 1);
 
 const CUBE_COMPANION_ID = 233;
 Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
-Block.setDestroyTime(CUBE_COMPANION_ID, 3);
+Block.setDestroyTime(CUBE_COMPANION_ID, 1);
 
 
 // blacklist variables
@@ -1430,7 +1431,7 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 
 		case PORTAL_GUN_WOOD_AND_STONE_ID:
 		{
-			ModPE.showTipMessage("Tap on a block to place a Portal.");
+			ModPE.showTipMessage("Tap to place a Portal.");
 			break;
 		}
 

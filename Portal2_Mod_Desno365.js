@@ -73,6 +73,8 @@ var playWelcomeSoundAtStartup = true;
 
 // map-makers settings
 var indestructibleBlocks = false;
+var alwaysFullHungerBar = false;
+var fullHungerBarTick = 0;
 
 // all the entities array
 var entities = [];
@@ -1043,6 +1045,7 @@ function destroyBlock(x, y, z)
 {
 	if(indestructibleBlocks && Level.getGameMode() == GameMode.SURVIVAL)
 	{
+		ModPE.showTipMessage("You can't break blocks in this world");
 		preventDefault();
 		return;
 	}
@@ -1451,15 +1454,25 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 
 function jumpHook() // not really an hook
 {
+	// repulsion gel block
 	if(blockUnderPlayerBefore == REPULSION_GEL_ID)
 	{
 		makeBounceSound();
+	}
+
+	// long fall boots
+	if(isFalling)
+	{
+		// player is spamming the jump button causing bugs
+		Entity.setVelY(Player.getEntity(), -3);
 	}
 }
 
 function modTick()
 {
 	var blockUnderPlayer = Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()))
+
+	ModTickFunctions.alwaysFullHungerBarOption();
 
 	ModTickFunctions.checkChangedCarriedItem();
 
@@ -1499,6 +1512,21 @@ function modTick()
 }
 
 var ModTickFunctions = {
+
+	alwaysFullHungerBarOption: function()
+	{
+		if(alwaysFullHungerBar)
+		{
+			fullHungerBarTick++;
+
+			if(fullHungerBarTick >= 50)
+			{
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Entity.addEffect(Player.getEntity(), MobEffect.saturation, 1, 19, false, false);
+				fullHungerBarTick = 0;
+			}
+		}
+	},
 
 	checkChangedCarriedItem: function()
 	{
@@ -4427,6 +4455,8 @@ function saveMapOptions()
 				var properties = new java.util.Properties();
 
 				properties.setProperty("indestructible_blocks", String(indestructibleBlocks));
+				properties.setProperty("full_hunger_bar", String(alwaysFullHungerBar));
+				properties.setProperty("pick_blacklist", pickBlocksBlacklist.toString());
 
 				properties.store(streamWriter, "Portal 2 Mod by Desno365");
 				streamWriter.close();
@@ -4458,6 +4488,8 @@ function loadMapOptions()
 					properties.load(streamReader);
 
 					indestructibleBlocks = stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
+					alwaysFullHungerBar = stringToBoolean(properties.getProperty("full_hunger_bar", "0"));
+					pickBlocksBlacklist = stringToIntArray(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID));
 
 					// close streams
 					streamReader.close();
@@ -5906,6 +5938,25 @@ function settingsMapMakersUI()
 				layout.addView(dividerText());
 
 
+				var switchFullHungerBar = new android.widget.Switch(currentActivity);
+				switchFullHungerBar.setChecked(alwaysFullHungerBar);
+				switchFullHungerBar.setText("Always full hunger bar in survival");
+				switchFullHungerBar.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				switchFullHungerBar.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
+				{
+					onCheckedChanged: function()
+					{
+						alwaysFullHungerBar = !alwaysFullHungerBar;
+						fullHungerBarTick = 50;
+						saveMapOptions();
+					}
+				});
+				switchFullHungerBar.setPadding(padding, 0, padding, 0);
+				layout.addView(switchFullHungerBar);
+
+				layout.addView(dividerText());
+
+
 
 				var title = defaultSubTitle("Pick blacklist");
 				layout.addView(title);
@@ -5937,8 +5988,7 @@ function settingsMapMakersUI()
 					{
 						pickBlocksBlacklist = stringToIntArray(String(inputText1.getText()));
 						saveMapOptions();
-						print("saved " + pickBlocksBlacklist.toString()); // use toast
-						// TODO actually save it
+						android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("Saved blacklist " + pickBlocksBlacklist.toString()), 1).show();
 					}
 				});
 				button1.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 3));

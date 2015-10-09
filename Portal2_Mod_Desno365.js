@@ -1244,7 +1244,7 @@ function attackHook(attacker, victim)
 			if(victim == turrets[i].entity || victim == turrets[i].container)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
-					turrets[i].aggressive = !turrets[i].aggressive;
+					turretOptionsUI(i);
 				else
 					ModPE.showTipMessage("You can't hit a turret.");
 				preventDefault();
@@ -1258,7 +1258,7 @@ function attackHook(attacker, victim)
 			if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
-					turretsDefective[i].aggressive = !turretsDefective[i].aggressive;
+					turretDefectiveOptionsUI(i);
 				else
 					ModPE.showTipMessage("You can't hit a turret.");
 				preventDefault();
@@ -6275,6 +6275,94 @@ function supportUI()
 	});
 }
 
+function turretOptionsUI(i)
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			try
+			{
+				var layout;
+				layout = defaultLayout("Turret options");
+
+				var padding = convertDpToPixel(8);
+
+
+
+				var switchAggressive = new android.widget.Switch(currentActivity);
+				switchAggressive.setChecked(turrets[i].aggressive);
+				switchAggressive.setText("Aggressive turret");
+				switchAggressive.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				switchAggressive.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
+				{
+					onCheckedChanged: function()
+					{
+						turrets[i].aggressive = !turrets[i].aggressive;
+						Entity.setRenderType(turrets[i].entity, TurretRenderType.renderType);
+						//saveTurrets() TODO
+
+						popup.dismiss();
+					}
+				});
+				switchAggressive.setPadding(padding, 0, padding, 0);
+				layout.addView(switchAggressive);
+
+				layout.addView(dividerText());
+
+
+				var removeButton = MinecraftButton(null, null, "#FF0000");
+				removeButton.setText("Remove turret");
+				removeButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						Entity.remove(turrets[i].container);
+						Entity.remove(turrets[i].entity);
+
+						var random = Math.floor((Math.random() * 9) + 1);
+						turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
+
+						turrets.splice(i, 1);
+						//saveTurrets(); TODO
+						
+						if(areTurretsSinging)
+							turretsStopSinging();
+
+						popup.dismiss();
+					}
+				});
+				layout.addView(removeButton);
+				setMarginsLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+				layout.addView(dividerText());
+
+
+
+				var exitButton = MinecraftButton();
+				exitButton.setText("Close");
+				exitButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						popup.dismiss();
+					}
+				});
+				layout.addView(exitButton);
+				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+
+				var popup = defaultPopup(layout);
+				popup.show();
+
+			} catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	});
+}
+
 // No Minecraft Layout because this UI can be showed at startup
 function pleaseInstallTextureUI()
 {
@@ -6624,7 +6712,7 @@ new java.lang.Thread(new java.lang.Runnable()
 // MINECRAFT BUTTON LIBRARY
 //########################################################################################################################################################
 
-// Library version: 1.2.2
+// Library version: 1.2.3
 // Made by Dennis Motta, also known as Desno365
 // https://github.com/Desno365/Minecraft-Button-Library
 
@@ -6681,12 +6769,16 @@ MinecraftButtonLibrary.ProcessedResources.mcPressedNineDrawable = null;
 // LIBRARY
 //########################################################################################################################################################
 
-function MinecraftButton(textSize, enableSound)
+// MinecraftButton(int textSize, bool enableSound, string customTextColor)
+// set an argument null if you want to use the default value
+function MinecraftButton(textSize, enableSound, customTextColor)
 {
 	if(textSize == null)
 		textSize = MinecraftButtonLibrary.defaultButtonTextSize;
 	if(enableSound == null)
 		enableSound = true;
+	if(customTextColor == null)
+		customTextColor = MinecraftButtonLibrary.defaultButtonTextColor;
 
 	var button = new android.widget.Button(MinecraftButtonLibrary.context);
 	button.setTextSize(textSize);
@@ -6694,7 +6786,7 @@ function MinecraftButton(textSize, enableSound)
 	{
 		onTouch: function(v, motionEvent)
 		{
-			MinecraftButtonLibrary.onTouch(v, motionEvent, enableSound);
+			MinecraftButtonLibrary.onTouch(v, motionEvent, enableSound, customTextColor);
 			return false;
 		}
 	});
@@ -6704,7 +6796,7 @@ function MinecraftButton(textSize, enableSound)
 	button.setTag(false); // is pressed?
 	button.setSoundEffectsEnabled(false);
 	button.setGravity(android.view.Gravity.CENTER);
-	button.setTextColor(android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextColor));
+	button.setTextColor(android.graphics.Color.parseColor(customTextColor));
 	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding));
 	button.setLineSpacing(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing), 1);
 	// apply custom font with shadow
@@ -6734,7 +6826,7 @@ MinecraftButtonLibrary.convertDpToPixel = function(dp)
 	return (dp * density);
 }
 
-MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound)
+MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound, customTextColor)
 {
 	var action = motionEvent.getActionMasked();
 	if(action == android.view.MotionEvent.ACTION_DOWN)
@@ -6745,7 +6837,7 @@ MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound)
 	if(action == android.view.MotionEvent.ACTION_CANCEL || action == android.view.MotionEvent.ACTION_UP)
 	{
 		// button released
-		MinecraftButtonLibrary.changeToNormalState(v);
+		MinecraftButtonLibrary.changeToNormalState(v, customTextColor);
 		
 		var rect = new android.graphics.Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
 		if(rect.contains(v.getLeft() + motionEvent.getX(), v.getTop() + motionEvent.getY())) // detect if the event happens inside the view
@@ -6778,16 +6870,16 @@ MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound)
 				// restore pressed state
 				v.setTag(false); // is pressed?
 
-				MinecraftButtonLibrary.changeToNormalState(v);
+				MinecraftButtonLibrary.changeToNormalState(v, customTextColor);
 			}
 		}
 	}
 }
 
-MinecraftButtonLibrary.changeToNormalState = function(button)
+MinecraftButtonLibrary.changeToNormalState = function(button, customTextColor)
 {
 	MinecraftButtonLibrary.setButtonBackground(button, MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable);
-	button.setTextColor(android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextColor));
+	button.setTextColor(android.graphics.Color.parseColor(customTextColor));
 	// reset pressed padding
 	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding));
 }

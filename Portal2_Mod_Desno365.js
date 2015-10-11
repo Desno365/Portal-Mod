@@ -972,21 +972,10 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
-		var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
-		Entity.setHealth(turret, 1);
-		Entity.setRenderType(turret, TurretRenderType.renderType);
-		var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
-		Entity.rideAnimal(turret, container);
-		Entity.setRenderType(container, 4); // dropped item render
-		Entity.setCollisionSize(container, 0, 0);
-		Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+		spawnTurret(x, y, z);
 
-		turrets.push(new TurretClass(turret, container));
-		turrets[turrets.length - 1].x = Entity.getX(turret);
-		turrets[turrets.length - 1].y = Entity.getY(turret);
-		turrets[turrets.length - 1].z = Entity.getZ(turret);
-		//saveTurrets(); // TODO
-		
+		// turrets[turrets.length - 1] is the latest spawned turret
+
 		if(turrets[turrets.length - 1].isThereTurretAtDistance(1))
 		{
 			if(turrets[turrets.length - 1].isThereTurretAtDistance(2))
@@ -1004,7 +993,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		}
 
 		if(turrets.length >= 20)
-			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+			clientMessage("§cWARNING§f: So many turrets can slow down your device");
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
@@ -1015,26 +1004,15 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
-		var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
-		Entity.setHealth(turret, 1);
-		Entity.setRenderType(turret, TurretRenderType.renderType);
-		var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
-		Entity.rideAnimal(turret, container);
-		Entity.setRenderType(container, 4); // dropped item render
-		Entity.setCollisionSize(container, 0, 0);
-		Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+		spawnTurretDefective(x, y, z);
 
-		turretsDefective.push(new TurretDefectiveClass(turret, container));
-		turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
-		turretsDefective[turretsDefective.length - 1].y = Entity.getY(turret);
-		turretsDefective[turretsDefective.length - 1].z = Entity.getZ(turret);
-		//saveTurrets(); // TODO
+		// turretsDefective[turretsDefective.length - 1] is the latest spawned turret
 
 		var random = Math.floor((Math.random() * 16) + 1);
 		turretsDefective[turretsDefective.length - 1].playSound("turrets_defective/turret_defective_spawn_" + random + ".wav");
 
 		if(turretsDefective.length >= 20)
-			clientMessage("§cWARNING§f: So many turrets can slow down your device when playing");
+			clientMessage("§cWARNING§f: So many turrets can slow down your device");
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
@@ -1244,9 +1222,15 @@ function attackHook(attacker, victim)
 			if(victim == turrets[i].entity || victim == turrets[i].container)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
+				{
 					turretOptionsUI(i);
-				else
-					ModPE.showTipMessage("You can't hit a turret.");
+				} else
+				{
+					if(isItemPortalGun(Player.getCarriedItem()))
+						ModPE.showTipMessage("Use \"pick\" to kill a turret");
+					else
+						ModPE.showTipMessage("Only gravity can kill a turret");
+				}
 				preventDefault();
 				return;
 			}
@@ -1258,9 +1242,15 @@ function attackHook(attacker, victim)
 			if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
+				{
 					turretDefectiveOptionsUI(i);
-				else
-					ModPE.showTipMessage("You can't hit a turret.");
+				} else
+				{
+					if(isItemPortalGun(Player.getCarriedItem()))
+						ModPE.showTipMessage("Use \"pick\" to kill a turret");
+					else
+						ModPE.showTipMessage("Only gravity can kill a turret");
+				}
 				preventDefault();
 				return;
 			}
@@ -1297,19 +1287,31 @@ function deathHook(murderer, victim)
 	{
 		if(victim == turrets[i].entity || victim == turrets[i].container)
 		{
+			if(murderer != -1 && murderer != Player.getEntity())
+			{
+				var deathTurret = turrets[i];
+				spawnTurret(Entity.getX(turrets[i].entity), Entity.getY(turrets[i].entity), Entity.getZ(turrets[i].entity));
+				turrets[turrets.length - 1].countdownToAttack = deathTurret.countdownToAttack;
+				turrets[turrets.length - 1].aggressive = deathTurret.aggressive;
+
+				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
+					Entity.remove(murderer);
+			} else
+			{
+				var random = Math.floor((Math.random() * 9) + 1);
+				turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
+
+				if(areTurretsSinging)
+					turretsStopSinging();
+			}
+
 			if(victim == turrets[i].entity)
 				Entity.remove(turrets[i].container);
 			if(victim == turrets[i].container)
 				Entity.remove(turrets[i].entity);
 
-			var random = Math.floor((Math.random() * 9) + 1);
-			turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
-
 			turrets.splice(i, 1);
 			//saveTurrets(); TODO
-			
-			if(areTurretsSinging)
-				turretsStopSinging();
 		}
 	}
 
@@ -1318,13 +1320,25 @@ function deathHook(murderer, victim)
 	{
 		if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
 		{
+			if(murderer != -1 && murderer != Player.getEntity())
+			{
+				var deathTurret = turretsDefective[i];
+				spawnTurret(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity));
+				turretsDefective[turretsDefective.length - 1].countdownToAttack = deathTurret.countdownToAttack;
+				turretsDefective[turretsDefective.length - 1].aggressive = deathTurret.aggressive;
+
+				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
+					Entity.remove(murderer);
+			} else
+			{
+				var random = Math.floor((Math.random() * 7) + 1);
+				turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
+			}
+
 			if(victim == turretsDefective[i].entity)
 				Entity.remove(turretsDefective[i].container);
 			if(victim == turretsDefective[i].container)
 				Entity.remove(turretsDefective[i].entity);
-
-			var random = Math.floor((Math.random() * 7) + 1);
-			turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
 
 			turretsDefective.splice(i, 1);
 			//saveTurrets(); TODO
@@ -1334,6 +1348,13 @@ function deathHook(murderer, victim)
 
 function entityAddedHook(entity)
 {
+	// to prevent the death of turrets by zombies
+	if(Entity.getEntityTypeId(entity) == EntityType.ZOMBIE_VILLAGER && (turrets.length > 0 || turretsDefective.length > 0))
+	{
+		Entity.remove(entity);
+		return;
+	}
+
 	// needed for mobs support for portal and jumper
 	var entityId = Entity.getEntityTypeId(entity);
 	if(entityId != 0 && entityId != EntityType.ARROW && entityId != EntityType.EGG && entityId != EntityType.EXPERIENCE_ORB && entityId != EntityType.EXPERIENCE_POTION && entityId != EntityType.FIREBALL && entityId != EntityType.FISHING_HOOK && entityId != EntityType.LIGHTNING_BOLT && entityId != EntityType.PAINTING && entityId != EntityType.PAINTING && entityId != EntityType.SMALL_FIREBALL && entityId != EntityType.SNOWBALL && entityId != EntityType.THROWN_POTION)
@@ -1945,7 +1966,7 @@ var ModTickFunctions = {
 					if(turretsDefective[i].countdownToAttack == 10)
 					{
 						Entity.setRenderType(turretsDefective[i].entity, TurretShooting2RenderType.renderType);
-						turretsDefective[i].shootDefective();
+						turretsDefective[i].shoot();
 					}
 				}else
 				{
@@ -4072,6 +4093,50 @@ function makeLongFallBootsSound()
 
 
 //########## TURRETS functions ##########
+function spawnTurret(x, y, z)
+{
+	x = Math.floor(x);
+	y = Math.floor(y);
+	z = Math.floor(z);
+
+	var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
+	Entity.setHealth(turret, 1);
+	Entity.setRenderType(turret, TurretRenderType.renderType);
+	var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+	Entity.rideAnimal(turret, container);
+	Entity.setRenderType(container, 4); // dropped item render
+	Entity.setCollisionSize(container, 0, 0);
+	Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+
+	turrets.push(new TurretClass(turret, container));
+	turrets[turrets.length - 1].x = Entity.getX(turret);
+	turrets[turrets.length - 1].y = Entity.getY(turret);
+	turrets[turrets.length - 1].z = Entity.getZ(turret);
+	//saveTurrets(); // TODO
+}
+
+function spawnTurretDefective(x, y, z)
+{
+	x = Math.floor(x);
+	y = Math.floor(y);
+	z = Math.floor(z);
+
+	var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
+	Entity.setHealth(turret, 1);
+	Entity.setRenderType(turret, TurretRenderType.renderType);
+	var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+	Entity.rideAnimal(turret, container);
+	Entity.setRenderType(container, 4); // dropped item render
+	Entity.setCollisionSize(container, 0, 0);
+	Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+
+	turretsDefective.push(new TurretDefectiveClass(turret, container));
+	turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
+	turretsDefective[turretsDefective.length - 1].y = Entity.getY(turret);
+	turretsDefective[turretsDefective.length - 1].z = Entity.getZ(turret);
+	//saveTurrets(); // TODO
+}
+
 function TurretClass(turret, container)
 {
 	this.entity = turret;
@@ -4102,9 +4167,9 @@ function TurretClass(turret, container)
 			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
 		}
 
-		Entity.setVelX(bullet, -turretShot.x * 1.5);
-		Entity.setVelY(bullet, turretShot.y * 1.5);
-		Entity.setVelZ(bullet, -turretShot.z * 1.5);
+		Entity.setVelX(bullet, -turretShot.x * 1.8);
+		Entity.setVelY(bullet, turretShot.y * 1.8);
+		Entity.setVelZ(bullet, -turretShot.z * 1.8);
 	}
 
 	this.isThereTurretAtDistance = function(distance)
@@ -4185,7 +4250,7 @@ function TurretDefectiveClass(turret, container)
 {
 	var turretObject = new TurretClass(turret, container);
 
-	turretObject.shootDefective = function()
+	turretObject.shoot = function()
 	{
 		var volume = 1.0;
 
@@ -5052,19 +5117,11 @@ function convertDpToPixel(dp)
 
 function basicMinecraftTextView(text, textSize) // TextView with just the Minecraft font
 {
-	var lineSpacing = convertDpToPixel(4);
-
 	var textview = new android.widget.TextView(currentActivity);
 	textview.setText(new android.text.Html.fromHtml(text));
 	if(textSize != null)
 		textview.setTextSize(textSize);
-	textview.setTypeface(MinecraftButtonLibrary.ProcessedResources.font);
-	textview.setPaintFlags(textview.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
-	textview.setLineSpacing(lineSpacing, 1);
-	if(android.os.Build.VERSION.SDK_INT > 19) // KITKAT
-		textview.setShadowLayer(1, Math.round((textview.getLineHeight() - lineSpacing) / 8), Math.round((textview.getLineHeight() - lineSpacing) / 8), android.graphics.Color.parseColor("#FF333333"));
-	else
-		textview.setShadowLayer(0.001, Math.round((textview.getLineHeight() - lineSpacing) / 8), Math.round((textview.getLineHeight() - lineSpacing) / 8), android.graphics.Color.parseColor("#FF333333"));
+	MinecraftButtonLibrary.addMinecraftStyleToTextView(textview);
 
 	return textview;
 }
@@ -6298,14 +6355,33 @@ function turretOptionsUI(i)
 				{
 					onCheckedChanged: function()
 					{
-						turrets[i].aggressive = !turrets[i].aggressive;
-						Entity.setRenderType(turrets[i].entity, TurretRenderType.renderType);
-						//saveTurrets() TODO
+						new android.os.Handler().postDelayed(new java.lang.Runnable(
+						{
+							run: function()
+							{
+								if(isInGame)
+								{
+									try
+									{
+										turrets[i].aggressive = !turrets[i].aggressive;
+										Entity.setRenderType(turrets[i].entity, TurretRenderType.renderType);
+										//saveTurrets() TODO
+									} catch(e) {}
+								}
+							}
+						}), 800);
 
-						popup.dismiss();
+						new android.os.Handler().postDelayed(new java.lang.Runnable(
+						{
+							run: function()
+							{
+								popup.dismiss();
+							}
+						}), 300);
 					}
 				});
 				switchAggressive.setPadding(padding, 0, padding, 0);
+				MinecraftButtonLibrary.addMinecraftStyleToTextView(switchAggressive);
 				layout.addView(switchAggressive);
 
 				layout.addView(dividerText());
@@ -6328,6 +6404,110 @@ function turretOptionsUI(i)
 						
 						if(areTurretsSinging)
 							turretsStopSinging();
+
+						popup.dismiss();
+					}
+				});
+				layout.addView(removeButton);
+				setMarginsLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+				layout.addView(dividerText());
+
+
+
+				var exitButton = MinecraftButton();
+				exitButton.setText("Close");
+				exitButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						popup.dismiss();
+					}
+				});
+				layout.addView(exitButton);
+				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+
+				var popup = defaultPopup(layout);
+				popup.show();
+
+			} catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	});
+}
+
+function turretDefectiveOptionsUI(i)
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			try
+			{
+				var layout;
+				layout = defaultLayout("Turret options");
+
+				var padding = convertDpToPixel(8);
+
+
+
+				var switchAggressive = new android.widget.Switch(currentActivity);
+				switchAggressive.setChecked(turretsDefective[i].aggressive);
+				switchAggressive.setText("Aggressive turret");
+				switchAggressive.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
+				switchAggressive.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
+				{
+					onCheckedChanged: function()
+					{
+						new android.os.Handler().postDelayed(new java.lang.Runnable(
+						{
+							run: function()
+							{
+								if(isInGame)
+								{
+									try
+									{
+										turretsDefective[i].aggressive = !turretsDefective[i].aggressive;
+										Entity.setRenderType(turretsDefective[i].entity, TurretRenderType.renderType);
+										//saveTurrets() TODO
+									} catch(e) { }
+								}
+							}
+						}), 800);
+
+						new android.os.Handler().postDelayed(new java.lang.Runnable(
+						{
+							run: function()
+							{
+								popup.dismiss();
+							}
+						}), 300);
+					}
+				});
+				switchAggressive.setPadding(padding, 0, padding, 0);
+				MinecraftButtonLibrary.addMinecraftStyleToTextView(switchAggressive);
+				layout.addView(switchAggressive);
+
+				layout.addView(dividerText());
+
+
+				var removeButton = MinecraftButton(null, null, "#FF0000");
+				removeButton.setText("Remove turret");
+				removeButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						Entity.remove(turretsDefective[i].container);
+						Entity.remove(turretsDefective[i].entity);
+
+						var random = Math.floor((Math.random() * 7) + 1);
+						turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
+
+						turretsDefective.splice(i, 1);
+						//saveTurrets(); TODO
 
 						popup.dismiss();
 					}
@@ -6712,7 +6892,7 @@ new java.lang.Thread(new java.lang.Runnable()
 // MINECRAFT BUTTON LIBRARY
 //########################################################################################################################################################
 
-// Library version: 1.2.3
+// Library version: 1.2.4
 // Made by Dennis Motta, also known as Desno365
 // https://github.com/Desno365/Minecraft-Button-Library
 
@@ -6798,19 +6978,26 @@ function MinecraftButton(textSize, enableSound, customTextColor)
 	button.setGravity(android.view.Gravity.CENTER);
 	button.setTextColor(android.graphics.Color.parseColor(customTextColor));
 	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding));
-	button.setLineSpacing(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing), 1);
-	// apply custom font with shadow
-	button.setTypeface(MinecraftButtonLibrary.ProcessedResources.font);
-	button.setPaintFlags(button.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
-	if (android.os.Build.VERSION.SDK_INT >= 19) // KitKat
-		button.setShadowLayer(1, Math.round((button.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((button.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
-	else
-		button.setShadowLayer(0.0001, Math.round((button.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((button.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
+	MinecraftButtonLibrary.addMinecraftStyleToTextView(button);
 
 	return button;
 }
 
 // ######### BUTTON UTILS functions #########
+MinecraftButtonLibrary.addMinecraftStyleToTextView = function(textview)
+{
+	// works also for subclasses of TextView
+	// you must set the text size before calling this function!
+
+	textview.setTypeface(MinecraftButtonLibrary.ProcessedResources.font);
+	textview.setPaintFlags(textview.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
+	textview.setLineSpacing(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing), 1);
+	if (android.os.Build.VERSION.SDK_INT >= 19) // KitKat
+		textview.setShadowLayer(1, Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
+	else
+		textview.setShadowLayer(0.0001, Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
+}
+
 MinecraftButtonLibrary.setButtonBackground = function(button, background)
 {
 	if (android.os.Build.VERSION.SDK_INT >= 16)

@@ -982,11 +982,11 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			{
 				if(turrets[turrets.length - 1].isThereTurretAtDistance(3))
 				{
-					turrets[turrets.length - 1].playSound("music/portal_turret_song.mp3");
+					turrets[turrets.length - 1].playSound("portal-music/portal_turret_song.mp3");
 					ModPE.showTipMessage("Singing...");
-					turretsSongX = Entity.getX(turret);
-					turretsSongY = Entity.getY(turret);
-					turretsSongZ = Entity.getZ(turret);
+					turretsSongX = Entity.getX(turrets[turrets.length - 1].entity);
+					turretsSongY = Entity.getY(turrets[turrets.length - 1].entity);
+					turretsSongZ = Entity.getZ(turrets[turrets.length - 1].entity);
 					areTurretsSinging = true;
 				}
 			}
@@ -1009,7 +1009,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		// turretsDefective[turretsDefective.length - 1] is the latest spawned turret
 
 		var random = Math.floor((Math.random() * 16) + 1);
-		turretsDefective[turretsDefective.length - 1].playSound("turrets_defective/turret_defective_spawn_" + random + ".wav");
+		turretsDefective[turretsDefective.length - 1].playSound("portal-sounds/turrets_defective/turret_defective_spawn_" + random + ".wav");
 
 		if(turretsDefective.length >= 20)
 			clientMessage("§cWARNING§f: So many turrets can slow down your device");
@@ -1119,7 +1119,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
 					pickEntity = turrets[i].container;
 
 					if(areTurretsSinging)
@@ -1129,7 +1129,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].container)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
 
 					if(areTurretsSinging)
 						turretsStopSinging();
@@ -1144,14 +1144,14 @@ function attackHook(attacker, victim)
 				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					pickEntity = turretsDefective[i].container;
 					break turretsDefectiveLoop;
 				}
 				if(victim == turretsDefective[i].container)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					break turretsDefectiveLoop;
 				}
 			}
@@ -1174,7 +1174,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
 					pickEntity = turrets[i].container;
 
 					if(areTurretsSinging)
@@ -1184,7 +1184,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].container)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
 
 					if(areTurretsSinging)
 						turretsStopSinging();
@@ -1199,14 +1199,14 @@ function attackHook(attacker, victim)
 				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					pickEntity = turretsDefective[i].container;
 					break turretsDefectiveLoop;
 				}
 				if(victim == turretsDefective[i].container)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					break turretsDefectiveLoop;
 				}
 			}
@@ -1301,7 +1301,7 @@ function deathHook(murderer, victim)
 			} else
 			{
 				var random = Math.floor((Math.random() * 9) + 1);
-				turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
+				turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
 
 				if(areTurretsSinging)
 					turretsStopSinging();
@@ -1325,7 +1325,7 @@ function deathHook(murderer, victim)
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
 				var deathTurret = turretsDefective[i];
-				spawnTurret(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity));
+				spawnTurretDefective(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity));
 				turretsDefective[turretsDefective.length - 1].countdownToAttack = deathTurret.countdownToAttack;
 				turretsDefective[turretsDefective.length - 1].aggressive = deathTurret.aggressive;
 				if(turretsDefective[turretsDefective.length - 1].aggressive)
@@ -1336,7 +1336,7 @@ function deathHook(murderer, victim)
 			} else
 			{
 				var random = Math.floor((Math.random() * 7) + 1);
-				turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
+				turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 			}
 
 			if(victim == turretsDefective[i].entity)
@@ -1921,7 +1921,7 @@ var ModTickFunctions = {
 					{
 						Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
 						var random = Math.floor((Math.random() * 9) + 1);
-						turrets[i].playSound("turrets/turret_active_" + random + ".mp3");
+						turrets[i].playSound("portal-sounds/turrets/turret_active_" + random + ".mp3");
 					}
 					if(turrets[i].countdownToAttack == 10)
 						Entity.setRenderType(turrets[i].entity, TurretShooting2RenderType.renderType);
@@ -1936,7 +1936,7 @@ var ModTickFunctions = {
 							Entity.setRenderType(turrets[i].entity, TurretLaserRenderType.renderType);
 							turrets[i].countdownToAttack = 0;
 							var random = Math.floor((Math.random() * 3) + 1);
-							turrets[i].playSound("turrets/turret_search_" + random + ".mp3");
+							turrets[i].playSound("portal-sounds/turrets/turret_search_" + random + ".mp3");
 						}else
 						{
 							Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
@@ -3967,7 +3967,7 @@ function shootGravityGun()
 			if(turrets[i].container == ggEntity)
 			{
 				var random = Math.floor((Math.random() * 8) + 1);
-				turrets[i].playSound("turrets/turret_launched_" + random + ".mp3");
+				turrets[i].playSound("portal-sounds/turrets/turret_launched_" + random + ".mp3");
 				break turretsLoop;
 			}
 		}
@@ -4229,7 +4229,7 @@ function TurretClass(turret, container)
 			if(turretSoundPlayer == null)
 				turretSoundPlayer = new android.media.MediaPlayer();
 			turretSoundPlayer.reset();
-			turretSoundPlayer.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
+			turretSoundPlayer.setDataSource(sdcard + "/games/com.mojang/" + fileName);
 			turretSoundPlayer.setVolume(volume, volume);
 			turretSoundPlayer.prepare();
 			turretSoundPlayer.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
@@ -4340,7 +4340,7 @@ function startRadioMusic()
 	try
 	{
 		radioPlayer.reset();
-		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/music/looping_radio_mix.mp3");
+		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/radio/looping_radio_mix.mp3");
 		radioPlayer.prepare();
 		radioPlayer.setLooping(true);
 		radioPlayer.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
@@ -4379,7 +4379,7 @@ function JukeboxClass(x, y, z, disc)
 
 	this.player = new android.media.MediaPlayer();
 	this.player.reset();
-	this.player.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + getFileNameFromDiscId(disc));
+	this.player.setDataSource(sdcard + "/games/com.mojang/portal-music/" + getFileNameFromDiscId(disc));
 	this.player.prepare();
 	this.player.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
 	this.player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
@@ -4456,15 +4456,15 @@ function getFileNameFromDiscId(discId)
 	{
 		case STILL_ALIVE_DISC_ID:
 		{
-			return "music/portal_still_alive.mp3";
+			return "portal_still_alive.mp3";
 		}
 		case WANT_YOU_GONE_DISC_ID:
 		{
-			return "music/portal_want_you_gone.mp3";
+			return "portal_want_you_gone.mp3";
 		}
 		case CARA_MIA_ADDIO_DISC_ID:
 		{
-			return "music/portal_turret_song.mp3";
+			return "portal_turret_song.mp3";
 		}
 		default:
 		{
@@ -6401,7 +6401,7 @@ function turretOptionsUI(i)
 						Entity.remove(turrets[i].entity);
 
 						var random = Math.floor((Math.random() * 9) + 1);
-						turrets[i].playSound("turrets/turret_disabled_" + random + ".mp3");
+						turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
 
 						turrets.splice(i, 1);
 						//saveTurrets(); TODO
@@ -6508,7 +6508,7 @@ function turretDefectiveOptionsUI(i)
 						Entity.remove(turretsDefective[i].entity);
 
 						var random = Math.floor((Math.random() * 7) + 1);
-						turretsDefective[i].playSound("turrets_defective/turret_defective_disabled_" + random + ".wav");
+						turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 
 						turretsDefective.splice(i, 1);
 						//saveTurrets(); TODO

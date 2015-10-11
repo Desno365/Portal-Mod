@@ -5112,6 +5112,54 @@ function scaleImageToSize(image, width, height, filter)
 //########## IMAGE functions - END ##########
 
 
+//########## FILE functions ##########
+function deleteFile(path)
+{
+	var file = new java.io.File(path);
+
+	if(file.isDirectory())
+	{
+		var directoryFiles = file.listFiles();
+		for(var i in directoryFiles)
+		{
+			deleteFile(directoryFiles[i].getAbsolutePath());
+		}
+		file.delete();
+	}
+
+	if(file.isFile())
+		file.delete();
+}
+
+function doesFileExist(path)
+{
+	var file = new java.io.File(path);
+	return file.exists();
+}
+
+function isFileEmpty(path)
+{
+	var file = new java.io.File(path);
+	if(file.length() > 0)
+		return false;
+	else
+		return true;
+}
+
+function writeFileFromByteArray(byteArray, path)
+{
+	var file = new java.io.File(path);
+	if(file.exists())
+		file.delete();
+	file.createNewFile();
+	var stream = new java.io.FileOutputStream(file);
+	stream.write(byteArray);
+	stream.close();
+	byteArray = null;
+}
+//########## FILE functions - END ##########
+
+
 //########## UTILS OF UIs functions ##########
 function convertDpToPixel(dp)
 {
@@ -6873,8 +6921,859 @@ addTurretShooting2RenderType(TurretShooting2RenderType);
 
 
 //########################################################################################################################################################
+// Sounds installation
+//########################################################################################################################################################
+
+var SoundsInstaller = {
+	sounds:
+	{
+		version: 1,
+		soundArray: [
+			// { fileName: "" },
+			// { fileName: "", fileDirectory: "" },
+
+			{
+				fileName: "game-entry1.mp3"
+			},
+			{
+				fileName: "player_bounce_jump_paint_01.mp3",
+				fileDirectory: "gelblue"
+			},
+			{
+				fileName: "player_bounce_jump_paint_02.mp3",
+				fileDirectory: "gelblue"
+			},
+			{
+				fileName: "drop.ogg",
+				fileDirectory: "gravitygun"
+			},
+			{
+				fileName: "equip.ogg",
+				fileDirectory: "gravitygun"
+			},
+			{
+				fileName: "fail.ogg",
+				fileDirectory: "gravitygun"
+			},
+			{
+				fileName: "fire.ogg",
+				fileDirectory: "gravitygun"
+			},
+			{
+				fileName: "pickup.ogg",
+				fileDirectory: "gravitygun"
+			},
+			{
+				fileName: "alyx_gun_fire4.mp3",
+				fileDirectory: "jumper"
+			},
+			{
+				fileName: "alyx_gun_fire5.mp3",
+				fileDirectory: "jumper"
+			},
+			{
+				fileName: "alyx_gun_fire6.mp3",
+				fileDirectory: "jumper"
+			},
+			{
+				fileName: "futureshoes1.mp3",
+				fileDirectory: "long_fall_boots"
+			},
+			{
+				fileName: "futureshoes2.mp3",
+				fileDirectory: "long_fall_boots"
+			},
+			{
+				fileName: "portalgun_powerup1.mp3",
+				fileDirectory: "portalgun"
+			},
+			{
+				fileName: "portalgun_shoot_blue1.mp3",
+				fileDirectory: "portalgun"
+			},
+			{
+				fileName: "portalgun_shoot_red1.mp3",
+				fileDirectory: "portalgun"
+			},
+			{
+				fileName: "portal_exit1.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "portal_exit2.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "portal_invalid_surface.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "portal_open1.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "portal_open2.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "portal_open3.mp3",
+				fileDirectory: "portals"
+			},
+			{
+				fileName: "looping_radio_mix.mp3",
+				fileDirectory: "radio"
+			},
+			{
+				fileName: "turret_active_1.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_2.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_3.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_4.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_5.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_6.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_7.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_8.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_active_9.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_1.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_2.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_3.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_4.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_5.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_6.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_7.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_8.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_disabled_9.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_1.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_2.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_3.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_4.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_5.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_6.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_7.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_launched_8.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_1.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_2.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_3.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_4.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_5.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_6.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_7.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_8.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_9.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_pickup_10.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_search_1.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_search_2.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_search_3.mp3",
+				fileDirectory: "turrets"
+			},
+			{
+				fileName: "turret_defective_after_shoot_1.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_2.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_3.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_4.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_5.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_6.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_7.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_8.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_9.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_10.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_11.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_12.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_13.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_14.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_15.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_16.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_17.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_18.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_19.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_after_shoot_20.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_1.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_2.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_3.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_4.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_5.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_6.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_disabled_7.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_pickup_1.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_pickup_2.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_pickup_3.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_pickup_4.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_shoot_1.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_shoot_2.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_shoot_3.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_shoot_4.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_shoot_5.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_1.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_2.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_3.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_4.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_5.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_6.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_7.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_8.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_9.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_10.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_11.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_12.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_13.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_14.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_15.wav",
+				fileDirectory: "turrets_defective"
+			},
+			{
+				fileName: "turret_defective_spawn_16.wav",
+				fileDirectory: "turrets_defective"
+			},
+		]
+	},
+
+	progressDialog: null,
+
+	versionFileName: "version.txt",
+
+
+	checkAtStartup: function()
+	{
+		ModPE.log(getLogText() + "checkAtStartup(): started check.");
+
+		if(SoundsInstaller.needsInstallation())
+		{
+			if(DEBUG)
+				print("Portal 2 Debug: checkAtStartup(): sounds NOT correctly installed!");
+
+			SoundsInstaller.installUI();
+		} else
+		{
+			if(DEBUG)
+				print("Portal 2 Debug: checkAtStartup(): sounds correctly installed.");
+			ModPE.log(getLogText() + "checkAtStartup(): sounds correctly installed.");
+		}
+	},
+
+
+	needsInstallation: function()
+	{
+		if(doesFileExist(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName))
+		{
+			var versionOfSounds = SoundsInstaller.getInstalledVersion();
+			ModPE.log(getLogText() + "needsInstallation(): version file found, version: " + versionOfSounds);
+
+			// check version
+			if(versionOfSounds == SoundsInstaller.sounds.version)
+			{
+				ModPE.log(getLogText() + "needsInstallation(): version of the file matches saved version.");
+				return !SoundsInstaller.areSoundsPresent();
+			} else
+			{
+				ModPE.log(getLogText() + "needsInstallation(): version of the file is different than saved version.");
+				return true;
+			}
+		} else
+		{
+			ModPE.log(getLogText() + "needsInstallation(): version file not found.");
+			return true;
+		}
+	},
+
+	getInstalledVersion: function()
+	{
+		var versionFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName);
+		if(versionFile.exists())
+		{
+			var loadedVersion = "";
+			var streamVersionInput = new java.io.FileInputStream(versionFile);
+			var bufferedVersionReader = new java.io.BufferedReader(new java.io.InputStreamReader(streamVersionInput));
+			var rowVersion = "";
+			while((rowVersion = bufferedVersionReader.readLine()) != null)
+			{
+				loadedVersion += rowVersion;
+			}
+			var loadedVersion = loadedVersion.split(" ");
+			bufferedVersionReader.close();
+
+			ModPE.log(getLogText() + "getInstalledVersion(): text on the version file: " + loadedVersion);
+			return parseInt(loadedVersion);
+		} else
+		{
+			print("Bug found: remember that getInstalledVersion() should be used only when version file exists.");
+			return -1;
+		}
+	},
+
+	areSoundsPresent: function()
+	{
+		var arrayOfMissingSounds = SoundsInstaller.checkMissingSounds();
+
+		if(arrayOfMissingSounds.length == 0)
+		{
+			// yeah, all sounds needed have been found
+			ModPE.log(getLogText() + "areSoundsPresent(): all sounds present.");
+			return true;
+		} else
+		{
+			// not correctly installed :(
+			ModPE.log(getLogText() + "areSoundsPresent(): some sounds are missing.");
+			ModPE.log(getLogText() + "areSoundsPresent(): missing: " + arrayOfMissingSounds.toString());
+			return false;
+		}
+	},
+
+	checkMissingSounds: function()
+	{
+		var tmpPath = sdcard + "/games/com.mojang/portal-sounds/";
+		var arrayOfErrors = [];
+		for(var i in SoundsInstaller.sounds.soundArray)
+		{
+			if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
+			{
+				// file is inside the general sound folder
+				if(!doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
+				{
+					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+				} else
+				{
+					// file exists, maybe is empty?
+					if(isFileEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
+					{
+						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+					}
+				}
+			} else
+			{
+				// file is inside another folder
+				if(!doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+				{
+					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+				} else
+				{
+					// file exists, maybe is empty?
+					if(isFileEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+					{
+						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+					}
+				}
+			}
+		}
+
+		return arrayOfErrors;
+	},
+
+
+	installUI: function()
+	{
+		currentActivity.runOnUiThread(new java.lang.Runnable()
+		{
+			run: function()
+			{
+				try
+				{
+					ModPE.log(getLogText() + "installUI(): displayed installation for sounds UI.");
+
+					var layout = new android.widget.LinearLayout(currentActivity);
+					layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+					var padding = convertDpToPixel(8);
+					layout.setPadding(padding, padding, padding, padding);
+
+					var scroll = new android.widget.ScrollView(currentActivity);
+					scroll.addView(layout);
+
+					var popup = new android.app.AlertDialog.Builder(currentActivity);
+					popup.setView(scroll);
+					popup.setTitle("Download sounds?");
+
+					var helpTextInstallation = new android.widget.TextView(currentActivity);
+					helpTextInstallation.setText(android.text.Html.fromHtml("<br>Would you like to download and install Portal 2 Mod sounds now?<br><br>" +
+						"A total of approximately 3 MB of data will be saved on your internal storage.<br>" +
+						"The installation may take up to one minute.<br><br>" +
+						"An active Internet connection is needed to install sounds.<br>"));
+					layout.addView(helpTextInstallation);
+
+					popup.setPositiveButton("Install", new android.content.DialogInterface.OnClickListener()
+					{
+						onClick: function(viewarg)
+						{
+							SoundsInstaller.installingUI();
+							ModPE.log(getLogText() + "installUI(): Sounds installation started by the user.");
+						}
+					});
+
+					popup.setNegativeButton("Cancel", new android.content.DialogInterface.OnClickListener()
+					{
+						onClick: function(viewarg)
+						{
+							android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: Some features may not work properly without sounds."), android.widget.Toast.LENGTH_LONG).show();
+							ModPE.log(getLogText() + "installUI(): Sounds installation canceled.");
+						}
+					});
+
+
+					var alertDialog = popup.create();
+					alertDialog.setCanceledOnTouchOutside(false);
+					alertDialog.show();
+
+				} catch(err)
+				{
+					print("Error: " + err);
+				}
+			}
+		});
+	},
+
+	installingUI: function()
+	{
+		currentActivity.runOnUiThread(new java.lang.Runnable()
+		{
+			run: function()
+			{
+				try
+				{
+					SoundsInstaller.progressDialog = new android.app.ProgressDialog(currentActivity);
+					SoundsInstaller.progressDialog.setTitle("Downloading...");
+					SoundsInstaller.progressDialog.setMessage("Downloading sound 1 of " + SoundsInstaller.sounds.soundArray.length);
+					SoundsInstaller.progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_HORIZONTAL);
+					SoundsInstaller.progressDialog.setCancelable(false);
+					SoundsInstaller.progressDialog.setCanceledOnTouchOutside(false);
+					SoundsInstaller.progressDialog.setIndeterminate(false);
+					SoundsInstaller.progressDialog.setMax(SoundsInstaller.sounds.soundArray.length);
+					SoundsInstaller.progressDialog.setProgress(0);
+					SoundsInstaller.progressDialog.show();
+
+					SoundsInstaller.install();
+				} catch(err)
+				{
+					print("Error: " + err);
+				}
+			}
+		});
+	},
+
+	install: function()
+	{
+		new java.lang.Thread(new java.lang.Runnable()
+		{
+			run: function()
+			{
+				var githubUrl = "https://raw.githubusercontent.com/DesnoSoftware/Portal-Mod-sounds-installer/master/version" + SoundsInstaller.sounds.version + "/portal-sounds/";
+				var tmpPath = sdcard + "/games/com.mojang/portal-sounds/";
+
+				deleteFile(tmpPath); //delete previous files if present
+
+				// creates directories
+				new java.io.File(tmpPath).mkdirs();
+				new java.io.File(tmpPath + "gelblue/").mkdirs();
+				new java.io.File(tmpPath + "gravitygun/").mkdirs();
+				new java.io.File(tmpPath + "jumper/").mkdirs();
+				new java.io.File(tmpPath + "long_fall_boots/").mkdirs();
+				new java.io.File(tmpPath + "portalgun/").mkdirs();
+				new java.io.File(tmpPath + "portals/").mkdirs();
+				new java.io.File(tmpPath + "radio/").mkdirs();
+				new java.io.File(tmpPath + "turrets/").mkdirs();
+				new java.io.File(tmpPath + "turrets_defective/").mkdirs();
+
+				for(var i in SoundsInstaller.sounds.soundArray)
+				{
+					// display progress
+					currentActivity.runOnUiThread(new java.lang.Runnable()
+					{
+						run: function()
+						{
+							var progress = parseInt(i) + 1;
+							SoundsInstaller.progressDialog.setMessage("Downloading sound " + (progress) + " of " + SoundsInstaller.sounds.soundArray.length);
+							SoundsInstaller.progressDialog.setProgress(progress);
+
+						}
+					});
+
+					// save file on the sdcard
+					if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
+					{
+						// file is inside the general sound folder
+						//writeFileFromByteArray(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
+						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
+					} else
+					{
+						// file is inside another folder
+						//writeFileFromByteArray(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
+						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
+					}
+				}
+
+				var nomediaFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/.nomedia");
+				if(!nomediaFile.exists())
+					nomediaFile.createNewFile();
+
+				// put file version
+				SoundsInstaller.saveFileWithVersion();
+
+				// END INSTALLATION
+				SoundsInstaller.onFinishInstallation();
+			}
+		}).start();
+	},
+
+
+	downloadFile: function(url, savePath)
+	{
+		try
+		{
+			// download content
+			var url = new java.net.URL(url);
+			var connection = url.openConnection();
+
+			// create file
+			var file = new java.io.File(savePath);
+			if(file.exists())
+				file.delete();
+			file.createNewFile();
+	 
+			// get content
+			inputStream = connection.getInputStream();
+
+			// write to file
+			var outputStream = new java.io.FileOutputStream(file);
+			var read = 0;
+			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+			while ((read = inputStream.read(bytes)) != -1) {
+				outputStream.write(bytes, 0, read);
+			}
+	 
+			// close what needs to be closed
+			outputStream.close();
+		} catch(err)
+		{
+			ModPE.log(getLogText() + "downloadFile(): caught an error: " + err);
+		}
+	},
+
+
+	onFinishInstallation: function()
+	{
+		SoundsInstaller.progressDialog.dismiss();
+
+		ModPE.log(getLogText() + "Finished sounds installation. Re-checking sounds...");
+
+		var notSuccess = SoundsInstaller.needsInstallation();
+		if(notSuccess)
+		{
+			currentActivity.runOnUiThread(new java.lang.Runnable()
+			{
+				run: function()
+				{
+					android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: An error has happened during installation, so sounds aren't correctly installed, please check your Internet connection and try again."), android.widget.Toast.LENGTH_LONG).show();
+				}
+			});
+			ModPE.log(getLogText() + "Sounds HAVEN'T been correctly installed!");
+		} else
+		{
+			currentActivity.runOnUiThread(new java.lang.Runnable()
+			{
+				run: function()
+				{
+					android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: Congratulations, sounds are now correctly installed. You can start playing with the <i>Portal 2 Mod</i>."), android.widget.Toast.LENGTH_LONG).show();
+				}
+			});
+			ModPE.log(getLogText() + "Sounds have been correctly installed. Very good.");
+		}
+
+		removeSoundsInstaller();
+	},
+
+	saveFileWithVersion: function()
+	{
+		var versionSaveFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName);
+		if(versionSaveFile.exists())
+			versionSaveFile.delete();
+		versionSaveFile.createNewFile();
+
+		var streamOutputVersion = new java.io.FileOutputStream(versionSaveFile);
+		var streamWriterVersion = new java.io.OutputStreamWriter(streamOutputVersion);
+
+		streamWriterVersion.append(SoundsInstaller.sounds.version + " Is anyone there?");
+		streamWriterVersion.close();
+		streamOutputVersion.close();
+	}
+};
+
+function removeSoundsInstaller()
+{
+	// this should allow the GC to free the memory that all the sounds were using
+	SoundsInstaller = null;
+}
+
+
+//########################################################################################################################################################
 // Things to do at startup
 //########################################################################################################################################################
+
+// check sounds
+SoundsInstaller.checkAtStartup();
 
 // create images from base64
 new java.lang.Thread(new java.lang.Runnable()

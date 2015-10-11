@@ -1293,6 +1293,8 @@ function deathHook(murderer, victim)
 				spawnTurret(Entity.getX(turrets[i].entity), Entity.getY(turrets[i].entity), Entity.getZ(turrets[i].entity));
 				turrets[turrets.length - 1].countdownToAttack = deathTurret.countdownToAttack;
 				turrets[turrets.length - 1].aggressive = deathTurret.aggressive;
+				if(turrets[turrets.length - 1].aggressive)
+					Entity.setRenderType(turrets[turrets.length - 1].entity, TurretShooting2RenderType.renderType);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1326,6 +1328,8 @@ function deathHook(murderer, victim)
 				spawnTurret(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity));
 				turretsDefective[turretsDefective.length - 1].countdownToAttack = deathTurret.countdownToAttack;
 				turretsDefective[turretsDefective.length - 1].aggressive = deathTurret.aggressive;
+				if(turretsDefective[turretsDefective.length - 1].aggressive)
+					Entity.setRenderType(turretsDefective[turretsDefective.length - 1].entity, TurretShooting2RenderType.renderType);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);

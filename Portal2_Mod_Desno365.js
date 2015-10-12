@@ -1316,7 +1316,7 @@ function deathHook(murderer, victim)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				restoreTurretFromOldTurretObject(x, y, z, turrets[i]);
+				restoreTurretFromOldTurretObject(Entity.getX(turrets[i].upEntity), Entity.getY(turrets[i].upEntity), Entity.getZ(turrets[i].upEntity), turrets[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1345,7 +1345,7 @@ function deathHook(murderer, victim)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				restoreTurretDefectiveFromOldTurretObject(x, y, z, turretsDefective[i]);
+				restoreTurretDefectiveFromOldTurretObject(Entity.getX(turretsDefective[i].upEntity), Entity.getY(turretsDefective[i].upEntity), Entity.getZ(turretsDefective[i].upEntity), turretsDefective[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);

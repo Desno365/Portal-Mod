@@ -372,6 +372,7 @@ Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, 
 	Block.setRenderLayer(id, 3); // in 0.11 was 5
 	Block.setLightLevel(id, 3);
 	Block.setLightOpacity(id, 0.01);
+	Block.setExplosionResistance(id, 30);
 }
 
 // Type 1
@@ -520,21 +521,25 @@ Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0]
 Block.setDestroyTime(PORTAL_RADIO_A, 1);
 Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
 Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
+Block.setExplosionResistance(PORTAL_RADIO_A, 30);
 const PORTAL_RADIO_B = 227;
 Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_B, 1);
 Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
 Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
+Block.setExplosionResistance(PORTAL_RADIO_B, 30);
 const PORTAL_RADIO_C = 228;
 Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_C, 1);
 Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
 Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
+Block.setExplosionResistance(PORTAL_RADIO_C, 30);
 const PORTAL_RADIO_D = 229;
 Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
 Block.setDestroyTime(PORTAL_RADIO_D, 1);
 Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
 Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
+Block.setExplosionResistance(PORTAL_RADIO_D, 30);
 
 // blue gel
 const REPULSION_GEL_ID = 230;
@@ -592,7 +597,6 @@ function newLevel()
 		Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
 		Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
-		Player.addItemCreativeInv(RADIO_ID, 1);
 		Player.addItemCreativeInv(ID_TURRET, 1);
 		Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
 		Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
@@ -600,6 +604,7 @@ function newLevel()
 		Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
 		Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
 
+		Player.addItemCreativeInv(RADIO_ID, 1);
 		Player.addItemCreativeInv(JUKEBOX_ID, 1);
 		Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
 		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
@@ -6357,6 +6362,49 @@ function settingsMapMakersUI()
 				});
 				switchFullHungerBar.setPadding(padding, 0, padding, 0);
 				layout.addView(switchFullHungerBar);
+
+				layout.addView(dividerText());
+
+
+
+				var title = defaultSubTitle("Aperture Lab options");
+				layout.addView(title);
+
+				layout.addView(dividerText());
+
+				var apertureLabEquipmentButton = MinecraftButton();
+				apertureLabEquipmentButton.setText("Get Aperture Lab Equipment");
+				apertureLabEquipmentButton.setOnClickListener(new android.view.View.OnClickListener()
+				{
+					onClick: function()
+					{
+						if(Level.getGameMode() == GameMode.SURVIVAL)
+						{
+							Player.addItemInventory(JUKEBOX_ID, 4, 0);
+							Player.addItemInventory(STILL_ALIVE_DISC_ID, 2, 0);
+							Player.addItemInventory(CARA_MIA_ADDIO_DISC_ID, 2, 0);
+							Player.addItemInventory(WANT_YOU_GONE_DISC_ID, 2, 0);
+							Player.addItemInventory(JUMPER_ITEM_ID, 64, 0);
+							Player.addItemInventory(ID_TURRET_OPTIONS, 1, 0);
+							Player.addItemInventory(ID_TURRET, 64, 0);
+							Player.addItemInventory(ID_TURRET_DEFECTIVE, 64, 0);
+							Player.addItemInventory(RADIO_ID, 64, 0);
+							Player.addItemInventory(REPULSION_GEL_ID, 64, 0);
+							Player.addItemInventory(PROPULSION_GEL_ID, 64, 0);
+							Player.addItemInventory(CUBE_NORMAL_ID, 64, 0);
+							Player.addItemInventory(CUBE_COMPANION_ID, 64, 0);
+							Player.addItemInventory(LONG_FALL_BOOTS_ID, 1, 0);
+							Player.addItemInventory(PORTAL_GUN_BLUE_ID, 1, 0);
+							Player.addItemInventory(GRAVITY_GUN_ID, 1, 0);
+							android.widget.Toast.makeText(currentActivity,"Equipment added to the inventory.",0).show();
+						} else
+						{
+							android.widget.Toast.makeText(currentActivity,"The equipment is useful only when playing in survival",0).show();
+						}
+					}
+				});
+				layout.addView(apertureLabEquipmentButton);
+				setMarginsLinearLayout(apertureLabEquipmentButton, MARGIN_HORIZONTAL_BIG, 0, MARGIN_HORIZONTAL_BIG, 0);
 
 				layout.addView(dividerText());
 

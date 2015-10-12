@@ -17,7 +17,7 @@ SOFTWARE.
 const DEBUG = false;
 
 // updates variables
-const CURRENT_VERSION = "r010";
+const CURRENT_VERSION = "r011";
 var latestVersion;
 
 // minecraft variables
@@ -78,6 +78,10 @@ var fullHungerBarTick = 0;
 
 // all the entities array
 var entities = [];
+
+// custom mobs array
+var customMobs = [];
+var oldCustomMobsToBeRemoved = [];
 
 // player interactions variables
 var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
@@ -564,10 +568,20 @@ var pickBlocksBlacklist = [REPULSION_GEL_ID, PROPULSION_GEL_ID, JUMPER_ID];
 // Hooks
 //########################################################################################################################################################
 
+function selectLevelHook()
+{
+	// reset custom mobs array
+	customMobs = [];
+	oldCustomMobsToBeRemoved = [];
+
+	loadCustomMobs();
+}
+
 function newLevel()
 {
 	isInGame = true;
 
+	// add items and blocks in the creative inventory
 	if(Level.getGameMode() == GameMode.CREATIVE)
 	{
 		// crashes in survival
@@ -680,6 +694,9 @@ function leaveGame()
 
 	// entities container
 	entities = [];
+
+	// save custom mobs
+	saveCustomMobs();
 
 	// settings only for maps
 	indestructibleBlocks = false;
@@ -968,7 +985,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// turrets
-	if(itemId == ID_TURRET && Level.getTile(x, y + 1, z) == 0)
+	if(itemId == ID_TURRET && Level.getTile(x, y + 1, z) == 0 && Level.getTile(x, y + 2, z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
@@ -984,23 +1001,23 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 				{
 					turrets[turrets.length - 1].playSound("portal-music/portal_turret_song.mp3");
 					ModPE.showTipMessage("Singing...");
-					turretsSongX = Entity.getX(turrets[turrets.length - 1].entity);
-					turretsSongY = Entity.getY(turrets[turrets.length - 1].entity);
-					turretsSongZ = Entity.getZ(turrets[turrets.length - 1].entity);
+					turretsSongX = Entity.getX(turrets[turrets.length - 1].upEntity);
+					turretsSongY = Entity.getY(turrets[turrets.length - 1].upEntity);
+					turretsSongZ = Entity.getZ(turrets[turrets.length - 1].upEntity);
 					areTurretsSinging = true;
 				}
 			}
 		}
 
 		if(turrets.length >= 20)
-			clientMessage("§cWARNING§f: So many turrets can slow down your device");
+			ModPE.showTipMessage("§cWARNING§f: So many turrets can slow down your device");
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
 	}
 
 	// defective turrets
-	if(itemId == ID_TURRET_DEFECTIVE && Level.getTile(x, y + 1, z) == 0)
+	if(itemId == ID_TURRET_DEFECTIVE && Level.getTile(x, y + 1, z) == 0 && Level.getTile(x, y + 2, z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
@@ -1012,7 +1029,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		turretsDefective[turretsDefective.length - 1].playSound("portal-sounds/turrets_defective/turret_defective_spawn_" + random + ".wav");
 
 		if(turretsDefective.length >= 20)
-			clientMessage("§cWARNING§f: So many turrets can slow down your device");
+			ModPE.showTipMessage("§cWARNING§f: So many turrets can slow down your device");
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
@@ -1116,17 +1133,17 @@ function attackHook(attacker, victim)
 			turretsLoop:
 			for(var i in turrets)
 			{
-				if(victim == turrets[i].entity)
+				if(victim == turrets[i].upEntity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
-					pickEntity = turrets[i].container;
+					pickEntity = turrets[i].downEntity;
 
 					if(areTurretsSinging)
 						turretsStopSinging();
 					break turretsLoop;
 				}
-				if(victim == turrets[i].container)
+				if(victim == turrets[i].downEntity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
@@ -1141,14 +1158,14 @@ function attackHook(attacker, victim)
 			turretsDefectiveLoop:
 			for(var i in turretsDefective)
 			{
-				if(victim == turretsDefective[i].entity)
+				if(victim == turretsDefective[i].upEntity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
-					pickEntity = turretsDefective[i].container;
+					pickEntity = turretsDefective[i].downEntity;
 					break turretsDefectiveLoop;
 				}
-				if(victim == turretsDefective[i].container)
+				if(victim == turretsDefective[i].downEntity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
@@ -1171,17 +1188,17 @@ function attackHook(attacker, victim)
 			turretsLoop:
 			for(var i in turrets)
 			{
-				if(victim == turrets[i].entity)
+				if(victim == turrets[i].upEntity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
-					pickEntity = turrets[i].container;
+					pickEntity = turrets[i].downEntity;
 
 					if(areTurretsSinging)
 						turretsStopSinging();
 					break turretsLoop;
 				}
-				if(victim == turrets[i].container)
+				if(victim == turrets[i].downEntity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
@@ -1196,14 +1213,14 @@ function attackHook(attacker, victim)
 			turretsDefectiveLoop:
 			for(var i in turretsDefective)
 			{
-				if(victim == turretsDefective[i].entity)
+				if(victim == turretsDefective[i].upEntity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
-					pickEntity = turretsDefective[i].container;
+					pickEntity = turretsDefective[i].downEntity;
 					break turretsDefectiveLoop;
 				}
-				if(victim == turretsDefective[i].container)
+				if(victim == turretsDefective[i].downEntity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
@@ -1219,7 +1236,7 @@ function attackHook(attacker, victim)
 		// turrets options, normal turrets
 		for(var i in turrets)
 		{
-			if(victim == turrets[i].entity || victim == turrets[i].container)
+			if(victim == turrets[i].upEntity || victim == turrets[i].downEntity)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
 				{
@@ -1239,7 +1256,7 @@ function attackHook(attacker, victim)
 		// turrets options, defective turrets
 		for(var i in turretsDefective)
 		{
-			if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
+			if(victim == turretsDefective[i].upEntity || victim == turretsDefective[i].downEntity)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
 				{
@@ -1260,6 +1277,11 @@ function attackHook(attacker, victim)
 
 function deathHook(murderer, victim)
 {
+	// custom mobs
+	var index = findPositionInCustomMobs(victim);
+	if(index != -1)
+		customMobs.splice(index, 1);
+
 	// GravityGun
 	if(victim == ggEntity)
 	{
@@ -1285,16 +1307,11 @@ function deathHook(murderer, victim)
 	// turrets
 	for(var i in turrets)
 	{
-		if(victim == turrets[i].entity || victim == turrets[i].container)
+		if(victim == turrets[i].upEntity || victim == turrets[i].downEntity)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				var deathTurret = turrets[i];
-				spawnTurret(Entity.getX(turrets[i].entity), Entity.getY(turrets[i].entity), Entity.getZ(turrets[i].entity));
-				turrets[turrets.length - 1].countdownToAttack = deathTurret.countdownToAttack;
-				turrets[turrets.length - 1].aggressive = deathTurret.aggressive;
-				if(turrets[turrets.length - 1].aggressive)
-					Entity.setRenderType(turrets[turrets.length - 1].entity, TurretShooting2RenderType.renderType);
+				restoreTurretFromOldTurretObject(x, y, z, turrets[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1307,29 +1324,23 @@ function deathHook(murderer, victim)
 					turretsStopSinging();
 			}
 
-			if(victim == turrets[i].entity)
-				Entity.remove(turrets[i].container);
-			if(victim == turrets[i].container)
-				Entity.remove(turrets[i].entity);
+			if(victim == turrets[i].upEntity)
+				Entity.remove(turrets[i].downEntity);
+			if(victim == turrets[i].downEntity)
+				Entity.remove(turrets[i].upEntity);
 
 			turrets.splice(i, 1);
-			//saveTurrets(); TODO
 		}
 	}
 
 	// defective turrets
 	for(var i in turretsDefective)
 	{
-		if(victim == turretsDefective[i].entity || victim == turretsDefective[i].container)
+		if(victim == turretsDefective[i].upEntity || victim == turretsDefective[i].downEntity)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				var deathTurret = turretsDefective[i];
-				spawnTurretDefective(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity));
-				turretsDefective[turretsDefective.length - 1].countdownToAttack = deathTurret.countdownToAttack;
-				turretsDefective[turretsDefective.length - 1].aggressive = deathTurret.aggressive;
-				if(turretsDefective[turretsDefective.length - 1].aggressive)
-					Entity.setRenderType(turretsDefective[turretsDefective.length - 1].entity, TurretShooting2RenderType.renderType);
+				restoreTurretDefectiveFromOldTurretObject(x, y, z, turretsDefective[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1339,19 +1350,61 @@ function deathHook(murderer, victim)
 				turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 			}
 
-			if(victim == turretsDefective[i].entity)
-				Entity.remove(turretsDefective[i].container);
-			if(victim == turretsDefective[i].container)
-				Entity.remove(turretsDefective[i].entity);
+			if(victim == turretsDefective[i].upEntity)
+				Entity.remove(turretsDefective[i].downEntity);
+			if(victim == turretsDefective[i].downEntity)
+				Entity.remove(turretsDefective[i].upEntity);
 
 			turretsDefective.splice(i, 1);
-			//saveTurrets(); TODO
 		}
 	}
 }
 
 function entityAddedHook(entity)
 {
+	// custom mobs
+	var index = findPositionInCustomMobs(entity);
+	if(index != -1)
+	{
+		// get old mobs position and remove them from world
+		var x = Entity.getX(entity);
+		var y = Entity.getY(entity);
+		var z = Entity.getZ(entity);
+		if(entity == customMobs[index].upEntity)
+		{
+			Entity.remove(customMobs[index].upEntity);
+			oldCustomMobsToBeRemoved.push(customMobs[index].downEntity);
+		}
+		if(entity == customMobs[index].downEntity)
+		{
+			Entity.remove(customMobs[index].downEntity);
+			oldCustomMobsToBeRemoved.push(customMobs[index].upEntity);
+		}
+
+		// spawn new turrets
+		if(customMobs[index].stringId == "turret")
+		{
+			restoreTurretFromOldTurretObject(x, y, z, customMobs[index]);
+		}
+		if(customMobs[index].stringId == "turret-defective")
+		{
+			restoreTurretDefectiveFromOldTurretObject(x, y, z, customMobs[index]);
+		}
+
+		// remove old mobs from custom mobs
+		customMobs.splice(index, 1);
+	}
+
+	// remove old custom mobs
+	for(var i in oldCustomMobsToBeRemoved)
+	{
+		if(entity == oldCustomMobsToBeRemoved[i])
+		{
+			Entity.remove(entity);
+			return;
+		}
+	}
+
 	// to prevent the death of turrets by zombies
 	if(Entity.getEntityTypeId(entity) == EntityType.ZOMBIE_VILLAGER && (turrets.length > 0 || turretsDefective.length > 0))
 	{
@@ -1910,90 +1963,13 @@ var ModTickFunctions = {
 		// normal turrets
 		for(var i in turrets)
 		{
-			//Entity.setRot(turrets[i].entity, 0, 0);
-
-			if(turrets[i].aggressive)
-			{
-				if(checkProximity(Player.getEntity(), turrets[i].entity, 10, 3))
-				{
-					turrets[i].countdownToAttack++;
-					if(turrets[i].countdownToAttack == 1)
-					{
-						Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
-						var random = Math.floor((Math.random() * 9) + 1);
-						turrets[i].playSound("portal-sounds/turrets/turret_active_" + random + ".mp3");
-					}
-					if(turrets[i].countdownToAttack == 10)
-						Entity.setRenderType(turrets[i].entity, TurretShooting2RenderType.renderType);
-					if(turrets[i].countdownToAttack % 15 == 0 && turrets[i].countdownToAttack >= 30)
-						turrets[i].shoot(Player.getEntity());
-				}else
-				{
-					if(turrets[i].countdownToAttack != 0)
-					{
-						if(turrets[i].countdownToAttack == 1)
-						{
-							Entity.setRenderType(turrets[i].entity, TurretLaserRenderType.renderType);
-							turrets[i].countdownToAttack = 0;
-							var random = Math.floor((Math.random() * 3) + 1);
-							turrets[i].playSound("portal-sounds/turrets/turret_search_" + random + ".mp3");
-						}else
-						{
-							Entity.setRenderType(turrets[i].entity, TurretShooting1RenderType.renderType);
-							if(turrets[i].countdownToAttack > 10)
-								turrets[i].countdownToAttack = 10;
-							turrets[i].countdownToAttack--;
-						}
-					}
-				}
-			}else
-			{
-				if(turrets[i].countdownToAttack != 0)
-					turrets[i].countdownToAttack = 0;
-			}
+			turrets[i].artificialIntelligence();
 		}
 
 		// defective turrets
 		for(var i in turretsDefective)
 		{
-			//Entity.setRot(turretsDefective[i].entity, 0, 0);
-
-			if(turretsDefective[i].aggressive)
-			{
-				if(checkProximity(Player.getEntity(), turretsDefective[i].entity, 8, 3))
-				{
-					turretsDefective[i].countdownToAttack++;
-					if(turretsDefective[i].countdownToAttack == 1)
-					{
-						Entity.setRenderType(turretsDefective[i].entity, TurretShooting1RenderType.renderType);
-					}
-					if(turretsDefective[i].countdownToAttack == 10)
-					{
-						Entity.setRenderType(turretsDefective[i].entity, TurretShooting2RenderType.renderType);
-						turretsDefective[i].shoot();
-					}
-				}else
-				{
-					if(turretsDefective[i].countdownToAttack != 0)
-					{
-						if(turretsDefective[i].countdownToAttack == 1)
-						{
-							Entity.setRenderType(turretsDefective[i].entity, TurretRenderType.renderType);
-							turretsDefective[i].countdownToAttack = 0;
-						}else
-						{
-							Entity.setRenderType(turretsDefective[i].entity, TurretShooting1RenderType.renderType);
-							if(turretsDefective[i].countdownToAttack > 10)
-								turretsDefective[i].countdownToAttack = 10;
-							turretsDefective[i].countdownToAttack--;
-						}
-					}
-				}
-			}else
-			{
-				if(turretsDefective[i].countdownToAttack != 0)
-					turretsDefective[i].countdownToAttack = 0;
-			}
+			turretsDefective[i].artificialIntelligence();
 		}
 	},
 
@@ -3964,7 +3940,7 @@ function shootGravityGun()
 		turretsLoop:
 		for(var i in turrets)
 		{
-			if(turrets[i].container == ggEntity)
+			if(turrets[i].downEntity == ggEntity)
 			{
 				var random = Math.floor((Math.random() * 8) + 1);
 				turrets[i].playSound("portal-sounds/turrets/turret_launched_" + random + ".mp3");
@@ -4096,6 +4072,182 @@ function makeLongFallBootsSound()
 //########## LONG FALl BOOTS functions - END ##########
 
 
+//########## CUSTOM MOBS functions ##########
+function saveCustomMobs()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			try
+			{
+				// create folders
+				var saveFolder = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod");
+				saveFolder.mkdirs();
+
+				// create file
+				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/mobs.dat");
+				if(saveFile.exists())
+					saveFile.delete();
+				saveFile.createNewFile();
+
+				// load streams
+				var streamOutput = new java.io.FileOutputStream(saveFile);
+				var streamWriter = new java.io.OutputStreamWriter(streamOutput);
+				
+				var properties = new java.util.Properties();
+
+				properties.setProperty("number_of_mobs", String(customMobs.length));
+				for(var i in customMobs)
+				{
+					properties.setProperty("mob_" + i + "_id", String(customMobs[i].downEntity));
+					properties.setProperty("mob_" + i + "_id_rider", String(customMobs[i].upEntity));
+					properties.setProperty("mob_" + i + "_string_id", String(customMobs[i].stringId));
+
+					// custom properties
+					properties.setProperty("mob_" + i + "_custom_properties", String(customMobs[i].getPropertiesNameArray().toString()));
+					for(var j in customMobs[i].customProperties)
+					{
+						var propertyName = customMobs[i].customProperties[j].propertyName;
+						var propertyType = customMobs[i].customProperties[j].propertyType;
+						var value;
+						eval("value = customMobs[i]." + propertyName + ";");
+
+						properties.setProperty("mob_" + i + "_" + propertyName, String(value));
+						properties.setProperty("mob_" + i + "_" + propertyName + "_type", String(propertyType));
+					}
+				}
+
+				// save and close
+				properties.store(streamWriter, "Portal 2 Mod by Desno365");
+				streamWriter.close();
+				streamOutput.close();
+			}catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	}));
+}
+
+function loadCustomMobs()
+{
+	currentActivity.runOnUiThread(new java.lang.Runnable(
+	{
+		run: function()
+		{
+			try
+			{
+				var loadFile = java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/mobs.dat");
+				if(loadFile.exists())
+				{
+					// load streams
+					var streamInput = new java.io.FileInputStream(loadFile);
+					var streamReader = new java.io.InputStreamReader(streamInput);
+
+					var properties = new java.util.Properties();
+					properties.load(streamReader);
+
+					var numberOfMobs = parseInt(properties.getProperty("number_of_mobs", "0"));
+					for(var i = 0; i < numberOfMobs; i++)
+					{
+						customMobs[i] = new CustomMobClass(parseFloat(properties.getProperty("mob_" + i + "_id", "0")), parseFloat(properties.getProperty("mob_" + i + "_id_rider", "0")));
+						customMobs[i].stringId = String(properties.getProperty("mob_" + i + "_string_id", "0"));
+
+						// custom properties
+						var customPropertiesArray = stringToArray(properties.getProperty("mob_" + i + "_custom_properties", "null"));
+						if(customPropertiesArray.length > 0 && customPropertiesArray[0] != "null")
+						{
+							for(var j in customPropertiesArray)
+							{
+								var propertyName = customPropertiesArray[j];
+								var propertyType = String(properties.getProperty("mob_" + i + "_" + propertyName + "_type", "null"));
+								if(propertyType != "null")
+								{
+									var propertyValue;
+									var propertyValueString = String(properties.getProperty("mob_" + i + "_" + propertyName, "null"));
+									if(propertyType == "bool")
+										propertyValue = stringToBoolean(propertyValueString);
+									if(propertyType == "int")
+										propertyValue = parseInt(propertyValueString);
+									if(propertyType == "float")
+										propertyValue = parseFloat(propertyValueString);
+									if(propertyType == "string")
+										propertyValue = propertyValueString;
+
+									eval("customMobs[i]." + propertyName + " = propertyValue;");
+								}
+							}
+						}
+					}
+
+					// close streams
+					streamReader.close();
+					streamInput.close();
+				}
+			}catch(err)
+			{
+				clientMessage("Error: " + err);
+			}
+		}
+	}));
+}
+
+function findPositionInCustomMobs(entity)
+{
+	for(var i in customMobs)
+	{
+		if(customMobs[i].upEntity == entity || customMobs[i].downEntity == entity)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+function addToCustomMobs(customMobObject)
+{
+	customMobs.push(customMobObject);
+	saveCustomMobs();
+}
+
+function CustomMobClass(upEntity, downEntity)
+{
+	this.upEntity = upEntity;
+	this.downEntity = downEntity;
+	this.stringId = "";
+	this.x = 0;
+	this.y = 0;
+	this.z = 0;
+	this.customProperties = [];
+
+	this.updatePosition = function()
+	{
+		var x = Entity.getX(this.downEntity);
+		var y = Entity.getY(this.downEntity);
+		var z = Entity.getZ(this.downEntity);
+
+		if(x != 0 && y != 0 && z != 0)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
+
+	this.getPropertiesNameArray = function()
+	{
+		var array = [];
+		for(var i in this.customProperties)
+		{
+			array.push(this.customProperties[i].propertyName);
+		}
+		return array;
+	}
+}
+//########## CUSTOM MOBS functions - END ##########
+
+
 //########## TURRETS functions ##########
 function spawnTurret(x, y, z)
 {
@@ -4103,20 +4255,21 @@ function spawnTurret(x, y, z)
 	y = Math.floor(y);
 	z = Math.floor(z);
 
-	var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
+	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+	var container = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.MINECART);
 	Entity.rideAnimal(turret, container);
 	Entity.setRenderType(container, 4); // dropped item render
 	Entity.setCollisionSize(container, 0, 0);
-	Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+	Entity.setPosition(container, x + 0.5, y + 1.6, z + 0.5);
 
 	turrets.push(new TurretClass(turret, container));
 	turrets[turrets.length - 1].x = Entity.getX(turret);
 	turrets[turrets.length - 1].y = Entity.getY(turret);
 	turrets[turrets.length - 1].z = Entity.getZ(turret);
-	//saveTurrets(); // TODO
+
+	addToCustomMobs(turrets[turrets.length - 1]);
 }
 
 function spawnTurretDefective(x, y, z)
@@ -4125,50 +4278,130 @@ function spawnTurretDefective(x, y, z)
 	y = Math.floor(y);
 	z = Math.floor(z);
 
-	var turret = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
+	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	var container = Level.spawnMob(x + 0.5, y + 2, z + 0.5, EntityType.MINECART);
+	var container = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.MINECART);
 	Entity.rideAnimal(turret, container);
 	Entity.setRenderType(container, 4); // dropped item render
 	Entity.setCollisionSize(container, 0, 0);
-	Entity.setPosition(container, x + 0.5, y + 2, z + 0.5);
+	Entity.setPosition(container, x + 0.5, y + 1.6, z + 0.5);
 
 	turretsDefective.push(new TurretDefectiveClass(turret, container));
 	turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
 	turretsDefective[turretsDefective.length - 1].y = Entity.getY(turret);
 	turretsDefective[turretsDefective.length - 1].z = Entity.getZ(turret);
-	//saveTurrets(); // TODO
+
+	addToCustomMobs(turretsDefective[turretsDefective.length - 1]);
+}
+
+function restoreTurretFromOldTurretObject(x, y, z, oldTurret)
+{
+	spawnTurret(x, y, z);
+	turrets[turrets.length - 1].countdownToAttack = oldTurret.countdownToAttack;
+	turrets[turrets.length - 1].aggressive = oldTurret.aggressive;
+	if(turrets[turrets.length - 1].aggressive)
+	{
+		if(turrets[turrets.length - 1].shouldShoot())
+			Entity.setRenderType(turrets[turrets.length - 1].upEntity, TurretShooting2RenderType.renderType);
+		else
+			Entity.setRenderType(turrets[turrets.length - 1].upEntity, TurretLaserRenderType.renderType);
+	}
+}
+
+function restoreTurretDefectiveFromOldTurretObject(x, y, z, oldTurret)
+{
+	spawnTurretDefective(x, y, z);
+	turretsDefective[turretsDefective.length - 1].countdownToAttack = oldTurret.countdownToAttack;
+	turretsDefective[turretsDefective.length - 1].aggressive = oldTurret.aggressive;
+	if(turretsDefective[turretsDefective.length - 1].aggressive)
+	{
+		if(turretsDefective[turretsDefective.length - 1].shouldShoot())
+			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].upEntity, TurretShooting2RenderType.renderType);
+		else
+			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].upEntity, TurretLaserRenderType.renderType);
+	}
 }
 
 function TurretClass(turret, container)
 {
-	this.entity = turret;
-	this.container = container;
-	this.x = 0;
-	this.y = 0;
-	this.z = 0;
-	this.aggressive = false;
-	this.countdownToAttack = 0;
+	var turretObject = new CustomMobClass(turret, container);
+	turretObject.stringId = "turret";
 
-	this.shoot = function(victim)
+	turretObject.customProperties = [{propertyName: "aggressive", propertyType:"bool"}, {propertyName: "countdownToAttack", propertyType:"int"}];
+
+	turretObject.aggressive = false;
+	turretObject.countdownToAttack = 0;
+
+	turretObject.artificialIntelligence = function()
 	{
-		var shotYaw = Math.atan2((Entity.getZ(this.entity) - Entity.getZ(victim)), (Entity.getX(this.entity) - Entity.getX(victim)));
+		//Entity.setRot(this.upEntity, 0, 0);
+
+		if(this.aggressive)
+		{
+			if(this.shouldShoot())
+			{
+				this.countdownToAttack++;
+				if(this.countdownToAttack == 1)
+				{
+					Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+					var random = Math.floor((Math.random() * 9) + 1);
+					this.playSound("portal-sounds/turrets/turret_active_" + random + ".mp3");
+				}
+				if(this.countdownToAttack == 10)
+					Entity.setRenderType(this.upEntity, TurretShooting2RenderType.renderType);
+				if(this.countdownToAttack % 15 == 0 && this.countdownToAttack >= 30)
+					this.shoot(Player.getEntity());
+			}else
+			{
+				if(this.countdownToAttack != 0)
+				{
+					if(this.countdownToAttack == 1)
+					{
+						Entity.setRenderType(this.upEntity, TurretLaserRenderType.renderType);
+						this.countdownToAttack = 0;
+						var random = Math.floor((Math.random() * 3) + 1);
+						this.playSound("portal-sounds/turrets/turret_search_" + random + ".mp3");
+					}else
+					{
+						Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+						if(this.countdownToAttack > 10)
+							this.countdownToAttack = 10;
+						this.countdownToAttack--;
+					}
+				}
+			}
+		}else
+		{
+			if(this.countdownToAttack != 0)
+				this.countdownToAttack = 0;
+		}
+	}
+
+	turretObject.shouldShoot = function()
+	{
+		//
+		return checkProximity(Player.getEntity(), this.upEntity, 10, 3);
+	}
+
+	turretObject.shoot = function(victim)
+	{
+		var shotYaw = Math.atan2((Entity.getZ(this.upEntity) - Entity.getZ(victim)), (Entity.getX(this.upEntity) - Entity.getX(victim)));
 		var turretShot = getDirection((java.lang.Math.toDegrees(shotYaw) - 90), 0);
-		Level.playSoundEnt(this.entity, "random.bow", 1000, 0);
+		Level.playSoundEnt(this.upEntity, "random.bow", 1000, 0);
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 		{
-			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 80);
+			var bullet = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 80);
 
 			// fix bouncing bullets
-			var skelly = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 34);
+			var skelly = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 34);
 			Entity.setRenderType(skelly, 4); // dropped item render
 			Entity.rideAnimal(skelly, bullet);
 			Entity.remove(skelly);
 		} else
 		{
-			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
+			var bullet = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 81);
 		}
 
 		Entity.setVelX(bullet, -turretShot.x * 1.8);
@@ -4176,34 +4409,34 @@ function TurretClass(turret, container)
 		Entity.setVelZ(bullet, -turretShot.z * 1.8);
 	}
 
-	this.isThereTurretAtDistance = function(distance)
+	turretObject.isThereTurretAtDistance = function(distance)
 	{
 		distance = Math.floor(distance);
 		for(var i in turrets)
 		{
-			if((Math.floor(Entity.getY(this.entity))) == (Math.floor(Entity.getY(turrets[i].entity))))
+			if((Math.floor(Entity.getY(this.upEntity))) == (Math.floor(Entity.getY(turrets[i].upEntity))))
 			{
-				if((Math.floor(Entity.getX(this.entity)) - distance) == (Math.floor(Entity.getX(turrets[i].entity))))
-					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
+				if((Math.floor(Entity.getX(this.upEntity)) - distance) == (Math.floor(Entity.getX(turrets[i].upEntity))))
+					if((Math.floor(Entity.getZ(this.upEntity))) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
 						return true;
 
-				if((Math.floor(Entity.getX(this.entity)) + distance) == (Math.floor(Entity.getX(turrets[i].entity))))
-					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
+				if((Math.floor(Entity.getX(this.upEntity)) + distance) == (Math.floor(Entity.getX(turrets[i].upEntity))))
+					if((Math.floor(Entity.getZ(this.upEntity))) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
 						return true;
 
-				if((Math.floor(Entity.getZ(this.entity)) - distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
-					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
+				if((Math.floor(Entity.getZ(this.upEntity)) - distance) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
+					if((Math.floor(Entity.getX(this.upEntity))) == (Math.floor(Entity.getX(turrets[i].upEntity))))
 						return true;
 
-				if((Math.floor(Entity.getZ(this.entity)) + distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
-					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
+				if((Math.floor(Entity.getZ(this.upEntity)) + distance) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
+					if((Math.floor(Entity.getX(this.upEntity))) == (Math.floor(Entity.getX(turrets[i].upEntity))))
 						return true;
 			}
 		}
 		return false;
 	}
 
-	this.playSound = function(fileName)
+	turretObject.playSound = function(fileName)
 	{
 		if(areTurretsSinging)
 			turretsStopSinging();
@@ -4212,7 +4445,7 @@ function TurretClass(turret, container)
 		var volume = 1.0;
 
 		// change volume based on distance from source
-		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.upEntity) - Player.getX(), 2) + Math.pow(Entity.getY(this.upEntity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.upEntity) - Player.getZ(), 2) );
 		if(distance > MAX_LOGARITHMIC_VOLUME)
 			volume = 0.0;
 		else
@@ -4248,18 +4481,69 @@ function TurretClass(turret, container)
 			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
 		}
 	}
+
+	return turretObject;
 }
 
 function TurretDefectiveClass(turret, container)
 {
 	var turretObject = new TurretClass(turret, container);
+	turretObject.stringId = "turret-defective";
+
+	turretObject.artificialIntelligence = function()
+	{
+		//Entity.setRot(this.upEntity, 0, 0);
+
+		if(this.aggressive)
+		{
+			if(checkProximity(Player.getEntity(), this.upEntity, 8, 3))
+			{
+				this.countdownToAttack++;
+				if(this.countdownToAttack == 1)
+				{
+					Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+				}
+				if(this.countdownToAttack == 10)
+				{
+					Entity.setRenderType(this.upEntity, TurretShooting2RenderType.renderType);
+					this.shoot();
+				}
+			}else
+			{
+				if(this.countdownToAttack != 0)
+				{
+					if(this.countdownToAttack == 1)
+					{
+						Entity.setRenderType(this.upEntity, TurretLaserRenderType.renderType);
+						this.countdownToAttack = 0;
+					}else
+					{
+						Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+						if(this.countdownToAttack > 10)
+							this.countdownToAttack = 10;
+						this.countdownToAttack--;
+					}
+				}
+			}
+		}else
+		{
+			if(this.countdownToAttack != 0)
+				this.countdownToAttack = 0;
+		}
+	}
+
+	turretObject.shouldShoot = function()
+	{
+		//
+		return checkProximity(Player.getEntity(), this.upEntity, 8, 3);
+	}
 
 	turretObject.shoot = function()
 	{
 		var volume = 1.0;
 
 		// change volume based on distance from source
-		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.upEntity) - Player.getX(), 2) + Math.pow(Entity.getY(this.upEntity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.upEntity) - Player.getZ(), 2) );
 		if(distance > MAX_LOGARITHMIC_VOLUME)
 			volume = 0.0;
 		else
@@ -5226,6 +5510,16 @@ function stringToBoolean(string)
 	}
 }
 
+function stringToArray(string)
+{
+	string = String(string);
+	string = string.replace(/ /g, "");
+
+	var stringArray = string.split(",");
+
+	return stringArray;
+}
+
 function stringToIntArray(string)
 {
 	string = String(string);
@@ -5591,11 +5885,11 @@ function informationUI()
 
 				var informationText1 = new android.widget.TextView(currentActivity);
 				informationText1.setText(new android.text.Html.fromHtml("<b>Portal guns:</b>" +
-					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, max damage: 1000" +
-					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, max damage: 500" +
-					"<br>-<i>PortalGun Iron</i>: bullet speed: 20 block/second, max damage: 250" +
-					"<br>-<i>PortalGun Lava</i>: bullet speed: 20 block/second, max damage: 200" +
-					"<br>-<i>PortalGun Wood & Stone</i>: Tap on a block to place a portal. max damage: 100"));
+					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, can be used " + PORTAL_GUN_DAMAGE + " times." +
+					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, can be used " + PORTAL_GUN_GOLD_DAMAGE + " times." +
+					"<br>-<i>PortalGun Iron</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_IRON_DAMAGE + " times." +
+					"<br>-<i>PortalGun Lava</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_LAVA_DAMAGE + " times." +
+					"<br>-<i>PortalGun Wood & Stone</i>: Tap on a block to place a portal. Can be used " + PORTAL_GUN_WOOD_AND_STONE_DAMAGE + " times."));
 				layout.addView(informationText1);
 
 				layout.addView(portalDivider());
@@ -5603,14 +5897,17 @@ function informationUI()
 				var informationText2 = new android.widget.TextView(currentActivity);
 				informationText2.setText(new android.text.Html.fromHtml("<b>Other Items:</b>" +
 					"<br>-<i>GravityGun</i>: Hit a mob with this item to pick it, then you can bring it everywhere or shoot it." +
-					"<br>-<i>Turret</i>: Tap on a block with this item to spawn a turret." +
-					"<br>-<i>Turret options</i>: Hit a turret with this item to display the options GUI." +
+					"<br>-<i>Turret</i>: Spawn a Turret." +
+					"<br>-<i>Turret Defective</i>: Spawn a Defective Turret." +
+					"<br>-<i>Turret Options</i>: Hit a turret with this item to display the options GUI." +
 					"<br>-<i>Long fall boots</i>: When you fall from a great height these boots prevent damage to you." +
-					"<br>-<i>Jumper</i>: When someone go above this block he will make a powerful jump." + 
-					"<br>-<i>Portal Jukebox</i>: Tap this block to open the GUI that consent you to listen to the beautiful songs of the Portal game." +
-					'<br>-<i>Portal Radio</i>: When you tap this block the "Radio loop" song will start, it will stop when you go far away (20 blocks) from the tapped radio.' +
-					"<br>-<i>Repulsion Gel Block</i>: When you fall on this block, it will repulse you in the air with a bit less speed than before." +
-					"<br>-<i>Propulsion Gel Block</i>: When you walk on these blocks your acceleration will increase." +
+					"<br>-<i>Aerial Faith Plate</i>: When the player goes above this block he will make a powerful jump." + 
+					"<br>-<i>Jukebox</i>: Tap this block with a disc and it will start playing the chosen song." +
+					'<br>-<i>Portal Radio</i>: When you tap this block the "Radio loop" song will start, it will stop when you go far away (20 blocks) from the radio.' +
+					"<br>-<i>Repulsion Gel Block</i>: When the player stands on this block he makes more powerful jumps, and when he fall on it, he will be repulsed in the air with a bit less speed than before." +
+					"<br>-<i>Propulsion Gel Block</i>: When the player walks on these blocks his acceleration will increase." +
+					"<br>-<i>Cube</i>: A cube. Doesn't do anything special." +
+					"<br>-<i>Companion Cube</i>: A cube. Doesn't do anything special. But it loves you." +
 					"<br>If you want a better explanation on how gels work watch <a href=\"http://youtu.be/32DaEaODKyI\">this YouTube video</a>"));
 				informationText2.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
 				layout.addView(informationText2);
@@ -5619,9 +5916,7 @@ function informationUI()
 				
 				var informationText3 = new android.widget.TextView(currentActivity);
 				informationText3.setText(new android.text.Html.fromHtml("<b>Tips and tricks:</b>" +
-					'<br>-<i>Turrets</i>: Place 4 turrets in line, near themselves and they will start to sing "Cara Mia Addio".' +
-					'<br>-<i>Easter egg</i>: There is an easter egg hidden in the "Portal Information" GUI, try to find it! ;-).' +
-					"<br>Can't find it? Try to long press all the buttons in the GUI."));
+					"<br>-<i>Turrets</i>: Place 4 turrets in a row, they will start to sing \"Cara Mia Addio\"."));
 				layout.addView(informationText3);
 
 
@@ -6416,8 +6711,9 @@ function turretOptionsUI(i)
 									try
 									{
 										turrets[i].aggressive = !turrets[i].aggressive;
-										Entity.setRenderType(turrets[i].entity, TurretRenderType.renderType);
-										//saveTurrets() TODO
+										Entity.setRenderType(turrets[i].upEntity, TurretRenderType.renderType);
+										
+										saveCustomMobs();
 									} catch(e) {}
 								}
 							}
@@ -6445,14 +6741,16 @@ function turretOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turrets[i].container);
-						Entity.remove(turrets[i].entity);
+						Entity.remove(turrets[i].downEntity);
+						Entity.remove(turrets[i].upEntity);
 
 						var random = Math.floor((Math.random() * 9) + 1);
 						turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
 
+						customMobs.splice(findPositionInCustomMobs(turrets[i].downEntity), 1);
 						turrets.splice(i, 1);
-						//saveTurrets(); TODO
+
+						saveCustomMobs();
 						
 						if(areTurretsSinging)
 							turretsStopSinging();
@@ -6523,8 +6821,9 @@ function turretDefectiveOptionsUI(i)
 									try
 									{
 										turretsDefective[i].aggressive = !turretsDefective[i].aggressive;
-										Entity.setRenderType(turretsDefective[i].entity, TurretRenderType.renderType);
-										//saveTurrets() TODO
+										Entity.setRenderType(turretsDefective[i].upEntity, TurretRenderType.renderType);
+										
+										saveCustomMobs();
 									} catch(e) { }
 								}
 							}
@@ -6552,14 +6851,16 @@ function turretDefectiveOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turretsDefective[i].container);
-						Entity.remove(turretsDefective[i].entity);
+						Entity.remove(turretsDefective[i].downEntity);
+						Entity.remove(turretsDefective[i].upEntity);
 
 						var random = Math.floor((Math.random() * 7) + 1);
 						turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 
+						customMobs.splice(findPositionInCustomMobs(turretsDefective[i].downEntity), 1);
 						turretsDefective.splice(i, 1);
-						//saveTurrets(); TODO
+						
+						saveCustomMobs();
 
 						popup.dismiss();
 					}

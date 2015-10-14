@@ -983,7 +983,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 			catch(err)
 			{
-				ModPE.showTipMessage("Portal Mod: Sounds not installed!");
+				ModPE.showTipMessage("Portal Mod: Music files not installed!");
 				clientMessage(err);
 			}
 		}
@@ -5753,7 +5753,24 @@ function defaultPopup(layout)
 	var popup = new android.app.Dialog(currentActivity);
 	popup.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 	popup.setContentView(scroll);
+
 	return popup;
+}
+
+function showImmersivePopup(popup)
+{
+	//Set the dialog to not focusable (makes navigation ignore us adding the window)
+	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
+	popup.getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+
+	//Show the dialog!
+	popup.show();
+
+	//Set the dialog to immersive
+	popup.getWindow().getDecorView().setSystemUiVisibility(currentActivity.getWindow().getDecorView().getSystemUiVisibility());
+
+	//Clear the not focusable flag from the window
+	popup.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 }
 
 
@@ -5868,7 +5885,7 @@ function infoPortalMod()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -5909,10 +5926,10 @@ function informationUI()
 					"<br>-<i>Aerial Faith Plate</i>: When the player goes above this block he will make a powerful jump." + 
 					"<br>-<i>Jukebox</i>: Tap this block with a disc and it will start playing the chosen song." +
 					'<br>-<i>Portal Radio</i>: When you tap this block the "Radio loop" song will start, it will stop when you go far away (20 blocks) from the radio.' +
-					"<br>-<i>Repulsion Gel Block</i>: When the player stands on this block he makes more powerful jumps, and when he fall on it, he will be repulsed in the air with a bit less speed than before." +
-					"<br>-<i>Propulsion Gel Block</i>: When the player walks on these blocks his acceleration will increase." +
 					"<br>-<i>Cube</i>: A cube. Doesn't do anything special." +
 					"<br>-<i>Companion Cube</i>: A cube. Doesn't do anything special. But it loves you." +
+					"<br>-<i>Repulsion Gel Block</i>: When the player stands on this block he makes more powerful jumps, and when he fall on it, he will be repulsed in the air with a bit less speed than before." +
+					"<br>-<i>Propulsion Gel Block</i>: When the player walks on these blocks his acceleration will increase." +
 					"<br>If you want a better explanation on how gels work watch <a href=\"http://youtu.be/32DaEaODKyI\">this YouTube video</a>"));
 				informationText2.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
 				layout.addView(informationText2);
@@ -5955,7 +5972,7 @@ function informationUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6032,7 +6049,7 @@ function settingsUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6294,7 +6311,7 @@ function settingsGeneralUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6479,7 +6496,7 @@ function settingsMapMakersUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6554,7 +6571,7 @@ function latestVersionUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6611,7 +6628,7 @@ function updateAvailableUI()
 
 				var popup = defaultPopup(layout);
 				popup.setCanceledOnTouchOutside(false);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6716,7 +6733,7 @@ function supportUI()
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6827,7 +6844,7 @@ function turretOptionsUI(i)
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6934,7 +6951,7 @@ function turretDefectiveOptionsUI(i)
 
 
 				var popup = defaultPopup(layout);
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6986,7 +7003,7 @@ function pleaseInstallTextureUI()
 				layout.addView(exitButton);
 
 
-				popup.show();
+				showImmersivePopup(popup);
 
 			} catch(err)
 			{

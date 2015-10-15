@@ -508,12 +508,16 @@ Block.setExplosionResistance(JUKEBOX_ID, 30);
 
 // jumper
 const JUMPER_DIRECTION_ID = 224;
-Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0);
+Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0, false);
 Block.setDestroyTime(JUMPER_DIRECTION_ID, 1);
+Block.setLightOpacity(JUMPER_DIRECTION_ID, 0.01);
+Block.setShape(JUMPER_DIRECTION_ID, 0, 0, 0, 1, 1/16, 1);
 
 const JUMPER_ID = 225;
-Block.newBlock(JUMPER_ID, "Jumper", "jumper", 0);
+Block.newBlock(JUMPER_ID, "Jumper", "jumper", 0, false);
 Block.setDestroyTime(JUMPER_ID, 1);
+Block.setLightOpacity(JUMPER_ID, 0.01);
+Block.setShape(JUMPER_ID, 0, 0, 0, 1, 1/16, 1);
 
 // radio
 const PORTAL_RADIO_A = 226;
@@ -1555,6 +1559,8 @@ function modTick()
 {
 	var blockUnderPlayer = Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()))
 
+	var flatBlockUnderPlayer = Level.getTile(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()))
+
 	ModTickFunctions.alwaysFullHungerBarOption();
 
 	ModTickFunctions.checkChangedCarriedItem();
@@ -1577,7 +1583,7 @@ function modTick()
 
 	ModTickFunctions.jukebox();
 
-	ModTickFunctions.jumper(blockUnderPlayer);
+	ModTickFunctions.jumper(flatBlockUnderPlayer);
 
 	ModTickFunctions.longFallBoots(blockUnderPlayer);
 
@@ -1871,19 +1877,19 @@ var ModTickFunctions = {
 		}
 	},
 
-	jumper: function(blockUnderPlayer)
+	jumper: function(flatBlockUnderPlayer)
 	{
-		if(blockUnderPlayer == JUMPER_ID)
+		if(flatBlockUnderPlayer == JUMPER_ID)
 		{
-			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()), JUMPER_DIRECTION_ID);
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_DIRECTION_ID);
 			if(angle == null)
 				angle = getYaw();
 
 			makeJumperJump(angle);
 		}
-		if(blockUnderPlayer == JUMPER_DIRECTION_ID && blockUnderPlayerBefore != JUMPER_ID)
+		if(flatBlockUnderPlayer == JUMPER_DIRECTION_ID && blockUnderPlayerBefore != JUMPER_ID)
 		{
-			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 2, Math.floor(Player.getZ()), JUMPER_ID);
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_ID);
 			if(angle == null)
 				angle = getYaw();
 			else

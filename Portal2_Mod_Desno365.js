@@ -570,7 +570,7 @@ Block.setDestroyTime(CUBE_COMPANION_ID, 1);
 
 // blacklist variables
 var pickBuggedBlocksBlacklist = [7, 26, 52, 54, 59, 61, 62, 63, 64, 68, 71, 83, 90, 96, 104, 105, 106, 111, 115, 141, 142, 207, ORANGE_Z_MIN_D, ORANGE_Z_MIN_U, ORANGE_Z_MAX_D, ORANGE_Z_MAX_U, ORANGE_Y_MIN_D, ORANGE_Y_MIN_U, ORANGE_Y_MAX_D, ORANGE_Y_MAX_U, ORANGE_X_MIN_D, ORANGE_X_MIN_U, ORANGE_X_MAX_D, ORANGE_X_MAX_U, BLUE_Z_MIN_D, BLUE_Z_MIN_U, BLUE_Z_MAX_D, BLUE_Z_MAX_U, BLUE_Y_MIN_D, BLUE_Y_MIN_U, BLUE_Y_MAX_D, BLUE_Y_MAX_U, BLUE_X_MIN_D, BLUE_X_MIN_U, BLUE_X_MAX_D, BLUE_X_MAX_U];
-var pickBlocksBlacklist = [REPULSION_GEL_ID, PROPULSION_GEL_ID, JUMPER_ID];
+var pickBlocksBlacklist = [REPULSION_GEL_ID, PROPULSION_GEL_ID, JUMPER_ID, JUMPER_DIRECTION_ID];
 
 
 //########################################################################################################################################################
@@ -4853,7 +4853,7 @@ function loadMapOptions()
 
 					indestructibleBlocks = stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
 					alwaysFullHungerBar = stringToBoolean(properties.getProperty("full_hunger_bar", "0"));
-					pickBlocksBlacklist = stringToIntArray(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID));
+					pickBlocksBlacklist = stringToIntArray(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID));
 
 					// close streams
 					streamReader.close();
@@ -6440,7 +6440,7 @@ function settingsMapMakersUI()
 
 
 				var pickBlacklistText = new android.widget.TextView(currentActivity);
-				pickBlacklistText.setText("Type the IDs of the blocks that the player can't pick with the GravityGun or the PortalGun (default is: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ")");
+				pickBlacklistText.setText("Type the IDs of the blocks that the player can't pick with the GravityGun or the PortalGun (default is: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID + ")");
 				pickBlacklistText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				pickBlacklistText.setPadding(padding, 0, padding, 0);
 				layout.addView(pickBlacklistText);
@@ -6450,7 +6450,7 @@ function settingsMapMakersUI()
 				layoutH.setPadding(padding * 2, 0, padding * 2, 0);
 
 				var inputText1 = new android.widget.EditText(currentActivity);
-				inputText1.setHint("Example: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID);
+				inputText1.setHint("Example: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID);
 				inputText1.setText(pickBlocksBlacklist.toString());
 				inputText1.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 7));
 				layoutH.addView(inputText1);

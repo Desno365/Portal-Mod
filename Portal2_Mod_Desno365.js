@@ -25,8 +25,6 @@ const GameMode = {
 	SURVIVAL: 0,
 	CREATIVE: 1
 };
-const ITEM_CATEGORY_TOOL = 3; // 3 seems to be the category of the tools
-const ITEM_CATEGORY_MATERIAL = 1;
 const VEL_Y_OFFSET = -0.07840000092983246;
 var isInGame = false;
 
@@ -155,13 +153,21 @@ Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmo
 	}
 }
 
+const PORTAL_GUN_ORANGE_ID = 3649;
+const PORTAL_GUN_DAMAGE = 1000;
+Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGunO");
+Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
+Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
+Item.setCategory(PORTAL_GUN_ORANGE_ID, ItemCategory.TOOL);
+
 const PORTAL_INFORMATION_ID = 3650;
 Item.defineItem(PORTAL_INFORMATION_ID, "portalinfo", 0, "Portal Information");
 Item.addShapedRecipe(PORTAL_INFORMATION_ID, 1, 0, [
 	"   ",
 	" w ",
 	"   "], ["w", 17, 0]);
-Item.setCategory(PORTAL_INFORMATION_ID, ITEM_CATEGORY_TOOL);
+Item.setCategory(PORTAL_INFORMATION_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_INFORMATION_ID, 1);
 
 // portal guns variables
 var blueBullet;
@@ -197,15 +203,15 @@ var pgBlockId;
 var pgBlockData;
 
 const PORTAL_GUN_BLUE_ID = 3651;
-const PORTAL_GUN_DAMAGE = 1000;
 Item.defineItem(PORTAL_GUN_BLUE_ID, "portalgunblue", 0, "PortalGun");
 Item.setMaxDamage(PORTAL_GUN_BLUE_ID, PORTAL_GUN_DAMAGE);
 Item.addShapedRecipe(PORTAL_GUN_BLUE_ID, 1, 0, [
 	"f f",
 	" d ",
 	"f f"], ["f", 265, 0, "d", 264, 0]);
-Item.setCategory(PORTAL_GUN_BLUE_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(PORTAL_GUN_BLUE_ID);
+Item.setCategory(PORTAL_GUN_BLUE_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_GUN_BLUE_ID, 1);
 
 const PORTAL_GUN_GOLD_ID = 3652;
 const PORTAL_GUN_GOLD_DAMAGE = 500;
@@ -215,8 +221,9 @@ Item.addShapedRecipe(PORTAL_GUN_GOLD_ID, 1, 0, [
 	"f f",
 	" g ",
 	"f f"], ["f", 265, 0, "g", 266, 0]);
-Item.setCategory(PORTAL_GUN_GOLD_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(PORTAL_GUN_GOLD_ID);
+Item.setCategory(PORTAL_GUN_GOLD_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_GUN_GOLD_ID, 1);
 
 const PORTAL_GUN_IRON_ID = 3653;
 const PORTAL_GUN_IRON_DAMAGE = 250;
@@ -226,8 +233,9 @@ Item.addShapedRecipe(PORTAL_GUN_IRON_ID, 1, 0, [
 	"fff",
 	"f f",
 	"fff"], ["f", 265, 0]);
-Item.setCategory(PORTAL_GUN_IRON_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(PORTAL_GUN_IRON_ID);
+Item.setCategory(PORTAL_GUN_IRON_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_GUN_IRON_ID, 1);
 
 const PORTAL_GUN_LAVA_ID = 3654;
 const PORTAL_GUN_LAVA_DAMAGE = 200;
@@ -237,8 +245,9 @@ Item.addShapedRecipe(PORTAL_GUN_LAVA_ID, 1, 0, [
 	"f f",
 	" a ",
 	"f f"], ["f", 265, 0, "a", 259, 0]);
-Item.setCategory(PORTAL_GUN_LAVA_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(PORTAL_GUN_LAVA_ID);
+Item.setCategory(PORTAL_GUN_LAVA_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
 
 const PORTAL_GUN_WOOD_AND_STONE_ID = 3655;
 const PORTAL_GUN_WOOD_AND_STONE_DAMAGE = 100;
@@ -248,13 +257,9 @@ Item.addShapedRecipe(PORTAL_GUN_WOOD_AND_STONE_ID, 1, 0, [
 	"sws",
 	"s s",
 	"sws"], ["s", 98, 0, "w", 17, 0]);
-Item.setCategory(PORTAL_GUN_WOOD_AND_STONE_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(PORTAL_GUN_WOOD_AND_STONE_ID);
-
-const PORTAL_GUN_ORANGE_ID = 3649;
-Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGun");
-Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
-Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
+Item.setCategory(PORTAL_GUN_WOOD_AND_STONE_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 
 var isGravityGunPicking = false;
 var ggShootButtonFalse;
@@ -274,12 +279,20 @@ Item.addShapedRecipe(GRAVITY_GUN_ID, 1, 0, [
 	"frf",
 	"r r",
 	"frf"], ["f", 265, 0, "r", 331, 0]);
-Item.setCategory(GRAVITY_GUN_ID, ITEM_CATEGORY_TOOL);
 Item.setVerticalRender(GRAVITY_GUN_ID);
+Item.setCategory(GRAVITY_GUN_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 
 const ID_TURRET_OPTIONS = 3657;
 Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
-Item.setCategory(ID_TURRET_OPTIONS, ITEM_CATEGORY_TOOL);
+Item.setCategory(ID_TURRET_OPTIONS, ItemCategory.TOOL);
+Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
+
+var turretsDefective = [];
+const ID_TURRET_DEFECTIVE = 3666;
+Item.defineItem(ID_TURRET_DEFECTIVE, "turretdefective", 0, "Turret Defective");
+Item.setCategory(ID_TURRET_DEFECTIVE, ItemCategory.TOOL);
+Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
 
 var turrets = [];
 var areTurretsSinging = false;
@@ -290,12 +303,8 @@ var turretsSongY;
 var turretsSongZ;
 const ID_TURRET = 3658;
 Item.defineItem(ID_TURRET, "turret", 0, "Turret");
-Item.setCategory(ID_TURRET, ITEM_CATEGORY_TOOL);
-
-var turretsDefective = [];
-const ID_TURRET_DEFECTIVE = 3666;
-Item.defineItem(ID_TURRET_DEFECTIVE, "turretdefective", 0, "Turret Defective");
-Item.setCategory(ID_TURRET_DEFECTIVE, ITEM_CATEGORY_TOOL);
+Item.setCategory(ID_TURRET, ItemCategory.TOOL);
+Player.addItemCreativeInv(ID_TURRET, 1);
 
 const LONG_FALL_BOOT_ID = 3659;
 Item.defineItem(LONG_FALL_BOOT_ID, "longfallboot", 0, "Long Fall Boot");
@@ -312,7 +321,6 @@ Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
 	"   ",
 	"   ",
 	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
-Item.setCategory(LONG_FALL_BOOTS_ID, ITEM_CATEGORY_TOOL);
 
 const MAX_LOGARITHMIC_VOLUME_RADIO = 25;
 var radioPlayer = new android.media.MediaPlayer();
@@ -321,29 +329,35 @@ var radioCountdown = 0;
 var radioX;
 var radioY;
 var radioZ;
-const RADIO_ID = 3661;
-Item.defineItem(RADIO_ID, "portalradio", 0, "Portal Radio");
+const RADIO_ID = 3661; //3661
+Item.defineItem(RADIO_ID, "portalradio", 0, "Aperture Radio");
 Item.addShapedRecipe(RADIO_ID, 1, 0, [
 	"   ",
 	"iii",
 	"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
-Item.setCategory(RADIO_ID, ITEM_CATEGORY_MATERIAL);
+Item.setCategory(RADIO_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(RADIO_ID, 1);
 
 const STILL_ALIVE_DISC_ID = 3662;
 Item.defineItem(STILL_ALIVE_DISC_ID, "discstillalive", 0, "Still Alive Disc");
-Item.setCategory(STILL_ALIVE_DISC_ID, ITEM_CATEGORY_TOOL);
+Item.setCategory(STILL_ALIVE_DISC_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
 
 const WANT_YOU_GONE_DISC_ID = 3663;
 Item.defineItem(WANT_YOU_GONE_DISC_ID, "discwantyougone", 0, "Want You Gone Disc");
-Item.setCategory(WANT_YOU_GONE_DISC_ID, ITEM_CATEGORY_TOOL);
+Item.setCategory(WANT_YOU_GONE_DISC_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
 
 const CARA_MIA_ADDIO_DISC_ID = 3664;
 Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "disccaramiaaddio", 0, "Cara Mia Addio Disc");
-Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ITEM_CATEGORY_TOOL);
+Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ItemCategory.TOOL);
+Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
 
 const JUMPER_ITEM_ID = 3665;
 Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
-Item.setCategory(JUMPER_ITEM_ID, ITEM_CATEGORY_MATERIAL);
+Item.setCategory(JUMPER_ITEM_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
+
 
 //########################################################################################################################################################
 // Blocks
@@ -366,12 +380,12 @@ Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 }
 Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, zMax)
 {
-	Block.newBlock(id, name, textureName, 0, false);
+	Block.newBlock(id, name, textureName, 0, false, 0);
 	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
 	Block.setDestroyTime(id, 3);
-	Block.setRenderLayer(id, 3); // in 0.11 was 5
+	Block.setRenderLayer(id, 4); // recently changed from 3 to 4
 	Block.setLightLevel(id, 3);
-	Block.setLightOpacity(id, 0.01);
+	Block.setLightOpacity(id, 0);
 	Block.setExplosionResistance(id, 30);
 }
 
@@ -505,6 +519,8 @@ const JUKEBOX_ID = 84;
 Block.defineBlock(JUKEBOX_ID, "Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]], 17);
 Block.setDestroyTime(JUKEBOX_ID, 2);
 Block.setExplosionResistance(JUKEBOX_ID, 30);
+Item.setCategory(JUKEBOX_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(JUKEBOX_ID, 1);
 
 // jumper
 const JUMPER_DIRECTION_ID = 224;
@@ -549,6 +565,8 @@ Block.setExplosionResistance(PORTAL_RADIO_D, 30);
 const REPULSION_GEL_ID = 230;
 Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
 Block.setDestroyTime(REPULSION_GEL_ID, 1);
+Item.setCategory(REPULSION_GEL_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 
 // orange gel
 const SPEED_MULTIPLIER_MIN = 1.35;
@@ -557,15 +575,21 @@ var speedMultiplier = SPEED_MULTIPLIER_MIN;
 const PROPULSION_GEL_ID = 231;
 Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 Block.setDestroyTime(PROPULSION_GEL_ID, 1);
+Item.setCategory(PROPULSION_GEL_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
 // cubes
 const CUBE_NORMAL_ID = 232;
 Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
 Block.setDestroyTime(CUBE_NORMAL_ID, 1);
+Item.setCategory(CUBE_NORMAL_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
 
 const CUBE_COMPANION_ID = 233;
 Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
 Block.setDestroyTime(CUBE_COMPANION_ID, 1);
+Item.setCategory(CUBE_COMPANION_ID, ItemCategory.MATERIAL);
+Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
 
 
 // blacklist variables
@@ -589,33 +613,6 @@ function selectLevelHook()
 function newLevel()
 {
 	isInGame = true;
-
-	// add items and blocks in the creative inventory
-	if(Level.getGameMode() == GameMode.CREATIVE)
-	{
-		// crashes in survival
-		Player.addItemCreativeInv(PORTAL_INFORMATION_ID, 1);
-		Player.addItemCreativeInv(PORTAL_GUN_BLUE_ID, 1);
-		Player.addItemCreativeInv(PORTAL_GUN_GOLD_ID, 1);
-		Player.addItemCreativeInv(PORTAL_GUN_IRON_ID, 1);
-		Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
-		Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
-		Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
-		Player.addItemCreativeInv(ID_TURRET, 1);
-		Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
-		Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
-		Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
-		Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
-		Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
-
-		Player.addItemCreativeInv(RADIO_ID, 1);
-		Player.addItemCreativeInv(JUKEBOX_ID, 1);
-		Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
-		Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
-		Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
-		Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
-		Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
-	}
 
 	// things to do when the world is completely loaded
 	currentActivity.runOnUiThread(new java.lang.Runnable(
@@ -1071,6 +1068,8 @@ function destroyBlock(x, y, z)
 	// radio
 	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B || tile == PORTAL_RADIO_C || tile == PORTAL_RADIO_D)
 	{
+		preventDefault();
+		Level.setTile(x, y, z, 0);
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
 	}
 
@@ -1079,16 +1078,20 @@ function destroyBlock(x, y, z)
 	{
 		if(x == orangePortal.x1 && y == orangePortal.y1 && z == orangePortal.z1)
 		{
+			preventDefault();
 			orangePortalCreated = false;
 			updateOverlay();
+			Level.setTile(orangePortal.x1, orangePortal.y1, orangePortal.z1, 0);
 			Level.setTile(orangePortal.x2, orangePortal.y2, orangePortal.z2, 0);
 			savePortalsToDelete();
 		}
 		if(x == orangePortal.x2 && y == orangePortal.y2 && z == orangePortal.z2)
 		{
+			preventDefault();
 			orangePortalCreated = false;
 			updateOverlay();
 			Level.setTile(orangePortal.x1, orangePortal.y1, orangePortal.z1, 0);
+			Level.setTile(orangePortal.x2, orangePortal.y2, orangePortal.z2, 0);
 			savePortalsToDelete();
 		}
 	}
@@ -1096,16 +1099,20 @@ function destroyBlock(x, y, z)
 	{
 		if(x == bluePortal.x1 && y == bluePortal.y1 && z == bluePortal.z1)
 		{
+			preventDefault();
 			bluePortalCreated = false;
 			updateOverlay();
+			Level.setTile(bluePortal.x1, bluePortal.y1, bluePortal.z1, 0);
 			Level.setTile(bluePortal.x2, bluePortal.y2, bluePortal.z2, 0);
 			savePortalsToDelete();
 		}
 		if(x == bluePortal.x2 && y == bluePortal.y2 && z == bluePortal.z2)
 		{
+			preventDefault();
 			bluePortalCreated = false;
 			updateOverlay();
 			Level.setTile(bluePortal.x1, bluePortal.y1, bluePortal.z1, 0);
+			Level.setTile(bluePortal.x2, bluePortal.y2, bluePortal.z2, 0);
 			savePortalsToDelete();
 		}
 	}
@@ -1114,7 +1121,15 @@ function destroyBlock(x, y, z)
 	if(tile == JUMPER_ID)
 	{
 		//
+		preventDefault();
+		Level.setTile(x, y, z, 0);
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
+	}
+	if(tile == JUMPER_DIRECTION_ID)
+	{
+		//
+		preventDefault();
+		Level.setTile(x, y, z, 0);
 	}
 
 	// jukebox
@@ -1255,7 +1270,8 @@ function attackHook(attacker, victim)
 					if(isItemPortalGun(Player.getCarriedItem()))
 						ModPE.showTipMessage("Use \"pick\" to kill a turret");
 					else
-						ModPE.showTipMessage("Only gravity can kill a turret");
+						if(Player.getCarriedItem() != GRAVITY_GUN_ID)
+							ModPE.showTipMessage("Only gravity can kill a turret");
 				}
 				preventDefault();
 				return;
@@ -1275,7 +1291,8 @@ function attackHook(attacker, victim)
 					if(isItemPortalGun(Player.getCarriedItem()))
 						ModPE.showTipMessage("Use \"pick\" to kill a turret");
 					else
-						ModPE.showTipMessage("Only gravity can kill a turret");
+						if(Player.getCarriedItem() != GRAVITY_GUN_ID)
+							ModPE.showTipMessage("Only gravity can kill a turret");
 				}
 				preventDefault();
 				return;

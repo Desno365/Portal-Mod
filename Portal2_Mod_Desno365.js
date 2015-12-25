@@ -79,7 +79,6 @@ var entities = [];
 
 // custom mobs array
 var customMobs = [];
-var oldCustomMobsToBeRemoved = [];
 
 // player interactions variables
 var velBeforeX = 0, velBeforeY = 0, velBeforeZ = 0;
@@ -605,7 +604,6 @@ function selectLevelHook()
 {
 	// reset custom mobs array
 	customMobs = [];
-	oldCustomMobsToBeRemoved = [];
 
 	loadCustomMobs();
 }
@@ -1007,9 +1005,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 				{
 					turrets[turrets.length - 1].playSound("portal-music/portal_turret_song.mp3");
 					ModPE.showTipMessage("Singing...");
-					turretsSongX = Entity.getX(turrets[turrets.length - 1].upEntity);
-					turretsSongY = Entity.getY(turrets[turrets.length - 1].upEntity);
-					turretsSongZ = Entity.getZ(turrets[turrets.length - 1].upEntity);
+					turretsSongX = Entity.getX(turrets[turrets.length - 1].entity);
+					turretsSongY = Entity.getY(turrets[turrets.length - 1].entity);
+					turretsSongZ = Entity.getZ(turrets[turrets.length - 1].entity);
 					areTurretsSinging = true;
 				}
 			}
@@ -1150,24 +1148,11 @@ function attackHook(attacker, victim)
 		// GravityGun
 		if(itemId == GRAVITY_GUN_ID && !isGravityGunPicking)
 		{
-			var pickEntity = victim;
-			preventDefault();
-
 			// for turrets
 			turretsLoop:
 			for(var i in turrets)
 			{
-				if(victim == turrets[i].upEntity)
-				{
-					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
-					pickEntity = turrets[i].downEntity;
-
-					if(areTurretsSinging)
-						turretsStopSinging();
-					break turretsLoop;
-				}
-				if(victim == turrets[i].downEntity)
+				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
@@ -1182,14 +1167,7 @@ function attackHook(attacker, victim)
 			turretsDefectiveLoop:
 			for(var i in turretsDefective)
 			{
-				if(victim == turretsDefective[i].upEntity)
-				{
-					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
-					pickEntity = turretsDefective[i].downEntity;
-					break turretsDefectiveLoop;
-				}
-				if(victim == turretsDefective[i].downEntity)
+				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
@@ -1197,32 +1175,21 @@ function attackHook(attacker, victim)
 				}
 			}
 
-			// pick the correct entity
-			pickEntityGravityGun(pickEntity);
+			preventDefault();
+
+			// pick the entity
+			pickEntityGravityGun(victim);
 			return;
 		}
 
 		// PortalGun
 		if(isItemPortalGun(itemId) && !isPortalGunPicking && pgIsPickingEnabled)
 		{
-			var pickEntity = victim;
-			preventDefault();
-
 			// for turrets
 			turretsLoop:
 			for(var i in turrets)
 			{
-				if(victim == turrets[i].upEntity)
-				{
-					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
-					pickEntity = turrets[i].downEntity;
-
-					if(areTurretsSinging)
-						turretsStopSinging();
-					break turretsLoop;
-				}
-				if(victim == turrets[i].downEntity)
+				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
 					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
@@ -1237,14 +1204,7 @@ function attackHook(attacker, victim)
 			turretsDefectiveLoop:
 			for(var i in turretsDefective)
 			{
-				if(victim == turretsDefective[i].upEntity)
-				{
-					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
-					pickEntity = turretsDefective[i].downEntity;
-					break turretsDefectiveLoop;
-				}
-				if(victim == turretsDefective[i].downEntity)
+				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
 					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
@@ -1252,15 +1212,17 @@ function attackHook(attacker, victim)
 				}
 			}
 
-			// pick the correct entity
-			pickEntityPortalGun(pickEntity);
+			preventDefault();
+
+			// pick the entity
+			pickEntityPortalGun(victim);
 			return;
 		}
 
 		// turrets options, normal turrets
 		for(var i in turrets)
 		{
-			if(victim == turrets[i].upEntity || victim == turrets[i].downEntity)
+			if(victim == turrets[i].entity)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
 				{
@@ -1281,7 +1243,7 @@ function attackHook(attacker, victim)
 		// turrets options, defective turrets
 		for(var i in turretsDefective)
 		{
-			if(victim == turretsDefective[i].upEntity || victim == turretsDefective[i].downEntity)
+			if(victim == turretsDefective[i].entity)
 			{
 				if(Player.getCarriedItem() == ID_TURRET_OPTIONS)
 				{
@@ -1333,11 +1295,11 @@ function deathHook(murderer, victim)
 	// turrets
 	for(var i in turrets)
 	{
-		if(victim == turrets[i].upEntity || victim == turrets[i].downEntity)
+		if(victim == turrets[i].entity)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				restoreTurretFromOldTurretObject(Entity.getX(turrets[i].upEntity), Entity.getY(turrets[i].upEntity), Entity.getZ(turrets[i].upEntity), turrets[i]);
+				restoreTurretFromOldTurretObject(Entity.getX(turrets[i].entity), Entity.getY(turrets[i].entity), Entity.getZ(turrets[i].entity), turrets[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1350,11 +1312,6 @@ function deathHook(murderer, victim)
 					turretsStopSinging();
 			}
 
-			if(victim == turrets[i].upEntity)
-				Entity.remove(turrets[i].downEntity);
-			if(victim == turrets[i].downEntity)
-				Entity.remove(turrets[i].upEntity);
-
 			turrets.splice(i, 1);
 		}
 	}
@@ -1362,11 +1319,11 @@ function deathHook(murderer, victim)
 	// defective turrets
 	for(var i in turretsDefective)
 	{
-		if(victim == turretsDefective[i].upEntity || victim == turretsDefective[i].downEntity)
+		if(victim == turretsDefective[i].entity)
 		{
 			if(murderer != -1 && murderer != Player.getEntity())
 			{
-				restoreTurretDefectiveFromOldTurretObject(Entity.getX(turretsDefective[i].upEntity), Entity.getY(turretsDefective[i].upEntity), Entity.getZ(turretsDefective[i].upEntity), turretsDefective[i]);
+				restoreTurretDefectiveFromOldTurretObject(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity), turretsDefective[i]);
 
 				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
 					Entity.remove(murderer);
@@ -1376,11 +1333,6 @@ function deathHook(murderer, victim)
 				turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 			}
 
-			if(victim == turretsDefective[i].upEntity)
-				Entity.remove(turretsDefective[i].downEntity);
-			if(victim == turretsDefective[i].downEntity)
-				Entity.remove(turretsDefective[i].upEntity);
-
 			turretsDefective.splice(i, 1);
 		}
 	}
@@ -1389,47 +1341,7 @@ function deathHook(murderer, victim)
 function entityAddedHook(entity)
 {
 	// custom mobs
-	var index = findPositionInCustomMobs(entity);
-	if(index != -1)
-	{
-		// get old mobs position and remove them from world
-		var x = Entity.getX(entity);
-		var y = Entity.getY(entity);
-		var z = Entity.getZ(entity);
-		if(entity == customMobs[index].upEntity)
-		{
-			Entity.remove(customMobs[index].upEntity);
-			oldCustomMobsToBeRemoved.push(customMobs[index].downEntity);
-		}
-		if(entity == customMobs[index].downEntity)
-		{
-			Entity.remove(customMobs[index].downEntity);
-			oldCustomMobsToBeRemoved.push(customMobs[index].upEntity);
-		}
-
-		// spawn new turrets
-		if(customMobs[index].stringId == "turret")
-		{
-			restoreTurretFromOldTurretObject(x, y, z, customMobs[index]);
-		}
-		if(customMobs[index].stringId == "turret-defective")
-		{
-			restoreTurretDefectiveFromOldTurretObject(x, y, z, customMobs[index]);
-		}
-
-		// remove old mobs from custom mobs
-		customMobs.splice(index, 1);
-	}
-
-	// remove old custom mobs
-	for(var i in oldCustomMobsToBeRemoved)
-	{
-		if(entity == oldCustomMobsToBeRemoved[i])
-		{
-			Entity.remove(entity);
-			return;
-		}
-	}
+	customMobRespawnerCheck(entity);
 
 	// to prevent the death of turrets by zombies
 	if(Entity.getEntityTypeId(entity) == EntityType.ZOMBIE_VILLAGER && (turrets.length > 0 || turretsDefective.length > 0))
@@ -2111,6 +2023,8 @@ function showPortalGunUI()
 				popupPortalGunPick = new android.widget.PopupWindow(layoutLeft, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 				popupPortalGunPick.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				popupPortalGunPick.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.CENTER, 0, pixelsOffsetButtons);
+
+				setPickEnabledPortalGun(pgIsPickingEnabled); // restore previous status of pick
 				// PICK BUTTONS - END
 
 
@@ -3968,7 +3882,7 @@ function shootGravityGun()
 		turretsLoop:
 		for(var i in turrets)
 		{
-			if(turrets[i].downEntity == ggEntity)
+			if(turrets[i].entity == ggEntity)
 			{
 				var random = Math.floor((Math.random() * 8) + 1);
 				turrets[i].playSound("portal-sounds/turrets/turret_launched_" + random + ".mp3");
@@ -4128,8 +4042,7 @@ function saveCustomMobs()
 				properties.setProperty("number_of_mobs", String(customMobs.length));
 				for(var i in customMobs)
 				{
-					properties.setProperty("mob_" + i + "_id", String(customMobs[i].downEntity));
-					properties.setProperty("mob_" + i + "_id_rider", String(customMobs[i].upEntity));
+					properties.setProperty("mob_" + i + "_id", String(customMobs[i].entity));
 					properties.setProperty("mob_" + i + "_string_id", String(customMobs[i].stringId));
 
 					// custom properties
@@ -4179,7 +4092,7 @@ function loadCustomMobs()
 					var numberOfMobs = parseInt(properties.getProperty("number_of_mobs", "0"));
 					for(var i = 0; i < numberOfMobs; i++)
 					{
-						customMobs[i] = new CustomMobClass(parseFloat(properties.getProperty("mob_" + i + "_id", "0")), parseFloat(properties.getProperty("mob_" + i + "_id_rider", "0")));
+						customMobs[i] = new CustomMobClass(parseFloat(properties.getProperty("mob_" + i + "_id", "0")));
 						customMobs[i].stringId = String(properties.getProperty("mob_" + i + "_string_id", "0"));
 
 						// custom properties
@@ -4221,11 +4134,37 @@ function loadCustomMobs()
 	}));
 }
 
+function customMobRespawnerCheck(entity)
+{
+	var index = findPositionInCustomMobs(entity);
+	if(index != -1) // if true a custom mob has just been added
+	{
+		// get old mobs position and remove it from world
+		var x = Entity.getX(entity);
+		var y = Entity.getY(entity);
+		var z = Entity.getZ(entity);
+		Entity.remove(customMobs[index].entity);
+
+		// spawn new turrets
+		if(customMobs[index].stringId == "turret")
+		{
+			restoreTurretFromOldTurretObject(x, y, z, customMobs[index]);
+		}
+		if(customMobs[index].stringId == "turret-defective")
+		{
+			restoreTurretDefectiveFromOldTurretObject(x, y, z, customMobs[index]);
+		}
+
+		// remove old mob from custom mobs
+		customMobs.splice(index, 1);
+	}
+}
+
 function findPositionInCustomMobs(entity)
 {
 	for(var i in customMobs)
 	{
-		if(customMobs[i].upEntity == entity || customMobs[i].downEntity == entity)
+		if(customMobs[i].entity == entity)
 		{
 			return i;
 		}
@@ -4235,14 +4174,14 @@ function findPositionInCustomMobs(entity)
 
 function addToCustomMobs(customMobObject)
 {
+	// add an object that must be a subclass of CustomMobClass to the custom mobs array
 	customMobs.push(customMobObject);
 	saveCustomMobs();
 }
 
-function CustomMobClass(upEntity, downEntity)
+function CustomMobClass(entity)
 {
-	this.upEntity = upEntity;
-	this.downEntity = downEntity;
+	this.entity = entity;
 	this.stringId = "";
 	this.x = 0;
 	this.y = 0;
@@ -4251,9 +4190,9 @@ function CustomMobClass(upEntity, downEntity)
 
 	this.updatePosition = function()
 	{
-		var x = Entity.getX(this.downEntity);
-		var y = Entity.getY(this.downEntity);
-		var z = Entity.getZ(this.downEntity);
+		var x = Entity.getX(this.entity);
+		var y = Entity.getY(this.entity);
+		var z = Entity.getZ(this.entity);
 
 		if(x != 0 && y != 0 && z != 0)
 		{
@@ -4286,13 +4225,9 @@ function spawnTurret(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	var container = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.MINECART);
-	Entity.rideAnimal(turret, container);
-	Entity.setRenderType(container, 4); // dropped item render
-	Entity.setCollisionSize(container, 0, 0);
-	Entity.setPosition(container, x + 0.5, y + 1.6, z + 0.5);
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, true, true);
 
-	turrets.push(new TurretClass(turret, container));
+	turrets.push(new TurretClass(turret));
 	turrets[turrets.length - 1].x = Entity.getX(turret);
 	turrets[turrets.length - 1].y = Entity.getY(turret);
 	turrets[turrets.length - 1].z = Entity.getZ(turret);
@@ -4309,13 +4244,9 @@ function spawnTurretDefective(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	var container = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.MINECART);
-	Entity.rideAnimal(turret, container);
-	Entity.setRenderType(container, 4); // dropped item render
-	Entity.setCollisionSize(container, 0, 0);
-	Entity.setPosition(container, x + 0.5, y + 1.6, z + 0.5);
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
 
-	turretsDefective.push(new TurretDefectiveClass(turret, container));
+	turretsDefective.push(new TurretDefectiveClass(turret));
 	turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
 	turretsDefective[turretsDefective.length - 1].y = Entity.getY(turret);
 	turretsDefective[turretsDefective.length - 1].z = Entity.getZ(turret);
@@ -4331,9 +4262,9 @@ function restoreTurretFromOldTurretObject(x, y, z, oldTurret)
 	if(turrets[turrets.length - 1].aggressive)
 	{
 		if(turrets[turrets.length - 1].shouldShoot())
-			Entity.setRenderType(turrets[turrets.length - 1].upEntity, TurretShooting2RenderType.renderType);
+			Entity.setRenderType(turrets[turrets.length - 1].entity, TurretShooting2RenderType.renderType);
 		else
-			Entity.setRenderType(turrets[turrets.length - 1].upEntity, TurretLaserRenderType.renderType);
+			Entity.setRenderType(turrets[turrets.length - 1].entity, TurretLaserRenderType.renderType);
 	}
 }
 
@@ -4345,15 +4276,15 @@ function restoreTurretDefectiveFromOldTurretObject(x, y, z, oldTurret)
 	if(turretsDefective[turretsDefective.length - 1].aggressive)
 	{
 		if(turretsDefective[turretsDefective.length - 1].shouldShoot())
-			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].upEntity, TurretShooting2RenderType.renderType);
+			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].entity, TurretShooting2RenderType.renderType);
 		else
-			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].upEntity, TurretLaserRenderType.renderType);
+			Entity.setRenderType(turretsDefective[turretsDefective.length - 1].entity, TurretLaserRenderType.renderType);
 	}
 }
 
-function TurretClass(turret, container)
+function TurretClass(turret)
 {
-	var turretObject = new CustomMobClass(turret, container);
+	var turretObject = new CustomMobClass(turret);
 	turretObject.stringId = "turret";
 
 	turretObject.customProperties = [{propertyName: "aggressive", propertyType:"bool"}, {propertyName: "countdownToAttack", propertyType:"int"}];
@@ -4363,7 +4294,7 @@ function TurretClass(turret, container)
 
 	turretObject.artificialIntelligence = function()
 	{
-		//Entity.setRot(this.upEntity, 0, 0);
+		//Entity.setRot(this.entity, 0, 0);
 
 		if(this.aggressive)
 		{
@@ -4372,12 +4303,12 @@ function TurretClass(turret, container)
 				this.countdownToAttack++;
 				if(this.countdownToAttack == 1)
 				{
-					Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+					Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
 					var random = Math.floor((Math.random() * 9) + 1);
 					this.playSound("portal-sounds/turrets/turret_active_" + random + ".mp3");
 				}
 				if(this.countdownToAttack == 10)
-					Entity.setRenderType(this.upEntity, TurretShooting2RenderType.renderType);
+					Entity.setRenderType(this.entity, TurretShooting2RenderType.renderType);
 				if(this.countdownToAttack % 15 == 0 && this.countdownToAttack >= 30)
 					this.shoot(Player.getEntity());
 			}else
@@ -4386,13 +4317,13 @@ function TurretClass(turret, container)
 				{
 					if(this.countdownToAttack == 1)
 					{
-						Entity.setRenderType(this.upEntity, TurretLaserRenderType.renderType);
+						Entity.setRenderType(this.entity, TurretLaserRenderType.renderType);
 						this.countdownToAttack = 0;
 						var random = Math.floor((Math.random() * 3) + 1);
 						this.playSound("portal-sounds/turrets/turret_search_" + random + ".mp3");
 					}else
 					{
-						Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+						Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
 						if(this.countdownToAttack > 10)
 							this.countdownToAttack = 10;
 						this.countdownToAttack--;
@@ -4409,27 +4340,27 @@ function TurretClass(turret, container)
 	turretObject.shouldShoot = function()
 	{
 		//
-		return checkProximity(Player.getEntity(), this.upEntity, 10, 3);
+		return checkProximity(Player.getEntity(), this.entity, 10, 3);
 	}
 
 	turretObject.shoot = function(victim)
 	{
-		var shotYaw = Math.atan2((Entity.getZ(this.upEntity) - Entity.getZ(victim)), (Entity.getX(this.upEntity) - Entity.getX(victim)));
+		var shotYaw = Math.atan2((Entity.getZ(this.entity) - Entity.getZ(victim)), (Entity.getX(this.entity) - Entity.getX(victim)));
 		var turretShot = getDirection((java.lang.Math.toDegrees(shotYaw) - 90), 0);
-		Level.playSoundEnt(this.upEntity, "random.bow", 1000, 0);
+		Level.playSoundEnt(this.entity, "random.bow", 1000, 0);
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 		{
-			var bullet = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 80);
+			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 80);
 
 			// fix bouncing bullets
-			var skelly = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 34);
+			var skelly = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 34);
 			Entity.setRenderType(skelly, 4); // dropped item render
 			Entity.rideAnimal(skelly, bullet);
 			Entity.remove(skelly);
 		} else
 		{
-			var bullet = Level.spawnMob(Entity.getX(this.upEntity) + (-turretShot.x * 1.1), Entity.getY(this.upEntity) + 1, Entity.getZ(this.upEntity) + (-turretShot.z * 1.1), 81);
+			var bullet = Level.spawnMob(Entity.getX(this.entity) + (-turretShot.x * 1.1), Entity.getY(this.entity) + 1, Entity.getZ(this.entity) + (-turretShot.z * 1.1), 81);
 		}
 
 		Entity.setVelX(bullet, -turretShot.x * 1.8);
@@ -4442,22 +4373,22 @@ function TurretClass(turret, container)
 		distance = Math.floor(distance);
 		for(var i in turrets)
 		{
-			if((Math.floor(Entity.getY(this.upEntity))) == (Math.floor(Entity.getY(turrets[i].upEntity))))
+			if((Math.floor(Entity.getY(this.entity))) == (Math.floor(Entity.getY(turrets[i].entity))))
 			{
-				if((Math.floor(Entity.getX(this.upEntity)) - distance) == (Math.floor(Entity.getX(turrets[i].upEntity))))
-					if((Math.floor(Entity.getZ(this.upEntity))) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
+				if((Math.floor(Entity.getX(this.entity)) - distance) == (Math.floor(Entity.getX(turrets[i].entity))))
+					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
 						return true;
 
-				if((Math.floor(Entity.getX(this.upEntity)) + distance) == (Math.floor(Entity.getX(turrets[i].upEntity))))
-					if((Math.floor(Entity.getZ(this.upEntity))) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
+				if((Math.floor(Entity.getX(this.entity)) + distance) == (Math.floor(Entity.getX(turrets[i].entity))))
+					if((Math.floor(Entity.getZ(this.entity))) == (Math.floor(Entity.getZ(turrets[i].entity))))
 						return true;
 
-				if((Math.floor(Entity.getZ(this.upEntity)) - distance) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
-					if((Math.floor(Entity.getX(this.upEntity))) == (Math.floor(Entity.getX(turrets[i].upEntity))))
+				if((Math.floor(Entity.getZ(this.entity)) - distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
+					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
 						return true;
 
-				if((Math.floor(Entity.getZ(this.upEntity)) + distance) == (Math.floor(Entity.getZ(turrets[i].upEntity))))
-					if((Math.floor(Entity.getX(this.upEntity))) == (Math.floor(Entity.getX(turrets[i].upEntity))))
+				if((Math.floor(Entity.getZ(this.entity)) + distance) == (Math.floor(Entity.getZ(turrets[i].entity))))
+					if((Math.floor(Entity.getX(this.entity))) == (Math.floor(Entity.getX(turrets[i].entity))))
 						return true;
 			}
 		}
@@ -4473,7 +4404,7 @@ function TurretClass(turret, container)
 		var volume = 1.0;
 
 		// change volume based on distance from source
-		var distance = Math.sqrt( Math.pow(Entity.getX(this.upEntity) - Player.getX(), 2) + Math.pow(Entity.getY(this.upEntity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.upEntity) - Player.getZ(), 2) );
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
 		if(distance > MAX_LOGARITHMIC_VOLUME)
 			volume = 0.0;
 		else
@@ -4513,27 +4444,27 @@ function TurretClass(turret, container)
 	return turretObject;
 }
 
-function TurretDefectiveClass(turret, container)
+function TurretDefectiveClass(turret)
 {
-	var turretObject = new TurretClass(turret, container);
+	var turretObject = new TurretClass(turret);
 	turretObject.stringId = "turret-defective";
 
 	turretObject.artificialIntelligence = function()
 	{
-		//Entity.setRot(this.upEntity, 0, 0);
+		//Entity.setRot(this.entity, 0, 0);
 
 		if(this.aggressive)
 		{
-			if(checkProximity(Player.getEntity(), this.upEntity, 8, 3))
+			if(checkProximity(Player.getEntity(), this.entity, 8, 3))
 			{
 				this.countdownToAttack++;
 				if(this.countdownToAttack == 1)
 				{
-					Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+					Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
 				}
 				if(this.countdownToAttack == 10)
 				{
-					Entity.setRenderType(this.upEntity, TurretShooting2RenderType.renderType);
+					Entity.setRenderType(this.entity, TurretShooting2RenderType.renderType);
 					this.shoot();
 				}
 			}else
@@ -4542,11 +4473,11 @@ function TurretDefectiveClass(turret, container)
 				{
 					if(this.countdownToAttack == 1)
 					{
-						Entity.setRenderType(this.upEntity, TurretLaserRenderType.renderType);
+						Entity.setRenderType(this.entity, TurretLaserRenderType.renderType);
 						this.countdownToAttack = 0;
 					}else
 					{
-						Entity.setRenderType(this.upEntity, TurretShooting1RenderType.renderType);
+						Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
 						if(this.countdownToAttack > 10)
 							this.countdownToAttack = 10;
 						this.countdownToAttack--;
@@ -4563,7 +4494,7 @@ function TurretDefectiveClass(turret, container)
 	turretObject.shouldShoot = function()
 	{
 		//
-		return checkProximity(Player.getEntity(), this.upEntity, 8, 3);
+		return checkProximity(Player.getEntity(), this.entity, 8, 3);
 	}
 
 	turretObject.shoot = function()
@@ -4571,7 +4502,7 @@ function TurretDefectiveClass(turret, container)
 		var volume = 1.0;
 
 		// change volume based on distance from source
-		var distance = Math.sqrt( Math.pow(Entity.getX(this.upEntity) - Player.getX(), 2) + Math.pow(Entity.getY(this.upEntity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.upEntity) - Player.getZ(), 2) );
+		var distance = Math.sqrt( Math.pow(Entity.getX(this.entity) - Player.getX(), 2) + Math.pow(Entity.getY(this.entity) - Player.getY(), 2) + Math.pow(Entity.getZ(this.entity) - Player.getZ(), 2) );
 		if(distance > MAX_LOGARITHMIC_VOLUME)
 			volume = 0.0;
 		else
@@ -6799,7 +6730,7 @@ function turretOptionsUI(i)
 									try
 									{
 										turrets[i].aggressive = !turrets[i].aggressive;
-										Entity.setRenderType(turrets[i].upEntity, TurretRenderType.renderType);
+										Entity.setRenderType(turrets[i].entity, TurretRenderType.renderType);
 										
 										saveCustomMobs();
 									} catch(e) {}
@@ -6829,13 +6760,12 @@ function turretOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turrets[i].downEntity);
-						Entity.remove(turrets[i].upEntity);
+						Entity.remove(turrets[i].entity);
 
 						var random = Math.floor((Math.random() * 9) + 1);
 						turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
 
-						customMobs.splice(findPositionInCustomMobs(turrets[i].downEntity), 1);
+						customMobs.splice(findPositionInCustomMobs(turrets[i].entity), 1);
 						turrets.splice(i, 1);
 
 						saveCustomMobs();
@@ -6909,7 +6839,7 @@ function turretDefectiveOptionsUI(i)
 									try
 									{
 										turretsDefective[i].aggressive = !turretsDefective[i].aggressive;
-										Entity.setRenderType(turretsDefective[i].upEntity, TurretRenderType.renderType);
+										Entity.setRenderType(turretsDefective[i].entity, TurretRenderType.renderType);
 										
 										saveCustomMobs();
 									} catch(e) { }
@@ -6939,13 +6869,12 @@ function turretDefectiveOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turretsDefective[i].downEntity);
-						Entity.remove(turretsDefective[i].upEntity);
+						Entity.remove(turretsDefective[i].entity);
 
 						var random = Math.floor((Math.random() * 7) + 1);
 						turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 
-						customMobs.splice(findPositionInCustomMobs(turretsDefective[i].downEntity), 1);
+						customMobs.splice(findPositionInCustomMobs(turretsDefective[i].entity), 1);
 						turretsDefective.splice(i, 1);
 						
 						saveCustomMobs();

@@ -17,7 +17,7 @@ SOFTWARE.
 const DEBUG = false;
 
 // updates variables
-const CURRENT_VERSION = "r011";
+const CURRENT_VERSION = "r012";
 var latestVersion;
 
 // minecraft variables
@@ -154,7 +154,7 @@ Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmo
 
 const PORTAL_GUN_ORANGE_ID = 3649;
 const PORTAL_GUN_DAMAGE = 1000;
-Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGunO");
+Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGun ");
 Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
 Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
 Item.setCategory(PORTAL_GUN_ORANGE_ID, ItemCategory.TOOL);
@@ -4225,7 +4225,8 @@ function spawnTurret(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, true, true);
+	Entity.setCollisionSize(turret, 8/16, 8/16);
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
 
 	turrets.push(new TurretClass(turret));
 	turrets[turrets.length - 1].x = Entity.getX(turret);
@@ -4244,6 +4245,7 @@ function spawnTurretDefective(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
+	Entity.setCollisionSize(turret, 8/16, 8/16);
 	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
 
 	turretsDefective.push(new TurretDefectiveClass(turret));
@@ -6084,7 +6086,7 @@ function settingsGeneralUI()
 					},
 					onStopTrackingTouch: function()
 					{
-						clientMessage("size " + imageSize);
+						//clientMessage("size " + imageSize);
 						ModPE.saveData("pref_portal_buttons_image_ buttons_size", imageSize);
 					}
 				});

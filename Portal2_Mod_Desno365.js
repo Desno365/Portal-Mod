@@ -17,7 +17,7 @@ SOFTWARE.
 const DEBUG = false;
 
 // updates variables
-const CURRENT_VERSION = "r012";
+const CURRENT_VERSION = "r013";
 var latestVersion;
 
 // minecraft variables
@@ -328,7 +328,7 @@ var radioCountdown = 0;
 var radioX;
 var radioY;
 var radioZ;
-const RADIO_ID = 3661; //3661
+const RADIO_ID = 3661;
 Item.defineItem(RADIO_ID, "portalradio", 0, "Aperture Radio");
 Item.addShapedRecipe(RADIO_ID, 1, 0, [
 	"   ",
@@ -4225,7 +4225,7 @@ function spawnTurret(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	Entity.setCollisionSize(turret, 8/16, 8/16);
+	Entity.setCollisionSize(turret, 8/16, 16/16);
 	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
 
 	turrets.push(new TurretClass(turret));
@@ -4245,7 +4245,7 @@ function spawnTurretDefective(x, y, z)
 	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
-	Entity.setCollisionSize(turret, 8/16, 8/16);
+	Entity.setCollisionSize(turret, 8/16, 16/16);
 	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
 
 	turretsDefective.push(new TurretDefectiveClass(turret));

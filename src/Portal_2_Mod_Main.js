@@ -38,14 +38,14 @@ var sdcard = android.os.Environment.getExternalStorageDirectory();
 // display size and density variables
 var metrics = new android.util.DisplayMetrics();
 currentActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-var displayHeight = metrics.heightPixels;
-var displayWidth = metrics.widthPixels;
-var deviceDensity = metrics.density;
-if(displayHeight > displayWidth) // fix auto-rotation disabled bug
+var Screen.getHeight() = metrics.heightPixels;
+var Screen.getWidth() = metrics.widthPixels;
+var Screen.getDensity() = metrics.density;
+if(Screen.getHeight() > Screen.getWidth()) // fix auto-rotation disabled bug
 {
-	var x = displayHeight;
-	displayHeight = displayWidth;
-	displayWidth = x;
+	var x = Screen.getHeight();
+	Screen.getHeight() = Screen.getWidth();
+	Screen.getWidth() = x;
 }
 metrics = null;
 
@@ -116,12 +116,6 @@ var settingsPngScaled;
 var background;
 
 // item functions needed on load
-Item.setVerticalRender = function(id)
-{
-	try {
-		Item.setHandEquipped(id, true);
-	} catch(e) { /* old version of BlockLauncher */ }
-}
 Item.defineItem = function(id, textureName, textureNumber, name, stackLimit)
 {
 	try
@@ -680,7 +674,7 @@ function newLevel()
 	clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
 
 	if(playWelcomeSoundAtStartup)
-		Sound.playFromFileName("game-entry1.mp3");
+		Sound.playFromPath("game-entry1.mp3");
 }
 
 function leaveGame()
@@ -706,15 +700,7 @@ function leaveGame()
 	indestructibleBlocks = false;
 
 	// stop sounds
-	try {
-		sound1.reset();
-	} catch(e) {}
-	try {
-		sound2.reset();
-	} catch(e) {}
-	try {
-		sound3.reset();
-	} catch(e) {}
+	Sound.stopAllSounds();
 
 	// info item
 	removeInfoItemUI();
@@ -768,7 +754,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	if(itemId == PORTAL_GUN_WOOD_AND_STONE_ID)
 	{
 		var random = Math.floor((Math.random() * 3) + 1);
-		Sound.playFromFileName("portals/portal_open" + random + ".mp3");
+		Sound.playFromPath("portals/portal_open" + random + ".mp3");
 
 		var placeX = x, placeY = y, placeZ = z;
 		// get correct block
@@ -840,7 +826,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		} else
 		{
-			Sound.playFromFileName("gravitygun/fail.ogg");
+			Sound.playFromPath("gravitygun/fail.ogg");
 			ModPE.showTipMessage("This block can't be picked");
 		}
 		return;
@@ -867,7 +853,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		} else
 		{
-			Sound.playFromFileName("gravitygun/fail.ogg");
+			Sound.playFromPath("gravitygun/fail.ogg");
 			ModPE.showTipMessage("This block can't be picked");
 		}
 		return;
@@ -1444,7 +1430,7 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 			if(!isItemPortalGun(previousItem))
 				showPortalGunUI();
 			if(!((previousItem == PORTAL_GUN_BLUE_ID && currentItem == PORTAL_GUN_ORANGE_ID) || (previousItem == PORTAL_GUN_ORANGE_ID && currentItem == PORTAL_GUN_BLUE_ID)))
-				Sound.playFromFileName("portalgun/portalgun_powerup1.mp3");
+				Sound.playFromPath("portalgun/portalgun_powerup1.mp3");
 			break;
 		}
 
@@ -1615,7 +1601,7 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the blueBullet hit an entity
-					Sound.playFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
+					Sound.playFromPath("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
 
 					Entity.remove(blueBullet.entity);
 					blueBullet = null;
@@ -1646,7 +1632,7 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the orangeBullet hit an entity
-					Sound.playFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
+					Sound.playFromPath("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
 
 					Entity.remove(orangeBullet.entity);
 					orangeBullet = null;
@@ -1667,13 +1653,13 @@ var ModTickFunctions = {
 		{
 			if(pgIsBlock)
 			{
-				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 				if(pgEntity != null)
 					Entity.remove(pgEntity);
 				pgEntity = Level.dropItem(Player.getX() + (dir.x * 2), Player.getY() + (dir.y * 2.5), Player.getZ() + (dir.z * 2), 0, pgBlockId, 1, pgBlockData);
 			} else
 			{
-				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 				if(Player.getX() + (dir.x * 3) - Entity.getX(pgEntity) > 0.5 ||  Player.getX() + (dir.x * 3) - Entity.getX(pgEntity) < -0.5 || Player.getY () + (dir.y * 3) - Entity.getY (pgEntity) > 0.5 ||  Player.getY () + (dir.y * 3) - Entity.getY (pgEntity) < -0.5 || Player.getZ () + (dir.z * 3) - Entity.getZ (pgEntity) > 0.5 ||  Player.getZ () + (dir.z * 3) - Entity.getZ (pgEntity) < -0.5)
 				{
 					Entity.setVelX(pgEntity, (Player.getX() + (dir.x * 3) - Entity.getX(pgEntity)) / 5)
@@ -1695,13 +1681,13 @@ var ModTickFunctions = {
 		{
 			if(ggIsBlock)
 			{
-				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 				if(ggEntity != null)
 					Entity.remove(ggEntity);
 				ggEntity = Level.dropItem(Player.getX() + (dir.x * 2), Player.getY() + (dir.y * 2.5), Player.getZ() + (dir.z * 2), 0, ggBlockId, 1, ggBlockData);
 			} else
 			{
-				var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+				var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 				if(Player.getX() + (dir.x * 3) - Entity.getX(ggEntity) > 0.5 ||  Player.getX() + (dir.x * 3) - Entity.getX(ggEntity) < -0.5 || Player.getY () + (dir.y * 3) - Entity.getY (ggEntity) > 0.5 ||  Player.getY () + (dir.y * 3) - Entity.getY (ggEntity) < -0.5 || Player.getZ () + (dir.z * 3) - Entity.getZ (ggEntity) > 0.5 ||  Player.getZ () + (dir.z * 3) - Entity.getZ (ggEntity) < -0.5)
 				{
 					Entity.setVelX(ggEntity, (Player.getX() + (dir.x * 3) - Entity.getX(ggEntity)) / 5)
@@ -1958,7 +1944,7 @@ function showPortalGunUI()
 				var layoutLeft = new android.widget.LinearLayout(currentActivity);
 				layoutLeft.setOrientation(android.widget.LinearLayout.VERTICAL);
 
-				var blueImage = scaleImageToSize(bluePortalScaled, bluePortalScaled.getWidth() * 0.166 * imageSize, bluePortalScaled.getHeight() * 0.166 * imageSize, true);
+				var blueImage = Image.scaleBitmapToSize(bluePortalScaled, bluePortalScaled.getWidth() * 0.166 * imageSize, bluePortalScaled.getHeight() * 0.166 * imageSize, true);
 				var blueImageView = new android.widget.ImageView(currentActivity);
 				blueImageView.setImageBitmap(blueImage);
 				blueImageView.setOnClickListener(new android.view.View.OnClickListener(
@@ -1975,7 +1961,7 @@ function showPortalGunUI()
 					}
 				}));
 				layoutLeft.addView(blueImageView);
-				setMarginsLinearLayout(blueImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(blueImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
 
 				// PICK BUTTONS
 				if(minecraftStyleForButtons)
@@ -2038,7 +2024,7 @@ function showPortalGunUI()
 				var layoutRight = new android.widget.LinearLayout(currentActivity);
 				layoutRight.setOrientation(android.widget.LinearLayout.VERTICAL);
 
-				var orangeImage = scaleImageToSize(orangePortalScaled, orangePortalScaled.getWidth() * 0.166 * imageSize, orangePortalScaled.getHeight() * 0.166 * imageSize, true);
+				var orangeImage = Image.scaleBitmapToSize(orangePortalScaled, orangePortalScaled.getWidth() * 0.166 * imageSize, orangePortalScaled.getHeight() * 0.166 * imageSize, true);
 				var orangeImageView = new android.widget.ImageView(currentActivity);
 				orangeImageView.setImageBitmap(orangeImage);
 				orangeImageView.setOnClickListener(new android.view.View.OnClickListener(
@@ -2055,7 +2041,7 @@ function showPortalGunUI()
 					}
 				}));
 				layoutRight.addView(orangeImageView);
-				setMarginsLinearLayout(orangeImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(orangeImageView, 0, 0, 0, MARGIN_HORIZONTAL_SMALL);
 
 				// DROP BUTTONS
 				if(minecraftStyleForButtons)
@@ -2070,7 +2056,7 @@ function showPortalGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromFileName("gravitygun/fail.ogg");
+						Sound.playFromPath("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -2111,9 +2097,9 @@ function showPortalGunUI()
 
 function shootBluePortal()
 {
-	Sound.playFromFileName("portalgun/portalgun_shoot_red1.mp3");
+	Sound.playFromPath("portalgun/portalgun_shoot_red1.mp3");
 
-	var gunShootDir = getDirection(getYaw(), getPitch());
+	var gunShootDir = DesnoUtils.getVector(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
 	var speed = getPortalGunBulletSpeed(Player.getCarriedItem());
 	Entity.setVelX(bullet, gunShootDir.x * speed);
@@ -2134,9 +2120,9 @@ function shootBluePortal()
 
 function shootOrangePortal()
 {
-	Sound.playFromFileName("portalgun/portalgun_shoot_blue1.mp3");
+	Sound.playFromPath("portalgun/portalgun_shoot_blue1.mp3");
 
-	var gunShootDir = getDirection(getYaw(), getPitch());
+	var gunShootDir = DesnoUtils.getVector(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
 	var speed = getPortalGunBulletSpeed(Player.getCarriedItem());
 	Entity.setVelX(bullet, gunShootDir.x * speed);
@@ -2212,7 +2198,7 @@ function displayOverlay()
 		run: function()
 		{
 			/*var correctOverlayImage = getOverlayFromID(getCurrentOverlayID());
-			var overlayImage = scaleImageToSize(correctOverlayImage, correctOverlayImage.getWidth() * 0.5, correctOverlayImage.getHeight() * 0.5, true);*/
+			var overlayImage = Image.scaleBitmapToSize(correctOverlayImage, correctOverlayImage.getWidth() * 0.5, correctOverlayImage.getHeight() * 0.5, true);*/
 			overlayImageView = new android.widget.ImageView(currentActivity);
 			showingOverlayID = 0;
 			updateOverlay();
@@ -2240,7 +2226,7 @@ function updateOverlay()
 				if(showingOverlayID != overlayID)
 				{
 					var correctOverlayImage = getOverlayFromID(overlayID);
-					var overlayImage = scaleImageToSize(correctOverlayImage, correctOverlayImage.getWidth() * 0.5, correctOverlayImage.getHeight() * 0.5, true);
+					var overlayImage = Image.scaleBitmapToSize(correctOverlayImage, correctOverlayImage.getWidth() * 0.5, correctOverlayImage.getHeight() * 0.5, true);
 					overlayImageView.setImageBitmap(overlayImage);
 
 					showingOverlayID = overlayID;
@@ -2338,7 +2324,7 @@ function pickWithPortalGun()
 		updateDropButtonPortalGun();
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.damageCarriedItem();
-		Sound.playFromFileName("gravitygun/pickup.ogg");
+		Sound.playFromPath("gravitygun/pickup.ogg");
 	}
 }
 
@@ -2365,14 +2351,14 @@ function dropPortalGun()
 {
 	if(pgIsBlock)
 	{
-		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+		var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 		var x = Player.getX() + (dir.x * 2);
 		var y = Player.getY() + (dir.y * 2.5);
 		var z = Player.getZ() + (dir.z * 2);
 		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
 		{
 			isPortalGunPicking = false;
-			Sound.playFromFileName("gravitygun/drop.ogg");
+			Sound.playFromPath("gravitygun/drop.ogg");
 			updateDropButtonPortalGun();
 
 			Level.setTileNotInAir(x, y, z, pgBlockId, pgBlockData);
@@ -2380,13 +2366,13 @@ function dropPortalGun()
 			pgEntity = null;
 		} else
 		{
-			Sound.playFromFileName("gravitygun/fail.ogg");
+			Sound.playFromPath("gravitygun/fail.ogg");
 			ModPE.showTipMessage("There is another block in this position.");
 		}
 	} else
 	{
 		isPortalGunPicking = false;
-		Sound.playFromFileName("gravitygun/drop.ogg");
+		Sound.playFromPath("gravitygun/drop.ogg");
 		updateDropButtonPortalGun();
 		pgEntity = null;
 	}
@@ -2401,7 +2387,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 	if(Math.floor(x) == orangePortal.x1 && Math.floor(y) == orangePortal.y1 && Math.floor(z) == orangePortal.z1 || Math.floor(x) == orangePortal.x2 && Math.floor(y) == orangePortal.y2 && Math.floor(z) == orangePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
+		Sound.playFromPath("portals/portal_exit" + random + ".mp3", x, y, z);
 
 		if(orangePortal.type == 2)
 		{
@@ -2711,7 +2697,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 	if(Math.floor(x) == bluePortal.x1 && Math.floor(y) == bluePortal.y1 && Math.floor(z) == bluePortal.z1 || Math.floor(x) == bluePortal.x2 && Math.floor(y) == bluePortal.y2 && Math.floor(z) == bluePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
+		Sound.playFromPath("portals/portal_exit" + random + ".mp3", x, y, z);
 
 		if(bluePortal.type == 2)
 		{
@@ -3024,7 +3010,7 @@ function setPortalOrange(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		Sound.playFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
+		Sound.playFromPath("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW
@@ -3306,7 +3292,7 @@ function setPortalBlue(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		Sound.playFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
+		Sound.playFromPath("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW
@@ -3637,7 +3623,7 @@ function loadPortalsAndDeleteThem()
 					var properties = new java.util.Properties();
 					properties.load(streamReader);
 
-					orangePortalCreated = stringToBoolean(properties.getProperty("orange", "0"));
+					orangePortalCreated = Convert.stringToBoolean(properties.getProperty("orange", "0"));
 					if(orangePortalCreated)
 					{
 						var x1 = parseInt(properties.getProperty("orange_x_1"));
@@ -3650,7 +3636,7 @@ function loadPortalsAndDeleteThem()
 						deleteOrangePortal();
 					}
 
-					bluePortalCreated = stringToBoolean(properties.getProperty("blue", "0"));
+					bluePortalCreated = Convert.stringToBoolean(properties.getProperty("blue", "0"));
 					if(bluePortalCreated)
 					{
 						var x1 = parseInt(properties.getProperty("blue_x_1"));
@@ -3746,7 +3732,7 @@ function canBlockBePicked(blockId)
 //########## GRAVITY GUN functions ##########
 function initializeAndShowGravityGunUI()
 {
-	Sound.playFromFileName("gravitygun/equip.ogg");
+	Sound.playFromPath("gravitygun/equip.ogg");
 
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
@@ -3770,7 +3756,7 @@ function initializeAndShowGravityGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromFileName("gravitygun/fail.ogg");
+						Sound.playFromPath("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -3819,7 +3805,7 @@ function initializeAndShowGravityGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromFileName("gravitygun/fail.ogg");
+						Sound.playFromPath("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -3862,11 +3848,11 @@ function shootGravityGun()
 {
 	isGravityGunPicking = false;
 
-	Sound.playFromFileName("gravitygun/fire.ogg");
+	Sound.playFromPath("gravitygun/fire.ogg");
 
 	if(ggIsBlock)
 	{
-		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+		var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 		Entity.setVelX(ggEntity, dir.x * 1.5);
 		Entity.setVelY(ggEntity, dir.y * 1.5);
 		Entity.setVelZ(ggEntity, dir.z * 1.5);
@@ -3874,7 +3860,7 @@ function shootGravityGun()
 		ggShotBlocksToBePlaced.push(new DroppedItemClass(ggEntity, ggBlockId, ggBlockData));
 	} else
 	{
-		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+		var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 		Entity.setVelX(ggEntity, dir.x * 3.3);
 		Entity.setVelY(ggEntity, dir.y * 3.3);
 		Entity.setVelZ(ggEntity, dir.z * 3.3);
@@ -3899,14 +3885,14 @@ function dropGravityGun()
 {
 	if(ggIsBlock)
 	{
-		var dir = getDirection(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
+		var dir = DesnoUtils.getVector(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity()));
 		var x = Player.getX() + (dir.x * 2);
 		var y = Player.getY() + (dir.y * 2.5);
 		var z = Player.getZ() + (dir.z * 2);
 		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
 		{
 			isGravityGunPicking = false;
-			Sound.playFromFileName("gravitygun/drop.ogg");
+			Sound.playFromPath("gravitygun/drop.ogg");
 			updateEnabledGravityGunButtons();
 
 			Level.setTileNotInAir(x, y, z, ggBlockId, ggBlockData);
@@ -3914,13 +3900,13 @@ function dropGravityGun()
 			ggEntity = null;
 		} else
 		{
-			Sound.playFromFileName("gravitygun/fail.ogg");
+			Sound.playFromPath("gravitygun/fail.ogg");
 			ModPE.showTipMessage("There is another block in this position.");
 		}
 	} else
 	{
 		isGravityGunPicking = false;
-		Sound.playFromFileName("gravitygun/drop.ogg");
+		Sound.playFromPath("gravitygun/drop.ogg");
 		updateEnabledGravityGunButtons();
 		ggEntity = null;
 	}
@@ -3982,7 +3968,7 @@ function pickWithGravityGun()
 		updateEnabledGravityGunButtons();
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.damageCarriedItem();
-		Sound.playFromFileName("gravitygun/pickup.ogg");
+		Sound.playFromPath("gravitygun/pickup.ogg");
 	}
 }
 
@@ -4009,7 +3995,7 @@ function removeGravityGunUI()
 function makeLongFallBootsSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
+	Sound.playFromPath("long_fall_boots/futureshoes" + random + ".mp3");
 }
 //########## LONG FALl BOOTS functions - END ##########
 
@@ -4108,7 +4094,7 @@ function loadCustomMobs()
 									var propertyValue;
 									var propertyValueString = String(properties.getProperty("mob_" + i + "_" + propertyName, "null"));
 									if(propertyType == "bool")
-										propertyValue = stringToBoolean(propertyValueString);
+										propertyValue = Convert.stringToBoolean(propertyValueString);
 									if(propertyType == "int")
 										propertyValue = parseInt(propertyValueString);
 									if(propertyType == "float")
@@ -4348,7 +4334,7 @@ function TurretClass(turret)
 	turretObject.shoot = function(victim)
 	{
 		var shotYaw = Math.atan2((Entity.getZ(this.entity) - Entity.getZ(victim)), (Entity.getX(this.entity) - Entity.getX(victim)));
-		var turretShot = getDirection((java.lang.Math.toDegrees(shotYaw) - 90), 0);
+		var turretShot = DesnoUtils.getVector((java.lang.Math.toDegrees(shotYaw) - 90), 0);
 		Level.playSoundEnt(this.entity, "random.bow", 1000, 0);
 
 		if(Level.getGameMode() == GameMode.SURVIVAL)
@@ -4724,7 +4710,7 @@ function getFileNameFromDiscId(discId)
 function makeBounceSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
+	Sound.playFromPath("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
 }
 //########## BLUE GEL functions - END ##########
 
@@ -4733,9 +4719,9 @@ function makeBounceSound()
 function makeJumperJump(angle)
 {
 	var random = Math.floor((Math.random() * 3) + 4);
-	Sound.playFromFileName("jumper/alyx_gun_fire" + random + ".mp3");
+	Sound.playFromPath("jumper/alyx_gun_fire" + random + ".mp3");
 
-	var jumperDir = getDirection(angle, 0);
+	var jumperDir = DesnoUtils.getVector(angle, 0);
 	Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
 	Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
 	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
@@ -4801,8 +4787,8 @@ function loadMapOptions()
 					var properties = new java.util.Properties();
 					properties.load(streamReader);
 
-					indestructibleBlocks = stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
-					alwaysFullHungerBar = stringToBoolean(properties.getProperty("full_hunger_bar", "0"));
+					indestructibleBlocks = Convert.stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
+					alwaysFullHungerBar = Convert.stringToBoolean(properties.getProperty("full_hunger_bar", "0"));
 					pickBlocksBlacklist = stringToIntArray(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID));
 
 					// close streams
@@ -4820,136 +4806,11 @@ function loadMapOptions()
 
 
 //########## SOUND functions ##########
-var sound1;
-var sound2;
-var sound3;
-
-var Sound = {
-
-	playFromFileName: function(fileName, x, y, z)
-	{
-		var volume = 1.0;
-
-		// change volume based on distance from source
-		if(!(x == null || y == null || z == null))
-		{
-			var distance = Math.sqrt( Math.pow(x - Player.getX(), 2) + Math.pow(y - Player.getY(), 2) + Math.pow(z - Player.getZ(), 2) );
-			if(distance > MAX_LOGARITHMIC_VOLUME)
-				volume = 0.0;
-			else
-			{
-				volume = 1 - (Math.log(distance) / Math.log(MAX_LOGARITHMIC_VOLUME));
-			}
-		}
-
-		// apply general volume
-		volume = volume * generalVolume;
-
-		// play sound
-		try
-		{
-			if(sound1 == null)
-			{
-				if(DEBUG)
-					clientMessage("sound 1");
-
-				if(sound1 == null)
-					sound1 = new android.media.MediaPlayer();
-				sound1.reset();
-				sound1.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
-				sound1.setVolume(volume, volume);
-				sound1.prepare();
-				sound1.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
-				{
-					onCompletion: function(mp)
-					{
-						if(DEBUG)
-							clientMessage("sound 1 finish");
-						sound1.release();
-						sound1 = null;
-					}
-				});
-				sound1.start();
-				return 1; // END
-			}
-			if(sound2 == null)
-			{
-				if(DEBUG)
-					clientMessage("sound 2");
-
-				if(sound2 == null)
-					sound2 = new android.media.MediaPlayer();
-				sound2.reset();
-				sound2.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
-				sound2.setVolume(volume, volume);
-				sound2.prepare();
-				sound2.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
-				{
-					onCompletion: function(mp)
-					{
-						if(DEBUG)
-							clientMessage("sound 2 finish");
-						sound2.release();
-						sound2 = null;
-					}
-				});
-				sound2.start();
-				return 2; // END
-			}
-			if(sound3 == null)
-			{
-				if(DEBUG)
-					clientMessage("sound 3");
-
-				if(sound3 == null)
-					sound3 = new android.media.MediaPlayer();
-				sound3.reset();
-				sound3.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
-				sound3.setVolume(volume, volume);
-				sound3.prepare();
-				sound3.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
-				{
-					onCompletion: function(mp)
-					{
-						if(DEBUG)
-							clientMessage("sound 3 finish");
-						sound3.release();
-						sound3 = null;
-					}
-				});
-				sound3.start();
-				return 3; // END
-			} else
-			{
-				if(DEBUG)
-					clientMessage("sound 1 all");
-
-				if(sound1 == null)
-					sound1 = new android.media.MediaPlayer();
-				sound1.reset();
-				sound1.setDataSource(sdcard + "/games/com.mojang/portal-sounds/" + fileName);
-				sound1.setVolume(volume, volume);
-				sound1.prepare();
-				sound1.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
-				{
-					onCompletion: function(mp)
-					{
-						if(DEBUG)
-							clientMessage("sound 1 all finish");
-						sound1.release();
-						sound1 = null;
-					}
-				});
-				sound1.start();
-				return 1; // END
-			}
-		} catch(err)
-		{
-			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-			ModPE.log(getLogText() + "Error in playSoundFromFile: " + err);
-		}
-	}
-};
+function playSoundFromFileName(fileName, x, y, z, volumeMultiplier)
+{
+	//
+	Sound.playFromPath(sdcard + "/games/com.mojang/portal-sounds/" + fileName, x, y, z, volumeMultiplier);
+}
 //########## SOUND functions - END ##########
 
 //########## INFO ITEM functions ##########
@@ -4973,7 +4834,7 @@ function displayInfoItemUI()
 
 				popupSettingsImage = new android.widget.PopupWindow(settingsImage, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 				popupSettingsImage.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-				popupSettingsImage.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.CENTER, convertDpToPixel(4), 0);
+				popupSettingsImage.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.CENTER, Convert.convertDpToPixels(4), 0);
 
 
 
@@ -4990,12 +4851,12 @@ function displayInfoItemUI()
 				tipText.setLinkTextColor(android.graphics.Color.parseColor("#FFFBFF97"));
 				tipText.setGravity(android.view.Gravity.LEFT);
 				tipText.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
-				tipText.setPadding(convertDpToPixel(4), convertDpToPixel(4), convertDpToPixel(4), convertDpToPixel(4));
+				tipText.setPadding(Convert.convertDpToPixels(4), Convert.convertDpToPixels(4), Convert.convertDpToPixels(4), Convert.convertDpToPixels(4));
 				tipText.setLayoutParams(new android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 
 				popupTip = new android.widget.PopupWindow(tipText, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 				popupTip.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-				popupTip.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, 0, -64 * deviceDensity);
+				popupTip.showAtLocation(currentActivity.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, 0, -64 * Screen.getDensity());
 			} catch(err)
 			{
 				clientMessage("Error: " + err);
@@ -5108,45 +4969,6 @@ function removeInfoItemUI()
 	}));
 }
 //########## INFO ITEM functions - END ##########
-
-
-//########## PLAYER functions ##########
-Player.damageCarriedItem = function()
-{
-	var maxDamage;
-	if(Player.getCarriedItem() == GRAVITY_GUN_ID)
-		maxDamage = GRAVITY_GUN_MAX_DAMAGE;
-	if(Player.getCarriedItem() == PORTAL_GUN_ORANGE_ID || Player.getCarriedItem() == PORTAL_GUN_BLUE_ID)
-		maxDamage = PORTAL_GUN_DAMAGE;
-	if(Player.getCarriedItem() == PORTAL_GUN_GOLD_ID)
-		maxDamage = PORTAL_GUN_GOLD_DAMAGE;
-	if(Player.getCarriedItem() == PORTAL_GUN_IRON_ID)
-		maxDamage = PORTAL_GUN_IRON_DAMAGE;
-	if(Player.getCarriedItem() == PORTAL_GUN_LAVA_ID)
-		maxDamage = PORTAL_GUN_LAVA_DAMAGE;
-	if(Player.getCarriedItem() == PORTAL_GUN_WOOD_AND_STONE_ID)
-		maxDamage = PORTAL_GUN_WOOD_AND_STONE_DAMAGE;
-
-	if(Player.getCarriedItemData() < maxDamage)
-		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount(), Player.getCarriedItemData() + 1);
-	else
-	{
-		Level.playSoundEnt(Player.getEntity(), "random.break", 100, 0);
-		/*if(Player.getCarriedItemCount() == 1)
-			Player.clearInventorySlot(Player.getSelectedSlotId()); // crashes in 0.12.1
-		else*/
-		Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
-	}
-}
-
-Player.decreaseByOneCarriedItem = function()
-{
-	/*if(Player.getCarriedItemCount() == 1)
-		Player.clearInventorySlot(Player.getSelectedSlotId()); // crashes on 0.12.1
-	else*/
-	Entity.setCarriedItem(Player.getEntity(), Player.getCarriedItem(), Player.getCarriedItemCount() - 1, 0);
-}
-//########## PLAYER functions - END ##########
 
 
 //########## LEVEL functions ##########
@@ -5271,7 +5093,7 @@ function vector3d(x, y, z)
 	this.z = z;
 }
 
-function getDirection(yaw, pitch)
+function DesnoUtils.getVector(yaw, pitch)
 {
 	var direction = new vector3d(0, 0, 0);
 	direction.y = -Math.sin(java.lang.Math.toRadians(pitch));
@@ -5285,133 +5107,53 @@ function getDirection(yaw, pitch)
 //########## IMAGE functions ##########
 function createImages()
 {
-	var bluePortalDecoded = decodeImageFromBase64(bluePortalImage);
-	bluePortalScaled = scaleImageToDensity(bluePortalDecoded, true);
+	var bluePortalDecoded = Image.decodeBitmapFromBase64(bluePortalImage);
+	bluePortalScaled = Image.scaleBitmapToScreenDensity(bluePortalDecoded, true);
 	bluePortalImage = null;
 
-	var orangePortalDecoded = decodeImageFromBase64(orangePortalImage);
-	orangePortalScaled = scaleImageToDensity(orangePortalDecoded, true);
+	var orangePortalDecoded = Image.decodeBitmapFromBase64(orangePortalImage);
+	orangePortalScaled = Image.scaleBitmapToScreenDensity(orangePortalDecoded, true);
 	orangePortalImage = null;
 
-	var overlayDecoded = decodeImageFromBase64(overlayFull);
-	overlayFullScaled = scaleImageToDensity(overlayDecoded);
+	var overlayDecoded = Image.decodeBitmapFromBase64(overlayFull);
+	overlayFullScaled = Image.scaleBitmapToScreenDensity(overlayDecoded);
 	overlayFull = null;
 
-	var overlayBlueDecoded = decodeImageFromBase64(overlayBlue);
-	overlayBlueScaled = scaleImageToDensity(overlayBlueDecoded);
+	var overlayBlueDecoded = Image.decodeBitmapFromBase64(overlayBlue);
+	overlayBlueScaled = Image.scaleBitmapToScreenDensity(overlayBlueDecoded);
 	overlayBlue = null;
 
-	var overlayOrangeDecoded = decodeImageFromBase64(overlayOrange);
-	overlayOrangeScaled = scaleImageToDensity(overlayOrangeDecoded);
+	var overlayOrangeDecoded = Image.decodeBitmapFromBase64(overlayOrange);
+	overlayOrangeScaled = Image.scaleBitmapToScreenDensity(overlayOrangeDecoded);
 	overlayOrange = null;
 
-	var overlayBlankDecoded = decodeImageFromBase64(overlayBlank);
-	overlayBlankScaled = scaleImageToDensity(overlayBlankDecoded);
+	var overlayBlankDecoded = Image.decodeBitmapFromBase64(overlayBlank);
+	overlayBlankScaled = Image.scaleBitmapToScreenDensity(overlayBlankDecoded);
 	overlayBlank = null;
 
 
-	var backgroundDarkDirtDecoded = decodeImageFromBase64(backgroundDarkDirtPng);
-	backgroundDarkDirtScaled = scaleImageToDensity(backgroundDarkDirtDecoded);
+	var backgroundDarkDirtDecoded = Image.decodeBitmapFromBase64(backgroundDarkDirtPng);
+	backgroundDarkDirtScaled = Image.scaleBitmapToScreenDensity(backgroundDarkDirtDecoded);
 	background = new android.graphics.drawable.BitmapDrawable(backgroundDarkDirtScaled);
 	background.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
 	backgroundDarkDirtPng = null;
 
-	var dividerDecoded = decodeImageFromBase64(divider);
-	dividerScaled = scaleImageToSize(dividerDecoded, dividerDecoded.getWidth() * deviceDensity * 0.5, dividerDecoded.getHeight() * deviceDensity * 0.5, true);
+	var dividerDecoded = Image.decodeBitmapFromBase64(divider);
+	dividerScaled = Image.scaleBitmapToSize(dividerDecoded, dividerDecoded.getWidth() * Screen.getDensity() * 0.5, dividerDecoded.getHeight() * Screen.getDensity() * 0.5, true);
 	divider = null;
 
-	var settingsPngDecoded = decodeImageFromBase64(settingsPng);
-	settingsPngScaled = scaleImageToSize(settingsPngDecoded, settingsPngDecoded.getWidth() * deviceDensity * 0.3, settingsPngDecoded.getHeight() * deviceDensity * 0.3, true);
+	var settingsPngDecoded = Image.decodeBitmapFromBase64(settingsPng);
+	settingsPngScaled = Image.scaleBitmapToSize(settingsPngDecoded, settingsPngDecoded.getWidth() * Screen.getDensity() * 0.3, settingsPngDecoded.getHeight() * Screen.getDensity() * 0.3, true);
 	settingsPng = null;
 
-	var playStorePngDecoded = decodeImageFromBase64(playStorePng);
-	playStorePngScaled = scaleImageToSize(playStorePngDecoded, playStorePngDecoded.getWidth() * (deviceDensity / 3), playStorePngDecoded.getHeight() * (deviceDensity / 3), true);
+	var playStorePngDecoded = Image.decodeBitmapFromBase64(playStorePng);
+	playStorePngScaled = Image.scaleBitmapToSize(playStorePngDecoded, playStorePngDecoded.getWidth() * (Screen.getDensity() / 3), playStorePngDecoded.getHeight() * (Screen.getDensity() / 3), true);
 	playStorePng = null;
-}
-
-function decodeImageFromBase64(base64String)
-{
-	if(base64String != null)
-	{
-		var byteArray = android.util.Base64.decode(base64String, 0);
-		return android.graphics.BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-	}else
-	{
-		throw getLogText() + "decodeImageFromBase64 has found a null string.";
-	}
-}
-
-function scaleImageToDensity(image, filter)
-{
-	if(filter == null)
-		filter = false;
-	return scaleImageToSize(image, Math.round(image.getWidth() * deviceDensity), Math.round(image.getHeight() * deviceDensity), filter);
-}
-
-function scaleImageToSize(image, width, height, filter)
-{
-	if(filter == null)
-		filter = false;
-	return android.graphics.Bitmap.createScaledBitmap(image, Math.round(width), Math.round(height), filter);
 }
 //########## IMAGE functions - END ##########
 
 
-//########## FILE functions ##########
-function deleteFile(path)
-{
-	var file = new java.io.File(path);
-
-	if(file.isDirectory())
-	{
-		var directoryFiles = file.listFiles();
-		for(var i in directoryFiles)
-		{
-			deleteFile(directoryFiles[i].getAbsolutePath());
-		}
-		file.delete();
-	}
-
-	if(file.isFile())
-		file.delete();
-}
-
-function doesFileExist(path)
-{
-	var file = new java.io.File(path);
-	return file.exists();
-}
-
-function isFileEmpty(path)
-{
-	var file = new java.io.File(path);
-	if(file.length() > 0)
-		return false;
-	else
-		return true;
-}
-
-function writeFileFromByteArray(byteArray, path)
-{
-	var file = new java.io.File(path);
-	if(file.exists())
-		file.delete();
-	file.createNewFile();
-	var stream = new java.io.FileOutputStream(file);
-	stream.write(byteArray);
-	stream.close();
-	byteArray = null;
-}
-//########## FILE functions - END ##########
-
-
 //########## UTILS OF UIs functions ##########
-function convertDpToPixel(dp)
-{
-	//
-	return Math.round(dp * deviceDensity);
-}
-
 function basicMinecraftTextView(text, textSize) // TextView with just the Minecraft font
 {
 	var textview = new android.widget.TextView(currentActivity);
@@ -5425,12 +5167,12 @@ function basicMinecraftTextView(text, textSize) // TextView with just the Minecr
 
 function defaultColoredMinecraftButton(text, colorString)
 {
-	var padding = convertDpToPixel(4);
+	var padding = Convert.convertDpToPixels(4);
 
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setColor(android.graphics.Color.TRANSPARENT);
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-	bg.setStroke(convertDpToPixel(1), android.graphics.Color.parseColor(colorString));
+	bg.setStroke(Convert.convertDpToPixels(1), android.graphics.Color.parseColor(colorString));
 
 	var coloredButton = basicMinecraftTextView(text, buttonsSize);
 	coloredButton.setGravity(android.view.Gravity.CENTER);
@@ -5449,26 +5191,6 @@ function getLogText()
 {
 	//
 	return("Portal Mod: ");
-}
-
-function stringToBoolean(string)
-{
-	if(typeof string != "string")
-		string = String(string);
-	switch(string.toLowerCase())
-	{
-		case "true":
-		case "yes":
-		case "1":
-			return true;
-		case "false":
-		case "no":
-		case "0":
-		case null:
-			return false;
-		default:
-			return Boolean(string);
-	}
 }
 
 function stringToArray(string)
@@ -5518,7 +5240,7 @@ function getSavedBoolean(name, defaultValue, debug)
 			if(typeof savedDataTest == "string")
 			{
 				clientMessage(name + " is string");
-				debugTest = stringToBoolean(savedDataTest);
+				debugTest = Convert.stringToBoolean(savedDataTest);
 			} else
 			{
 				clientMessage(name + " is " + typeof savedDataTest);
@@ -5549,14 +5271,14 @@ function getSavedBoolean(name, defaultValue, debug)
 		{
 			if(savedDataTest != "" && savedDataTest != null && savedDataTest != undefined)
 			{
-				return stringToBoolean(savedDataTest);
+				return Convert.stringToBoolean(savedDataTest);
 			} else
 			{
 				// this setting has never been saved.
 				if(typeof defaultValue == "boolean")
 					return defaultValue;
 				else
-					return stringToBoolean(defaultValue)
+					return Convert.stringToBoolean(defaultValue)
 			}
 		} else
 		{
@@ -5630,14 +5352,6 @@ function PortalClass(x1, y1, z1, x2, y2, z2, type)
 const MARGIN_HORIZONTAL_BIG = 16;
 const MARGIN_HORIZONTAL_SMALL = 4;
 
-function setMarginsLinearLayout(view, left, top, right, bottom)
-{
-	var originalParams = view.getLayoutParams();
-	var newParams = new android.widget.LinearLayout.LayoutParams(originalParams);
-	newParams.setMargins(convertDpToPixel(left), convertDpToPixel(top), convertDpToPixel(right), convertDpToPixel(bottom));
-	view.setLayoutParams(newParams);
-}
-
 function dividerText()
 {
 	var dividerText = new android.widget.TextView(currentActivity);
@@ -5663,12 +5377,12 @@ function defaultContentTextView(text) // TextView for contents (basicMinecraftTe
 
 function defaultSubTitle(subtitle) // TextView with Minecraft background
 {
-	var padding = convertDpToPixel(8);
+	var padding = Convert.convertDpToPixels(8);
 
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setColor(android.graphics.Color.parseColor("#FF736A6F"));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-	bg.setStroke(convertDpToPixel(2), android.graphics.Color.parseColor("#FF93898B"));
+	bg.setStroke(Convert.convertDpToPixels(2), android.graphics.Color.parseColor("#FF93898B"));
 
 	var title = basicMinecraftTextView(subtitle, 16);
 	title.setTextColor(android.graphics.Color.WHITE);
@@ -5682,7 +5396,7 @@ function defaultLayout(title)
 {
 	var layout = new android.widget.LinearLayout(currentActivity);
 	layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-	var padding = convertDpToPixel(8);
+	var padding = Convert.convertDpToPixels(8);
 	layout.setPadding(padding, padding, padding, padding);
 	layout.setBackgroundDrawable(background);
 
@@ -5690,13 +5404,13 @@ function defaultLayout(title)
 	titleTextView.setTextColor(android.graphics.Color.WHITE);
 	titleTextView.setGravity(android.view.Gravity.CENTER);
 	layout.addView(titleTextView);
-	setMarginsLinearLayout(titleTextView, 0, 4, 0, 4);
+	Ui.setMarginsToViewInLinearLayout(titleTextView, 0, 4, 0, 4);
 
 	var divider = new android.view.View(currentActivity);
 	divider.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#958681")));
-	divider.setLayoutParams(new android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.FILL_PARENT, convertDpToPixel(1)));
+	divider.setLayoutParams(new android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.FILL_PARENT, Convert.convertDpToPixels(1)));
 	layout.addView(divider);
-	setMarginsLinearLayout(divider, 0, 8, 0, 8);
+	Ui.setMarginsToViewInLinearLayout(divider, 0, 8, 0, 8);
 
 	return layout;
 }
@@ -5711,22 +5425,6 @@ function defaultPopup(layout)
 	popup.setContentView(scroll);
 
 	return popup;
-}
-
-function showImmersivePopup(popup)
-{
-	//Set the dialog to not focusable (makes navigation ignore us adding the window)
-	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-	popup.getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-
-	//Show the dialog!
-	popup.show();
-
-	//Set the dialog to immersive
-	popup.getWindow().getDecorView().setSystemUiVisibility(currentActivity.getWindow().getDecorView().getSystemUiVisibility());
-
-	//Clear the not focusable flag from the window
-	popup.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 }
 
 
@@ -5746,7 +5444,7 @@ function infoPortalMod()
 
 				var text = defaultContentTextView("Welcome to the Portal 2 Mod by Desno365!");
 				layout.addView(text);
-				setMarginsLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 				var informationButton = MinecraftButton();
 				informationButton.setText("Information");
@@ -5759,7 +5457,7 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(informationButton);
-				setMarginsLinearLayout(informationButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(informationButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var settingsButton = MinecraftButton();
 				settingsButton.setText("Settings");
@@ -5772,7 +5470,7 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(settingsButton);
-				setMarginsLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				layout.addView(portalDivider());
@@ -5795,7 +5493,7 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(updatesButton);
-				setMarginsLinearLayout(updatesButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(updatesButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var modThreadButton = MinecraftButton();
 				modThreadButton.setText("Visit the mod thread");
@@ -5808,7 +5506,7 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(modThreadButton);
-				setMarginsLinearLayout(modThreadButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(modThreadButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var supportButton = MinecraftButton();
 				supportButton.setText("Support the developer");
@@ -5821,7 +5519,7 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(supportButton);
-				setMarginsLinearLayout(supportButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(supportButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				layout.addView(portalDivider());
@@ -5837,11 +5535,11 @@ function infoPortalMod()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -5912,7 +5610,7 @@ function informationUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -5924,11 +5622,11 @@ function informationUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -5959,7 +5657,7 @@ function settingsUI()
 					}
 				});
 				layout.addView(settingsButton);
-				setMarginsLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(settingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var mapMakersSettingsButton = MinecraftButton();
 				mapMakersSettingsButton.setText("Map-makers settings");
@@ -5972,7 +5670,7 @@ function settingsUI()
 					}
 				});
 				layout.addView(mapMakersSettingsButton);
-				setMarginsLinearLayout(mapMakersSettingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(mapMakersSettingsButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				layout.addView(portalDivider());
@@ -5989,7 +5687,7 @@ function settingsUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 				
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6001,11 +5699,11 @@ function settingsUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6026,7 +5724,7 @@ function settingsGeneralUI()
 				var layout;
 				layout = defaultLayout("General settings");
 
-				var padding = convertDpToPixel(8);
+				var padding = Convert.convertDpToPixels(8);
 
 
 				var title = defaultSubTitle("Buttons");
@@ -6108,7 +5806,7 @@ function settingsGeneralUI()
 				moveButtonsText.setPadding(padding, 0, padding, 0);
 				layout.addView(moveButtonsText);
 
-				var maxY = (displayHeight / 4 * 3);
+				var maxY = (Screen.getHeight() / 4 * 3);
 				if(maxY % 2 != 0)
 					maxY--;
 				var moveButtonsChooser = new android.widget.SeekBar(currentActivity);
@@ -6251,7 +5949,7 @@ function settingsGeneralUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6263,11 +5961,11 @@ function settingsGeneralUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6288,12 +5986,12 @@ function settingsMapMakersUI()
 				var layout;
 				layout = defaultLayout("Map-makers settings");
 
-				var padding = convertDpToPixel(8);
+				var padding = Convert.convertDpToPixels(8);
 
 
 				var text = defaultContentTextView("Every option you change here is saved in the folder of the map you're playing.<br>You can share this map online and everyone will get the options you've selected.");
 				layout.addView(text);
-				setMarginsLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 
 				var title = defaultSubTitle("World interactions");
@@ -6377,7 +6075,7 @@ function settingsMapMakersUI()
 					}
 				});
 				layout.addView(apertureLabEquipmentButton);
-				setMarginsLinearLayout(apertureLabEquipmentButton, MARGIN_HORIZONTAL_BIG, 0, MARGIN_HORIZONTAL_BIG, 0);
+				Ui.setMarginsToViewInLinearLayout(apertureLabEquipmentButton, MARGIN_HORIZONTAL_BIG, 0, MARGIN_HORIZONTAL_BIG, 0);
 
 				layout.addView(dividerText());
 
@@ -6436,7 +6134,7 @@ function settingsMapMakersUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6448,11 +6146,11 @@ function settingsMapMakersUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6476,7 +6174,7 @@ function latestVersionUI()
 				var updatesText = defaultContentTextView("You have the latest version of the mod.<br><br>" +
 					"Download the Desno365's Mods app to receive notifications of new updates and get the latest news about my mods.");
 				layout.addView(updatesText);
-				setMarginsLinearLayout(updatesText, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(updatesText, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 				var playStoreView = new android.widget.ImageView(currentActivity);
 				playStoreView.setImageBitmap(playStorePngScaled);
@@ -6496,7 +6194,7 @@ function latestVersionUI()
 					}
 				}));
 				layout.addView(playStoreView);
-				setMarginsLinearLayout(playStoreView, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(playStoreView, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 
 
@@ -6511,7 +6209,7 @@ function latestVersionUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6523,11 +6221,11 @@ function latestVersionUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6551,7 +6249,7 @@ function updateAvailableUI()
 				var updatesText = defaultContentTextView("New version available, you have the " + CURRENT_VERSION + " version and the latest version is " + latestVersion + ".<br>" +
 					"You can find a download link on Desno365's website (press the button to visit it).");
 				layout.addView(updatesText);
-				setMarginsLinearLayout(updatesText, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(updatesText, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var threadButton = MinecraftButton();
 				threadButton.setText("Visit website");
@@ -6567,7 +6265,7 @@ function updateAvailableUI()
 					}
 				});
 				layout.addView(threadButton);
-				setMarginsLinearLayout(threadButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(threadButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6579,12 +6277,12 @@ function updateAvailableUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
 				popup.setCanceledOnTouchOutside(false);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6627,7 +6325,7 @@ function supportUI()
 
 				var text = defaultContentTextView("This mod was brought to you with love by Desno365 :)<br>Thank you for playing with it.");
 				layout.addView(text);
-				setMarginsLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var button1 = MinecraftButton();
 				button1.setText("Follow me on Twitter");
@@ -6643,7 +6341,7 @@ function supportUI()
 					}
 				});
 				layout.addView(button1);
-				setMarginsLinearLayout(button1, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(button1, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var button2 = MinecraftButton();
 				button2.setText("Subscribe to my YouTube channel");
@@ -6659,7 +6357,7 @@ function supportUI()
 					}
 				});
 				layout.addView(button2);
-				setMarginsLinearLayout(button2, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+				Ui.setMarginsToViewInLinearLayout(button2, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
 
 
 				var backButton = MinecraftButton();
@@ -6673,7 +6371,7 @@ function supportUI()
 					}
 				});
 				layout.addView(backButton);
-				setMarginsLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(backButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				var exitButton = MinecraftButton();
 				exitButton.setText("Close");
@@ -6685,11 +6383,11 @@ function supportUI()
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6711,7 +6409,7 @@ function turretOptionsUI(i)
 				var layout;
 				layout = defaultLayout("Turret options");
 
-				var padding = convertDpToPixel(8);
+				var padding = Convert.convertDpToPixels(8);
 
 
 
@@ -6779,7 +6477,7 @@ function turretOptionsUI(i)
 					}
 				});
 				layout.addView(removeButton);
-				setMarginsLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				layout.addView(dividerText());
 
@@ -6795,11 +6493,11 @@ function turretOptionsUI(i)
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6820,7 +6518,7 @@ function turretDefectiveOptionsUI(i)
 				var layout;
 				layout = defaultLayout("Turret options");
 
-				var padding = convertDpToPixel(8);
+				var padding = Convert.convertDpToPixels(8);
 
 
 
@@ -6885,7 +6583,7 @@ function turretDefectiveOptionsUI(i)
 					}
 				});
 				layout.addView(removeButton);
-				setMarginsLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(removeButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 				layout.addView(dividerText());
 
@@ -6901,11 +6599,11 @@ function turretDefectiveOptionsUI(i)
 					}
 				});
 				layout.addView(exitButton);
-				setMarginsLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+				Ui.setMarginsToViewInLinearLayout(exitButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
 				var popup = defaultPopup(layout);
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -6926,7 +6624,7 @@ function pleaseInstallTextureUI()
 			try
 			{
 				var layout = new android.widget.LinearLayout(currentActivity);
-				var padding = convertDpToPixel(8);
+				var padding = Convert.convertDpToPixels(8);
 				layout.setPadding(padding, padding, padding, padding);
 				layout.setOrientation(android.widget.LinearLayout.VERTICAL);
 
@@ -6957,7 +6655,7 @@ function pleaseInstallTextureUI()
 				layout.addView(exitButton);
 
 
-				showImmersivePopup(popup);
+				Popup.showImmersivePopup(popup);
 
 			} catch(err)
 			{
@@ -7736,7 +7434,7 @@ var SoundsInstaller = {
 
 	needsInstallation: function()
 	{
-		if(doesFileExist(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName))
+		if(File.doesFileExist(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName))
 		{
 			var versionOfSounds = SoundsInstaller.getInstalledVersion();
 			ModPE.log(getLogText() + "needsInstallation(): version file found, version: " + versionOfSounds);
@@ -7810,14 +7508,14 @@ var SoundsInstaller = {
 			if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
 			{
 				// file is inside the general sound folder
-				if(!doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
+				if(!File.doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
 				{
 					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
 						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
 				} else
 				{
 					// file exists, maybe is empty?
-					if(isFileEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
+					if(File.isEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
 					{
 						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
 							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
@@ -7826,14 +7524,14 @@ var SoundsInstaller = {
 			} else
 			{
 				// file is inside another folder
-				if(!doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+				if(!File.doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
 				{
 					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
 						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
 				} else
 				{
 					// file exists, maybe is empty?
-					if(isFileEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+					if(File.isEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
 					{
 						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
 							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
@@ -7858,7 +7556,7 @@ var SoundsInstaller = {
 
 					var layout = new android.widget.LinearLayout(currentActivity);
 					layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-					var padding = convertDpToPixel(8);
+					var padding = Convert.convertDpToPixels(8);
 					layout.setPadding(padding, padding, padding, padding);
 
 					var scroll = new android.widget.ScrollView(currentActivity);
@@ -7943,7 +7641,7 @@ var SoundsInstaller = {
 				var githubUrl = "https://raw.githubusercontent.com/DesnoSoftware/Portal-Mod-sounds-installer/master/version" + SoundsInstaller.sounds.version + "/portal-sounds/";
 				var tmpPath = sdcard + "/games/com.mojang/portal-sounds/";
 
-				deleteFile(tmpPath); //delete previous files if present
+				File.delete(tmpPath); //delete previous files if present
 
 				// creates directories
 				new java.io.File(tmpPath).mkdirs();
@@ -7975,12 +7673,12 @@ var SoundsInstaller = {
 					if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
 					{
 						// file is inside the general sound folder
-						//writeFileFromByteArray(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
+						//File.writeByteArrayToFile(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
 						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
 					} else
 					{
 						// file is inside another folder
-						//writeFileFromByteArray(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
+						//File.writeByteArrayToFile(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
 						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
 					}
 				}
@@ -8103,393 +7801,6 @@ new java.lang.Thread(new java.lang.Runnable()
 		try
 		{
 			createImages();
-		} catch(e)
-		{
-			print("Error " + e);
-		}
-	}
-}).start();
-
-
-//########################################################################################################################################################
-// MINECRAFT BUTTON LIBRARY
-//########################################################################################################################################################
-
-// Library version: 1.2.4
-// Made by Dennis Motta, also known as Desno365
-// https://github.com/Desno365/Minecraft-Button-Library
-
-/*
-	The MIT License (MIT)
-
-	Copyright (c) 2015 Dennis Motta 
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in all
-	copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	SOFTWARE.
-*/
-
-var MinecraftButtonLibrary = {};
-
-// Customization
-// These are the default values of the library, you can change them to make the buttons look how you want to.
-MinecraftButtonLibrary.defaultButtonPadding = 8;
-MinecraftButtonLibrary.defaultButtonTextSize = 16;
-MinecraftButtonLibrary.defaultButtonTextLineSpacing = 4;
-MinecraftButtonLibrary.defaultButtonTextColor = "#FFDDDDDD";
-MinecraftButtonLibrary.defaultButtonTextPressedColor = "#FFFBFF97";
-MinecraftButtonLibrary.defaultButtonTextShadowColor = "#FF292929";
-
-// Variables
-MinecraftButtonLibrary.Resources = {};
-MinecraftButtonLibrary.ProcessedResources = {};
-
-MinecraftButtonLibrary.context = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-MinecraftButtonLibrary.metrics = new android.util.DisplayMetrics();
-MinecraftButtonLibrary.context.getWindowManager().getDefaultDisplay().getMetrics(MinecraftButtonLibrary.metrics);
-MinecraftButtonLibrary.sdcard = new android.os.Environment.getExternalStorageDirectory();
-MinecraftButtonLibrary.LOG_TAG = "Minecraft Button Library ";
-
-MinecraftButtonLibrary.ProcessedResources.font = null;
-MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable = null;
-MinecraftButtonLibrary.ProcessedResources.mcPressedNineDrawable = null;
-
-//########################################################################################################################################################
-// LIBRARY
-//########################################################################################################################################################
-
-// MinecraftButton(int textSize, bool enableSound, string customTextColor)
-// set an argument null if you want to use the default value
-function MinecraftButton(textSize, enableSound, customTextColor)
-{
-	if(textSize == null)
-		textSize = MinecraftButtonLibrary.defaultButtonTextSize;
-	if(enableSound == null)
-		enableSound = true;
-	if(customTextColor == null)
-		customTextColor = MinecraftButtonLibrary.defaultButtonTextColor;
-
-	var button = new android.widget.Button(MinecraftButtonLibrary.context);
-	button.setTextSize(textSize);
-	button.setOnTouchListener(new android.view.View.OnTouchListener()
-	{
-		onTouch: function(v, motionEvent)
-		{
-			MinecraftButtonLibrary.onTouch(v, motionEvent, enableSound, customTextColor);
-			return false;
-		}
-	});
-	if (android.os.Build.VERSION.SDK_INT >= 14)
-		button.setAllCaps(false);
-	MinecraftButtonLibrary.setButtonBackground(button, MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable);
-	button.setTag(false); // is pressed?
-	button.setSoundEffectsEnabled(false);
-	button.setGravity(android.view.Gravity.CENTER);
-	button.setTextColor(android.graphics.Color.parseColor(customTextColor));
-	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding));
-	MinecraftButtonLibrary.addMinecraftStyleToTextView(button);
-
-	return button;
-}
-
-// ######### BUTTON UTILS functions #########
-MinecraftButtonLibrary.addMinecraftStyleToTextView = function(textview)
-{
-	// works also for subclasses of TextView
-	// you must set the text size before calling this function!
-
-	textview.setTypeface(MinecraftButtonLibrary.ProcessedResources.font);
-	textview.setPaintFlags(textview.getPaintFlags() | android.graphics.Paint.SUBPIXEL_TEXT_FLAG);
-	textview.setLineSpacing(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing), 1);
-	if (android.os.Build.VERSION.SDK_INT >= 19) // KitKat
-		textview.setShadowLayer(1, Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
-	else
-		textview.setShadowLayer(0.0001, Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), Math.round((textview.getLineHeight() - MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonTextLineSpacing)) / 8), android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextShadowColor));
-}
-
-MinecraftButtonLibrary.setButtonBackground = function(button, background)
-{
-	if (android.os.Build.VERSION.SDK_INT >= 16)
-		button.setBackground(background);
-	else
-		button.setBackgroundDrawable(background);
-}
-
-MinecraftButtonLibrary.convertDpToPixel = function(dp)
-{
-	var density = MinecraftButtonLibrary.metrics.density;
-
-	return (dp * density);
-}
-
-MinecraftButtonLibrary.onTouch = function(v, motionEvent, enableSound, customTextColor)
-{
-	var action = motionEvent.getActionMasked();
-	if(action == android.view.MotionEvent.ACTION_DOWN)
-	{
-		// button pressed
-		MinecraftButtonLibrary.changeToPressedState(v);
-	}
-	if(action == android.view.MotionEvent.ACTION_CANCEL || action == android.view.MotionEvent.ACTION_UP)
-	{
-		// button released
-		MinecraftButtonLibrary.changeToNormalState(v, customTextColor);
-		
-		var rect = new android.graphics.Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-		if(rect.contains(v.getLeft() + motionEvent.getX(), v.getTop() + motionEvent.getY())) // detect if the event happens inside the view
-		{
-			// onClick will run soon
-
-			// play sound
-			if(enableSound)
-				Level.playSoundEnt(Player.getEntity(), "random.click", 100, 0);
-		}
-	}
-	if(action == android.view.MotionEvent.ACTION_MOVE)
-	{
-		var rect = new android.graphics.Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-		if(rect.contains(v.getLeft() + motionEvent.getX(), v.getTop() + motionEvent.getY())) // detect if the event happens inside the view
-		{
-			// pointer inside the view
-			if(v.getTag() == false)
-			{
-				// restore pressed state
-				v.setTag(true); // is pressed?
-
-				MinecraftButtonLibrary.changeToPressedState(v);
-			}
-		} else
-		{
-			// pointer outside the view
-			if(v.getTag() == true)
-			{
-				// restore pressed state
-				v.setTag(false); // is pressed?
-
-				MinecraftButtonLibrary.changeToNormalState(v, customTextColor);
-			}
-		}
-	}
-}
-
-MinecraftButtonLibrary.changeToNormalState = function(button, customTextColor)
-{
-	MinecraftButtonLibrary.setButtonBackground(button, MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable);
-	button.setTextColor(android.graphics.Color.parseColor(customTextColor));
-	// reset pressed padding
-	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding));
-}
-
-MinecraftButtonLibrary.changeToPressedState = function(button)
-{
-	MinecraftButtonLibrary.setButtonBackground(button, MinecraftButtonLibrary.ProcessedResources.mcPressedNineDrawable);
-	button.setTextColor(android.graphics.Color.parseColor(MinecraftButtonLibrary.defaultButtonTextPressedColor));
-	// make the effect of a pressed button with padding
-	button.setPadding(MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding) + MinecraftButtonLibrary.convertDpToPixel(2), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding), MinecraftButtonLibrary.convertDpToPixel(MinecraftButtonLibrary.defaultButtonPadding) - MinecraftButtonLibrary.convertDpToPixel(2));
-}
-// ######### END - BUTTON UTILS functions #########
-
-
-// ######### CREATE NINE PATCH functions #########
-MinecraftButtonLibrary.createNinePatchDrawables = function()
-{
-	var mcButtonNormalBitmap = MinecraftButtonLibrary.getMinecraftButtonBitmap();
-	var mcButtonPressedBitmap = MinecraftButtonLibrary.getMinecraftButtonPressedBitmap();
-
-	var mcNormalNinePatch = new android.graphics.NinePatch(mcButtonNormalBitmap, mcButtonNormalBitmap.getNinePatchChunk(), null);
-	var mcPressedNinePatch = new android.graphics.NinePatch(mcButtonPressedBitmap, mcButtonPressedBitmap.getNinePatchChunk(), null);
-
-	// here is used a deprecated method that doesn't deals with density
-	//noinspection deprecation
-	MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable = new android.graphics.drawable.NinePatchDrawable(mcNormalNinePatch);
-	MinecraftButtonLibrary.ProcessedResources.mcNormalNineDrawable.setFilterBitmap(false);
-	//noinspection deprecation
-	MinecraftButtonLibrary.ProcessedResources.mcPressedNineDrawable = new android.graphics.drawable.NinePatchDrawable(mcPressedNinePatch);
-	MinecraftButtonLibrary.ProcessedResources.mcPressedNineDrawable.setFilterBitmap(false);
-}
-
-MinecraftButtonLibrary.getMinecraftButtonBitmap = function()
-{
-	var density = MinecraftButtonLibrary.metrics.density;
-
-	if(density < 1)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", ldpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalLDPI);
-	}
-	if(density >= 1 && density < 1.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", mdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalMDPI);
-	}
-	if(density >= 1.5 && density < 2)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", hdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalHDPI);
-	}
-	if(density >= 2 && density < 2.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", xhdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXHDPI);
-	}
-	if(density >= 2.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", xxhdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXXHDPI);
-	}
-
-	ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Error: " + density + ", xhdpi");
-	return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXHDPI);
-}
-
-MinecraftButtonLibrary.getMinecraftButtonPressedBitmap = function()
-{
-	var density = MinecraftButtonLibrary.metrics.density;
-
-	if(density < 1)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", ldpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedLDPI);
-	}
-	if(density >= 1 && density < 1.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", mdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedMDPI);
-	}
-	if(density >= 1.5 && density < 2)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", hdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedHDPI);
-	}
-	if(density >= 2 && density < 2.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", xhdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXHDPI);
-	}
-	if(density >= 2.5)
-	{
-		ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Density: " + density + ", xxhdpi");
-		return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXXHDPI);
-	}
-
-	ModPE.log(MinecraftButtonLibrary.LOG_TAG + "Error: " + density + ", xhdpi");
-	return MinecraftButtonLibrary.decodeImageFromBase64(MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXHDPI);
-}
-
-MinecraftButtonLibrary.decodeImageFromBase64 = function(base64String)
-{
-	var byteArray = android.util.Base64.decode(base64String, 0);
-	return android.graphics.BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-}
-// ######### END - CREATE NINE PATCH functions #########
-
-
-// ######### CREATE TYPEFACE functions #########
-MinecraftButtonLibrary.createTypeface = function()
-{
-	MinecraftButtonLibrary.writeFileFromByteArray(android.util.Base64.decode(MinecraftButtonLibrary.Resources.base64Font, 0), MinecraftButtonLibrary.sdcard + "/minecraft.ttf");
-	MinecraftButtonLibrary.ProcessedResources.font = android.graphics.Typeface.createFromFile(MinecraftButtonLibrary.sdcard + "/minecraft.ttf");
-	MinecraftButtonLibrary.deleteFile(MinecraftButtonLibrary.sdcard + "/minecraft.ttf");
-}
-
-MinecraftButtonLibrary.writeFileFromByteArray = function(byteArray, path)
-{
-	var file = new java.io.File(path);
-	if(file.exists())
-		file.delete();
-	file.createNewFile();
-	var stream = new java.io.FileOutputStream(file);
-	stream.write(byteArray);
-	stream.close();
-	byteArray = null;
-}
-// ######### END - CREATE TYPEFACE functions #########
-
-
-// ######### UTILS functions #########
-MinecraftButtonLibrary.removeResources = function()
-{
-	MinecraftButtonLibrary.Resources.minecraftButtonStateNormalLDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStateNormalMDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStateNormalHDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXHDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXXHDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStatePressedLDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStatePressedMDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStatePressedHDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXHDPI = null;
-	MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXXHDPI = null;
-
-	MinecraftButtonLibrary.Resources.base64Font = null;
-}
-
-MinecraftButtonLibrary.deleteFile = function(path)
-{
-	var file = new java.io.File(path);
-
-	if(file.isDirectory())
-	{
-		var directoryFiles = file.listFiles();
-		for(var i in directoryFiles)
-		{
-			deleteFile(directoryFiles[i].getAbsolutePath());
-		}
-		file.delete();
-	}
-
-	if(file.isFile())
-		file.delete();
-}
-// ######### END - UTILS functions #########
-
-
-//########################################################################################################################################################
-// RESOURCES IN BASE64
-//########################################################################################################################################################
-
-// backgrounds
-MinecraftButtonLibrary.Resources.minecraftButtonStateNormalLDPI = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAACAAAAAgAAAAMAAAACMAAAAAAAAAEAAAAHAAAAAgAAAAf/vLGr/7yxqwAAAAH/vLGr/5WGgQAAAAH/cmVnAAAAAf8oJyoMgs1WAAAASUlEQVQY02Pcs3H1fwY8gAmf5NYtexhYGBgYGG5evYZVwfZDh/GbwPD/PwEFjIwEFBByJAPDfwaWbVv2MGw7eIiBgRFuLrIdDADq5BFxvezsVAAAAABJRU5ErkJggg==";
-MinecraftButtonLibrary.Resources.minecraftButtonStateNormalMDPI = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAEAAAABAAAAAYAAAAEMAAAAAAAAAIAAAAOAAAABAAAAA7/vLGr/7yxqwAAAAH/vLGr/5WGgQAAAAH/cmVnAAAAAf8oJyqdu2NqAAAAT0lEQVQ4y2Pcs3H1fwYKABMDhYCFXI1bt+yhsgtuXr1Gksbthw4PcBgw/P8/0C5gZKSOCwbeAPLDgIFasbANmqa3HTwEDV2M4MYVDdRxAQBscxGJWBLxyQAAAABJRU5ErkJggg==";
-MinecraftButtonLibrary.Resources.minecraftButtonStateNormalHDPI = "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAGAAAABgAAAAkAAAAGMAAAAAAAAAMAAAAVAAAABgAAABX/vLGr/7yxqwAAAAH/vLGr/5WGgQAAAAH/cmVnAAAAAf8oJyqPt1DfAAAAV0lEQVRIx2Pcs3H1fwYaAiYGGgOaW8BCC0O3btkzXIPo5tVrVDF0+6HDo6mIAPj/fzSICABGxmEURKMWDFAqYhhWGW0bUu2z7eAhpMyCMxcRk9OGURABAH/ZEZn4HdB3AAAAAElFTkSuQmCC";
-MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXHDPI = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAIAAAACAAAAAwAAAAIMAAAAAAAAAQAAAAcAAAACAAAABz/vLGr/7yxqwAAAAH/vLGr/5WGgQAAAAH/cmVnAAAAAf8oJypkuTlTAAAAZUlEQVRYw2Pcs3H1f4YBBEwMAwxGHcBCbwu3btkzGgWDPA3cvHqNphZuP3R4NApGeDnA8P//aBSM9DTAyDgaBaMOGHXASC8HGEbrgsGWBrahtdO3HTyEVnYTLNxJrQxGo2BwOQAAWckRqcYME3kAAAAASUVORK5CYII=";
-MinecraftButtonLibrary.Resources.minecraftButtonStateNormalXXHDPI = "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAMAAAADAAAABIAAAAMMAAAAAAAAAYAAAAqAAAADAAAACr/vLGr/7yxqwAAAAH/vLGr/5WGgQAAAAH/cmVnAAAAAf8oJypAoV45AAAAg0lEQVRo3u3ZwQmAMAyF4UTcfxFPgtZLL9YZFJwmTtCDINQ0/5sgHzxCQzXPk4njDOI8AABEB4xeBl2XTIUAAAi1he7z+tWgWzmoEAAAvIVaxowKAQDAFmoZVSoEAAAAAAAAAIj7FhIuMgAA+txCqfL3lPZSuYxen1JfnWRUCACAHgEPIUcRyZ0dVsEAAAAASUVORK5CYII=";
-MinecraftButtonLibrary.Resources.minecraftButtonStatePressedLDPI = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAACAAAAAgAAAAIAAAADMAAAAAAAAAEAAAAHAAAAAQAAAAb/KCcqAAAAAf9yZWcAAAABAAAAAQAAAAEAAAABAAAAAQAAAAGZYAV4AAAAb0lEQVQY012OQQqDMBRE34Scwp1QsHgHs7CbGnv9UjzNuIjRxuHD/wzzhq/nMBrKIIENAhA5TUQwS0pUiZIFeK8zEVSAQy5Vpxdq3k3HdYbLq2xTRwBht2T9QxJxSRP588I2d9kmPvqO7ftryb+9AxX7IG5YZYu3AAAAAElFTkSuQmCC";
-MinecraftButtonLibrary.Resources.minecraftButtonStatePressedMDPI = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAEAAAABAAAAAQAAAAGMAAAAAAAAAIAAAAOAAAAAgAAAAz/KCcqAAAAAf9yZWcAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEDO+tuAAAAkklEQVQ4y62SwQrCMAyGvwyfwpswcOwd7EEvbu71Zfg08ZIgi10ZtLm0CSn5/r+R4ToqAGwPRCy3gqV+mdMNgI7KOPnIKaVsgw/WUH++7s0IZCsxhP5Myfa184CgVf5cyJvTgiDarUYixV/wQrtfUC1rjiRim1pPMNlOz8vDSPTQQ++rJ+gvZwA+77WseSevJvgCGagihHTV1j0AAAAASUVORK5CYII=";
-MinecraftButtonLibrary.Resources.minecraftButtonStatePressedHDPI = "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAGAAAABgAAAAYAAAAJMAAAAAAAAAMAAAAVAAAAAwAAABL/KCcqAAAAAf9yZWcAAAABAAAAAQAAAAEAAAABAAAAAQAAAAGqizz1AAAAl0lEQVRIx92VwQqAIAyGXfQU3YKg6B3yUJe0Xj+ip1k3+QOHGXhoO+l0Ch/flIZ+ZBMiPjREkIcFSOPE2ymMK1M4il9QIwtnbbIAqbCwZ91mXYgoLoUQ/NQrWavMIiMYQqJHadVUIJK6iAEXZTUaLihrNOY8WyRcBM+7AkQOfh+/L4CLPx+KtQoQdW0TJtdx5tnyIv9/RDcytSKUL7bTXAAAAABJRU5ErkJggg==";
-MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXHDPI = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAAIAAAACAAAAAgAAAAMMAAAAAAAAAQAAAAcAAAABAAAABj/KCcqAAAAAf9yZWcAAAABAAAAAQAAAAEAAAABAAAAAQAAAAHs/TEDAAAAqUlEQVRYw+2WwQqAIAyGXfQU3YKg6B3yUJe0Xj+ip1ln/8AhBnrYbroxhe/frzSNM5sg4ktDBHkogDRueLsE68YUDr1Ai5CdtUkNEDkL9fuxKoLqNEDxMRaCv0aR1E8R1OcDRphrEp0gzTgUQQ0akMydQROU9RZggSKo7y1gzptzSRMEf0pFUF4DDv7p/txAE/zrgdhPEZTXwNB3wcZz3XlznphXBMUv8AJ9bSKkEsE9twAAAABJRU5ErkJggg==";
-MinecraftButtonLibrary.Resources.minecraftButtonStatePressedXXHDPI = "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGG5wT2wAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAADYHRhkAAAAVG5wVGMAAgIJIAAAACgAAAAAAAALAAAACwAAAAsAAAARMAAAAAAAAAYAAAAqAAAABgAAACT/KCcqAAAAAf9yZWcAAAABAAAAAQAAAAEAAAABAAAAAQAAAAGV/cSjAAAAzElEQVRo3u2ZQQrCMBBFM9JTuBMEi3cwC93Y6vVFPM14gfzFQIpMfLNMJk0ffD5/WptPZy/Nii0XM9EvDoh2tbHWS3N9V5IXAAD8O8CkbGWptcsFymw8+Jz744qEAABgUBeyWFQJluvw1OVeJAQAAKNmoRLMMBZOQ31CFRICAID8LhQdpVy4UyzbRCcydQAJAQDAqBOZ+7bZJupOJr5+IyEAAMjuQov497Q+b8Kd/Ccvqu5FQgAAkN2Fjod9c+Pzem+bbTr1IyEAAEheX2f8IsSeFAnbAAAAAElFTkSuQmCC";
-
-// font
-MinecraftButtonLibrary.Resources.base64Font = "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AICAgID/AP8AAgCAgICAgICAAAAAAQAAAgAAgAOAAAMAABkBMxGAAgABgP6AAAAAAAUAAAAAAgADgAADAAcACwAPABMAACE1IRUlNTMVJREzGQE1MxU9ASEVAQABAP6AgP8AgIABAICAgICAgAGA/oABgICAgICAAAUAAAAAAgADgAADAAcACwAPABMAADE1IRU9ATMVNREzEQE1MxUlNSEVAQCAgP8AgP6AAQCAgICAgIABgP6AAYCAgICAgAAAAAUAAAEAAgACgAADAAcACwAPABMAABE1MxUhNTMVJTUhFSU1MxUhNTMVgAEAgP6AAQD+gIABAIABAICAgICAgICAgICAgAAAAAEAAACAAoADAAALAAAlESE1IREzESEVIREBAP8AAQCAAQD/AIABAIABAP8AgP8AAAEAAP+AAIABAAADAAAVETMRgIABgP6AAAEAAAGAAoACAAADAAARNSEVAoABgICAAAEAAAAAAIABAAADAAAxETMRgAEA/wAAAAUAAAAAAoADgAADAAcACwAPABMAADE1MxU1ETMZATUzFTURMxkBNTMVgICAgICAgIABAP8AAQCAgIABAP8AAQCAgAAABQAAAAACgAOAAAMABwAPABcAGwAAMzUhFQE1MxUBETMRMxUjFSERIzUzNTMRATUhFYABgP8AgP6AgICAAYCAgID+AAGAgIABgICA/wACgP6AgIABgICA/YACgICAAAAAAQAAAAACgAOAAAsAADE1IREjNTM1MxEhFQEAgICAAQCAAgCAgP0AgAAAAAAGAAAAAAKAA4AABwALAA8AEwAXABsAADERMxUhNTMRATUzFT0BIRUBNTMVBREzEQE1IRWAAYCA/gCAAQD+AIABgID+AAGAAQCAgP8AAQCAgICAgAEAgICAAQD/AAEAgIAAAAAABwAAAAACgAOAAAMABwALAA8AEwAXABsAADM1IRUlNTMVIREzEQE1IRUBNTMVBREzEQE1IRWAAYD+AIABgID+gAEA/gCAAYCA/gABgICAgICAAQD/AAEAgIABAICAgAEA/wABAICAAAADAAAAAAKAA4AAAwAHABMAABM1MxU9ATMVExEhETMVIREjNSERgICAgP4AgAGAgAEAAgCAgICAgP2AAQABAIABgID8gAAAAAAEAAAAAAKAA4AAAwAHAAsAEwAAMzUhFSU1MxUhETMRAREhFSEVIRWAAYD+AIABgID9gAKA/gABgICAgICAAYD+gAGAAYCAgIAAAAAABQAAAAACgAOAAAMABwAPABMAFwAAMzUhFTURMxEhETMVIRUhGQE1MxU9ASEVgAGAgP2AgAGA/oCAAQCAgIABAP8AAgCAgP8AAgCAgICAgAADAAAAAAKAA4AAAwAHAA8AACERMxkBNTMVNREhFSMRIREBAICA/oCAAoABgP6AAYCAgIABAIABAP6AAAAHAAAAAAKAA4AAAwAHAAsADwATABcAGwAAMzUhFSURMxEhETMRATUhFSURMxEhETMRATUhFYABgP4AgAGAgP4AAYD+AIABgID+AAGAgICAAQD/AAEA/wABAICAgAEA/wABAP8AAQCAgAAAAAAFAAAAAAKAA4AAAwAHAAsAEwAXAAAzNSEVPQEzFQERMxEBNSE1IREzEQE1IRWAAQCA/gCAAYD+gAGAgP4AAYCAgICAgAGAAQD/AP8AgIABAP4AAgCAgAAAAgAAAAAAgAKAAAMABwAAMREzEQMRMxGAgIABAP8AAYABAP8AAAAAAAIAAP+AAIACgAADAAcAABURMxEDETMRgICAgAGA/oACAAEA/wAAAAAHAAAAAAIAA4AAAwAHAAsADwATABcAGwAAITUzFSU1MxUlNTMVJTUzFT0BMxU9ATMVPQEzFQGAgP8AgP8AgP8AgICAgICAgICAgICAgICAgICAgICAgICAAAAAAAIAAACAAoACAAADAAcAAD0BIRUBNSEVAoD9gAKAgICAAQCAgAAAAAAHAAAAAAIAA4AAAwAHAAsADwATABcAGwAAMTUzFT0BMxU9ATMVPQEzFSU1MxUlNTMVJTUzFYCAgID/AID/AID/AICAgICAgICAgICAgICAgICAgICAgAAABgAAAAACgAOAAAMABwALAA8AEwAXAAAhNTMVAzUzFT0BMxUBNTMVBREzEQE1IRUBAICAgID+AIABgID+AAGAgIABAICAgICAAQCAgIABAP8AAQCAgAAAAAQAAAAAAwADgAADAAcADwATAAAzNSEVJREzETcRIREzETMRATUhFYACAP2AgIABAICA/YACAICAgAKA/YCAAYD/AAGA/gACAICAAAACAAAAAAKAA4AACwAPAAAxETMVITUzESMRIRkBNSEVgAGAgID+gAGAAwCAgP0AAgD+AAMAgIAAAAMAAAAAAoADgAADAAcAEwAAJREzEQM1MxUBESEVIRUhFSERIRUCAICAgP2AAgD+gAGA/oABgIABgP6AAgCAgP2AA4CAgID+gIAAAAAFAAAAAAKAA4AAAwAHAAsADwATAAAzNSEVPQEzFSERMxEBNTMVJTUhFYABgID9gIABgID+AAGAgICAgIACgP2AAgCAgICAgAACAAAAAAKAA4AAAwALAAAlETMRBREhFSERIRUCAID9gAIA/oABgIACgP2AgAOAgP2AgAAAAQAAAAACgAOAAAsAADERIRUhFSEVIREhFQKA/gABAP8AAgADgICAgP6AgAABAAAAAAKAA4AACQAAMREhFSEVIRUhEQKA/gABAP8AA4CAgID+AAAABAAAAAACgAOAAAMACQANABEAADM1IRU1ESM1IREhETMZATUhFYABgIABAP2AgAIAgICAAYCA/gACgP2AAoCAgAAAAAABAAAAAAKAA4AACwAAMREzESERMxEjESERgAGAgID+gAOA/wABAPyAAgD+AAAAAAABAAAAAAGAA4AACwAAMTUzESM1IRUjETMVgIABgICAgAKAgID9gIAAAwAAAAACgAOAAAMABwALAAAzNSEVJTUzFSERMxGAAYD+AIABgICAgICAgAMA/QAABQAAAAACgAOAAAMABwALABMAFwAAIREzEQE1MxUDNTMVAREzESEVIREBNTMVAgCA/wCAgID+AIABAP8AAYCAAYD+gAGAgIABAICA/YADgP8AgP4AAwCAgAAAAAABAAAAAAKAA4AABQAAMREzESEVgAIAA4D9AIAAAwAAAAACgAOAAAMACwATAAABNTMVAREzFTMVIxEhESM1MzUzEQEAgP6AgICAAYCAgIACAICA/gADgICA/YACgICA/IAAAAAAAwAAAAACgAOAAAMACwATAAABNTMVAREzFTMVIxEhESM1MxEzEQEAgP6AgICAAYCAgIACAICA/gADgICA/YABgIABgPyAAAAABAAAAAACgAOAAAMABwALAA8AADM1IRUlETMRIREzEQE1IRWAAYD+AIABgID+AAGAgICAAoD9gAKA/YACgICAAAIAAAAAAoADgAADAA0AAAE1MxUBESEVIRUhFSERAgCA/YACAP6AAYD+gAKAgID9gAOAgICA/gAABgAAAAACgAOAAAMABwALAA8AEwAXAAAzNSEVMzUzFSU1MxUhETMRJREzEQE1IRWAAQCAgP8AgP4AgAGAgP4AAYCAgICAgICAAoD9gIACAP4AAgCAgAAAAAMAAAAAAoADgAADAAcAEQAAIREzEQM1MxUBESEVIRUhFSERAgCAgID9gAIA/oABgP6AAgD+AAKAgID9gAOAgICA/gAABgAAAAACgAOAAAMABwALAA8AEwAXAAAzNSEVJTUzFSERMxEBNSEVJTUzFT0BIRWAAYD+AIABgID+AAGA/gCAAgCAgICAgAGA/oABgICAgICAgICAAAAAAAEAAAAAAoADgAAHAAAhESE1IRUhEQEA/wACgP8AAwCAgP0AAAMAAAAAAoADgAADAAcACwAAMzUhFSURMxEhETMRgAGA/gCAAYCAgICAAwD9AAMA/QAAAAAFAAAAAAKAA4AAAwAHAAsADwATAAAhNTMVJREzETMRMxEBETMRIREzEQEAgP8AgICA/gCAAYCAgICAAQD/AAEA/wABAAIA/gACAP4AAAAAAAMAAAAAAoADgAADAAsAEwAAATUzFQERMxEzFSMVITUjNTMRMxEBAID+gICAgAGAgICAAQCAgP8AA4D9gICAgIACgPyAAAAAAAkAAAAAAoADgAADAAcACwAPABMAFwAbAB8AIwAAMREzESERMxEBNTMVMzUzFSU1MxUlNTMVMzUzFSU1MxUhNTMVgAGAgP4AgICA/wCA/wCAgID+AIABgIABgP6AAYD+gAGAgICAgICAgICAgICAgICAgIAABQAAAAACgAOAAAMABwALAA8AEwAAIREzEQE1MxUzNTMVJTUzFSE1MxUBAID/AICAgP4AgAGAgAKA/YACgICAgICAgICAgAAABQAAAAACgAOAAAUACQANABEAFwAAMREzFSEVATUzFT0BMxU9ATMVPQEhNSERgAIA/gCAgID+AAKAAQCAgAEAgICAgICAgICAgID/AAAAAAABAAAAAAGAA4AABwAAMREhFSERIRUBgP8AAQADgID9gIAAAAAFAAAAAAKAA4AAAwAHAAsADwATAAAhNTMVJREzEQE1MxUlETMRATUzFQIAgP8AgP8AgP8AgP8AgICAgAEA/wABAICAgAEA/wABAICAAAAAAAEAAAAAAYADgAAHAAAxNSERITUhEQEA/wABgIACgID8gAAAAAUAAAIAAoADgAADAAcACwAPABMAABE1MxUhNTMVJTUzFTM1MxUlNTMVgAGAgP4AgICA/wCAAgCAgICAgICAgICAgIAAAQAA/4ACgAAAAAMAABU1IRUCgICAgAAAAQAAAwABAAOAAAMAABE1IRUBAAMAgIAAAwAAAAACgAKAAAMADQARAAA9ATMdATUhNSE1ITUzEQE1IRWAAYD+gAGAgP4AAYCAgICAgICAgP4AAgCAgAAAAAMAAAAAAoADgAADAAcAEQAAJREzEQE1IRUBETMRMxUjESEVAgCA/oABAP4AgICAAYCAAYD+gAGAgID+AAOA/oCA/wCAAAAAAAUAAAAAAoACgAADAAcACwAPABMAADM1IRU9ATMVIREzEQE1MxUlNSEVgAGAgP2AgAGAgP4AAYCAgICAgAGA/oABAICAgICAAAMAAAAAAoADgAADAAcAEQAANREzGQE1IRUBNSERIzUzETMRgAEA/wABgICAgIABgP6AAYCAgP4AgAEAgAGA/IAAAAAAAwAAAAACgAKAAAMADQARAAAzNSEVJREzFSE1MxEhFRE1IRWAAgD9gIABgID+AAGAgICAAYCAgP8AgAGAgIAAAAIAAAAAAgADgAALAA8AADMRIzUzNTMVIRUhGQE1IRWAgICAAQD/AAEAAgCAgICA/gADAICAAAAAAwAA/4ACgAKAAAMABwARAAAVNSEVAREzEQE1ITUhESE1IRECAP4AgAGA/oABgP6AAgCAgIABgAEA/wD/AICAAQCA/YAAAAAAAwAAAAACgAOAAAMABwAPAAAhETMRATUhFQERMxEzFSMRAgCA/oABAP4AgICAAgD+AAIAgID+AAOA/oCA/oAAAAIAAAAAAIADgAADAAcAADERMxEDNTMVgICAAoD9gAMAgIAAAAQAAP+AAoADAAADAAcACwAPAAAXNSEVJREzESERMxEDNTMVgAGA/gCAAYCAgICAgICAAQD/AAIA/gACgICAAAAFAAAAAAIAA4AAAwAHAAsADwAXAAAhNTMVJTUzFQM1MxU9ATMVAREzETMVIxEBgID/AICAgID+AICAgICAgICAAQCAgICAgP4AA4D+AID/AAAAAAACAAAAAAEAA4AAAwAHAAAzNTMVJREzEYCA/wCAgICAAwD9AAAEAAAAAAKAAoAAAwAHAA0AEQAAAREzERMRMxEhESEVIxEBNTMVAQCAgID9gAEAgAEAgAEAAQD/AP8AAgD+AAKAgP4AAgCAgAACAAAAAAKAAoAAAwAJAAAhETMRIREhFSERAgCA/YACAP6AAgD+AAKAgP4AAAQAAAAAAoACgAADAAcACwAPAAAzNSEVJREzESERMxEBNSEVgAGA/gCAAYCA/gABgICAgAGA/oABgP6AAYCAgAADAAD/gAKAAoAAAwAPABMAAAERMxEBETMVMxUjFSEVIRETNSEVAgCA/YCAgIABgP6AgAEAAQABAP8A/oADAICAgID/AAKAgIAAAAAAAwAA/4ACgAKAAAMABwATAAAZATMZATUhFRMRITUhNSM1MzUzEYABAID+gAGAgICAAQABAP8AAQCAgP2AAQCAgICA/QAAAAAAAwAAAAACgAKAAAMACwAPAAABNTMVAREzFTMVIxETNSEVAgCA/YCAgICAAQABgICA/oACgICA/oACAICAAAAAAAUAAAAAAoACgAADAAcACwAPABMAADE1IRU9ATMVJTUhFSU1MxU9ASEVAgCA/gABgP4AgAIAgICAgICAgICAgICAgIAAAgAAAAABgAOAAAMADwAAITUzFSURIzUzETMRMxUjEQEAgP8AgICAgICAgIABgIABAP8AgP6AAAACAAAAAAKAAoAAAwAJAAA1ETMRFTUhETMRgAGAgIACAP4AgIACAP2AAAAAAAUAAAAAAoACgAADAAcACwAPABMAACE1MxUlNTMVMzUzFSURMxEhETMRAQCA/wCAgID+AIABgICAgICAgICAgAGA/oABgP6AAAIAAAAAAoACgAADAA0AADURMxEVNTMRMxEzETMRgICAgICAAgD+AICAAQD/AAIA/YAAAAAJAAAAAAKAAoAAAwAHAAsADwATABcAGwAfACMAADE1MxUhNTMVJTUzFTM1MxUlNTMVJTUzFTM1MxUlNTMVITUzFYABgID+AICAgP8AgP8AgICA/gCAAYCAgICAgICAgICAgICAgICAgICAgICAgAAAAwAA/4ACgAKAAAMABwAPAAAXNSEVAREzEQE1ITUhETMRgAGA/gCAAYD+gAGAgICAgAGAAYD+gP8AgIABgP2AAAMAAAAAAoACgAAHAAsAEwAAMTUzNTMVIRUBNTMVPQEhNSEVIxWAgAGA/oCA/oACgICAgICAAQCAgICAgICAAAAFAAAAAAIAA4AAAwAHAAsADwATAAAhNSEVJREzEQE1MxU1ETMZATUhFQEAAQD+gID/AICAAQCAgIABAP8AAQCAgIABAP8AAQCAgAAAAQAAAAAAgAOAAAMAADERMxGAA4D8gAAABQAAAAACAAOAAAMABwALAA8AEwAAMTUhFTURMxkBNTMVJREzEQE1IRUBAICA/wCA/oABAICAgAEA/wABAICAgAEA/wABAICAAAAAAAQAAAKAAwADgAADAAcACwAPAAARNTMVITUhFSU1IRUhNTMVgAEAAQD+AAEAAQCAAoCAgICAgICAgIAAAAIAAAAAAIADgAADAAcAADERMxEDNTMVgICAAoD9gAMAgIAAAAMAAAAAAgADAAADAAcACwAAMzUhFSURMxkBNSEVgAGA/gCAAYCAgIACAP4AAgCAgAAAAAACAAAAAAIAAwAADwATAAAxNTMRIzUzNTMVMxUjESEVATUzFYCAgICAgAEA/wCAgAEAgICAgP8AgAKAgIAAAAAABQAAAQABgAKAAAMABwALAA8AEwAAETUzFTM1MxUlNTMVJTUzFTM1MxWAgID/AID/AICAgAEAgICAgICAgICAgICAAAAFAAAAAAKAA4AAEwAXABsAHwAjAAAhNSM1MzUjNTM1MxUzFSMVMxUjFQE1MxUzNTMVJTUzFSE1MxUBAICAgICAgICAgP8AgICA/gCAAYCAgICAgICAgICAgAKAgICAgICAgICAAAAAAAIAAAAAAIADgAADAAcAADERMxEDETMRgICAAYD+gAIAAYD+gAAAAAAFAAD/gAKAAwAABwALAA8AEwAbAAAFNSM1IRUjFRM1MxUhETMRATUzFSU1MzUzFTMVAQCAAYCAgID9gIABgID+AICAgICAgICAAQCAgAGA/oABAICAgICAgIAAAAMAAAAAAwADgAAHAAsADwAAAREhFSMVMxUXESERBxEhEQEAAQCAgID+AIADAAEAAYCAgICAAoD9gIADgPyAAAABAAABAAGAAwAABwAAGQEhNSE1IREBAP8AAYABAAEAgID+AAAKAAAAAAKAAoAAAwAHAAsADwATABcAGwAfACMAJwAAITUzFTM1MxUlNTMVMzUzFSU1MxUzNTMVJTUzFTM1MxUlNTMVMzUzFQEAgICA/gCAgID+AICAgP8AgICA/wCAgICAgICAgICAgICAgICAgICAgICAgICAgIAAAAAAAQAAAIACgAGAAAUAACU1ITUhEQIA/gACgICAgP8AAAABAIABAAIAAYAAAwAAEzUhFYABgAEAgIAAAAAAAwAAAAADAAOAAAUADQARAAABESERIxUFNSM1MxEhEQcRIREBAAEAgAEAgID+AIADAAEAAYD/AICAgIABgP2AgAOA/IAAAAAAAQAAAwACgAOAAAMAABE1IRUCgAMAgIAAAgAAAgABgAOAAAMABwAAATUjFQcRIREBAICAAYACgICAgAGA/oAAAAIAAP+AAoADAAADAA8AABU1IRUBESE1IREzESEVIRECgP6A/wABAIABAP8AgICAAQABAIABAP8AgP8AAAIAAAIAAQADgAAFAAkAABkBMxUzFQM1MxWAgICAAgABAICAAQCAgAABAAACAAEAA4AABwAAETUzNSM1IRGAgAEAAgCAgID+gAAAAAABAYADAAKAA4AAAwAAATUhFQGAAQADAICAAAAAAQAA/4ACgAMAAAkAABURMxEhETMRIRWAAYCA/gCAA4D9gAKA/QCAAAMAAAAAAoADAAADAA0AEQAAETUzFRMRIzUzNSM1IREzETMRgICAgIABAICAAgCAgP4AAYCAgID9AAMA/QAAAAABAAABgACAAgAAAwAAETUzFYABgICAAAACAID/gAIAAIAAAwAHAAAXNSEVPQEzFYABAICAgICAgIAAAAABAAACgACAA4AAAwAAGQEzEYACgAEA/wAAAAAAAgAAAgABgAOAAAMABwAAATUjFQcRIREBAICAAYACgICAgAGA/oAAAAoAAAAAAoACgAADAAcACwAPABMAFwAbAB8AIwAnAAAxNTMVMzUzFSU1MxUzNTMVJTUzFTM1MxUlNTMVMzUzFSU1MxUzNTMVgICA/wCAgID/AICAgP4AgICA/gCAgICAgICAgICAgICAgICAgICAgICAgICAgIAAAAgAAAAAAoADgAADAAkADQARABUAGQAdACEAADE1MxUhETMVMxUlETMRJTUzFSU1MxU1ETMRJREzESU1MxWAAQCAgP4AgAEAgP6AgID+AIABgICAgAEAgICAAQD/AICAgICAgIABAP8AgAEA/wCAgIAAAAAABwAAAAACgAOAAAMABwANABEAFQAZAB0AADE1MxU1ETMRBTUjESERATUzFTURMxElETMRJTUzFYCAAQCAAQD+gICA/gCAAYCAgICAAQD/AICAAQD+gAGAgICAAQD/AIABAP8AgICAAAAHAAAAAAKAA4AAAwAHAA0AEQAVAB0AIQAAMTUzFTURMxEFNSMRIREBNTMVNREzESE1MzUjNSERATUzFYCAAQCAAQD+gICA/gCAgAEAAQCAgICAAQD/AICAAQD+gAGAgICAAQD/AICAgP6AAQCAgAAABgAAAAACgAOAAAMABwALAA8AEwAXAAAzNSEVPQEzFSERMxkBNTMVPQEzFQM1MxWAAYCA/YCAgICAgICAgICAAQD/AAEAgICAgIABAICAAAADAAAAAAKAA4AACwAPABMAADERMxUhNTMRIxEhGQE1IRUBNSEVgAGAgID+gAGA/gABAAIAgID+AAEA/wACAICAAQCAgAAAAAADAAAAAAKAA4AACwAPABMAADERMxUhNTMRIxEhGQE1IRUDNSEVgAGAgID+gAGAgAEAAgCAgP4AAQD/AAIAgIABAICAAAUAAAAAAoADgAALAA8AEwAXABsAADERMxUhNTMRIxEhGQE1IRUlNTMVITUzFSU1IRWAAYCAgP6AAYD+AIABgID+AAGAAgCAgP4AAQD/AAIAgICAgICAgICAgAAABQAAAAADAAOAAAsADwAXABsAHwAAMREzFSE1MxEjESERAzUzHQE1ITUhFSMVATUhFSE1MxWAAYCAgP6AgIABAAEAgP6AAQABAIACAICA/gABAP8AAoCAgICAgICAAQCAgICAAAQAAAAAAoADgAALAA8AEwAXAAAxETMVITUzESMRIRkBNSEVATUzFTM1MxWAAYCAgP6AAYD+gICAgAIAgID+AAEA/wACAICAAQCAgICAAAAAAwAAAAACgAOAAAsADwATAAAxETMVITUzESMRIRkBNSEVATUzFYABgICA/oABgP8AgAIAgID+AAEA/wACAICAAQCAgAABAAAAAAKAA4AAFQAAMREzFTM1IzUhFSEVMxUjESEVIREjEYCAgAIA/wCAgAEA/oCAAwCAgICAgID+gIACAP4AAAAAAAcAAP+AAoADgAADAAcACwAPABMAFwAbAAAFNSEVPQEzFSU1IRU9ATMVIREzEQE1MxUlNSEVAQABAID+AAGAgP2AgAGAgP4AAYCAgICAgICAgICAgIACAP4AAYCAgICAgAAAAAACAAAAAAKAA4AACwAPAAAxESEVIRUhFSEVIRUBNSEVAoD+AAEA/wACAP2AAQACgICAgICAAwCAgAAAAAACAAAAAAKAA4AACwAPAAAxESEVIRUhFSEVIRUBNSEVAoD+AAEA/wACAP8AAQACgICAgICAAwCAgAAAAAAFAAAAAAKAA4AACQANABEAFQAZAAAxETMVIRUhFSEVATUhFSU1MxUhNTMVJTUhFYABAP8AAgD+AAGA/gCAAYCA/gABgAIAgICAgAIAgICAgICAgICAgAAAAwAAAAACgAOAAAsADwATAAAxESEVIRUhFSEVIRUBNTMVMzUzFQKA/gABAP8AAgD+AICAgAKAgICAgIADAICAgIAAAAACAAAAAAIAA4AACwAPAAAzNTMRIzUhFSMRMxUBNSEVgICAAYCAgP4AAQCAAYCAgP6AgAMAgIAAAAIAgAAAAoADgAALAA8AADM1MxEjNSEVIxEzFQM1IRWAgIABgICAgAEAgAGAgID+gIADAICAAAAABAAAAAACgAOAAAsADwATABcAADM1MxEjNSEVIxEzFQE1MxUhNTMVJTUhFYCAgAGAgID+AIABgID+AAGAgAGAgID+gIACgICAgICAgIAAAAADAAAAAAGAA4AACwAPABMAADE1MxEjNSEVIxEzFQE1MxUzNTMVgIABgICA/oCAgICAAYCAgP6AgAMAgICAgAAAAgAAAAADAAOAAAMAEwAAJREzEQURIzUzESEVIREzFSMRIRUCgID9gICAAgD+gICAAYCAAoD9gIABgIABgID/AID/AIAAAAAABQAAAAADAAOAAAMACwAVABkAHQAAATUzFQERMxEzFSMRITUjNTMRIzUhEQE1IRUhNTMVAQCA/oCAgIABgICAgAEA/gABAAEAgAEAgID/AAMA/wCA/oCAgAGAgP0AAwCAgICAAAUAAAAAAoADgAADAAcACwAPABMAADM1IRUlETMRIREzEQE1IRUBNSEVgAGA/gCAAYCA/gABgP4AAQCAgIABgP6AAYD+gAGAgIABAICAAAAABQAAAAACgAOAAAMABwALAA8AEwAAMzUhFSURMxEhETMRATUhFQM1IRWAAYD+AIABgID+AAGAgAEAgICAAYD+gAGA/oABgICAAQCAgAAAAAAHAAAAAAKAA4AAAwAHAAsADwATABcAGwAAMzUhFSURMxEhETMRATUhFSU1MxUhNTMVJTUhFYABgP4AgAGAgP4AAYD+AIABgID+AAGAgICAAYD+gAGA/oABgICAgICAgICAgIAABwAAAAADAAOAAAMABwALAA8AFwAbAB8AADM1IRUlETMRIREzEQE1Mx0BNSE1IRUjFQE1IRUhNTMVgAGA/gCAAYCA/YCAAQABAID+gAEAAQCAgICAAYD+gAGA/oACAICAgICAgIABAICAgIAABgAAAAACgAOAAAMABwALAA8AEwAXAAAzNSEVJREzESERMxEBNSEVJTUzFSE1MxWAAYD+AIABgID+AAGA/gCAAYCAgICAAgD+AAIA/gACAICAgICAgIAAAAkAAACAAoADAAADAAcACwAPABMAFwAbAB8AIwAAPQEzFSE1MxUlNTMVMzUzFSU1MxUlNTMVMzUzFSU1MxUhNTMVgAGAgP4AgICA/wCA/wCAgID+AIABgICAgICAgICAgICAgICAgICAgICAgICAgAADAAAAAAKAA4AAAwANABcAAAERMxEBNSMRMxEzFSEVNREjNSE1IRUzEQEAgP8AgICAAQCA/wABgIABAAGA/oD/AIACgP4AgICAAgCAgID9gAAAAAAEAAAAAAKAA4AAAwAHAAsADwAAMzUhFSURMxEhETMRATUhFYABgP4AgAGAgP2AAQCAgIACAP4AAgD+AAKAgIAABAAAAAACgAOAAAMABwALAA8AADM1IRUlETMRIREzEQE1IRWAAYD+AIABgID/AAEAgICAAgD+AAIA/gACgICAAAYAAAAAAoADgAADAAcACwAPABMAFwAAMzUhFSURMxEhETMRATUzFSE1MxUlNSEVgAGA/gCAAYCA/YCAAYCA/gABgICAgAGA/oABgP6AAgCAgICAgICAAAAFAAAAAAKAA4AAAwAHAAsADwATAAAzNSEVJREzESERMxEBNTMVMzUzFYABgP4AgAGAgP4AgICAgICAAgD+AAIA/gACgICAgIAAAAAABgAAAAACgAOAAAMABwALAA8AEwAXAAAhETMRATUzFTM1MxUlNTMVITUzFQE1IRUBAID/AICAgP4AgAGAgP2AAQABgP6AAYCAgICAgICAgIABAICAAAAAAAMAAP+AAoADAAADAAcAEwAAJREzEQE1IRUBETMRMxUjESEVIRUCAID+gAEA/gCAgIABgP6AgAGA/oABgICA/YADgP8AgP8AgIAAAAAEAAAAAAKAA4AAAwANABEAFQAAPQEzHQE1ITUhNSE1MxEBNSEVATUhFYABgP6AAYCA/gABgP4AAQCAgICAgICAgP4AAgCAgAEAgIAABAAAAAACgAOAAAMADQARABUAAD0BMx0BNSE1ITUhNTMRATUhFQM1IRWAAYD+gAGAgP4AAYCAAQCAgICAgICAgP4AAgCAgAEAgIAAAAYAAAAAAoADgAADAA0AEQAVABkAHQAAPQEzHQE1ITUhNSE1MxEBNSEVJTUzFSE1MxUlNSEVgAGA/oABgID+AAGA/gCAAYCA/gABgICAgICAgICA/gACAICAgICAgICAgIAAAAAGAAAAAAMAA4AAAwANABEAGQAdACEAAD0BMx0BNSE1ITUhNTMRATUzHQE1ITUhFSMVATUhFSE1MxWAAYD+gAGAgP2AgAEAAQCA/oABAAEAgICAgICAgICA/gACgICAgICAgIABAICAgIAAAAAFAAAAAAKAA4AAAwANABEAFQAZAAA9ATMdATUhNSE1ITUzEQE1IRUBNTMVMzUzFYABgP6AAYCA/gABgP6AgICAgICAgICAgID+AAIAgIABAICAgIAAAAAABAAAAAACgAOAAAMADQARABUAAD0BMx0BNSE1ITUhNTMRATUhFQE1MxWAAYD+gAGAgP4AAYD/AICAgICAgICAgP4AAgCAgAEAgIAAAAQAAAAAAoACgAADABUAGQAdAAA9ATMdATUzNSM1MzUzFTM1MxEhFSEVATUzFTM1MxWAgICAgICA/wABAP4AgICAgICAgICAgICAgP8AgIACAICAgIAAAAAHAAD/gAKAAwAAAwAHAAsADwATABcAGwAABTUhFT0BMxUlNSEVPQEzFSERMxEBNTMVJTUhFQEAAQCA/gABgID9gIABgID+AAGAgICAgICAgICAgICAAYD+gAEAgICAgIAAAAAABAAAAAACgAOAAAMADQARABUAADM1IRUlETMVITUzESEVETUhFQE1IRWAAgD9gIABgID+AAGA/gABAICAgAGAgID/AIABgICAAQCAgAAAAAAEAAAAAAKAA4AAAwANABEAFQAAMzUhFSURMxUhNTMRIRURNSEVAzUhFYACAP2AgAGAgP4AAYCAAQCAgIABgICA/wCAAYCAgAEAgIAABgAAAAACgAOAAAMADQARABUAGQAdAAAzNSEVJREzFSE1MxEhFRE1IRUlNTMVITUzFSU1IRWAAgD9gIABgID+AAGA/gCAAYCA/gABgICAgAGAgID/AIABgICAgICAgICAgIAAAAUAAAAAAoADgAADAA0AEQAVABkAADM1IRUlETMVITUzESEVETUhFQE1MxUzNTMVgAIA/YCAAYCA/gABgP6AgICAgICAAYCAgP8AgAGAgIABAICAgIAAAAACAAAAAAEAA4AAAwAHAAAzETMRATUhFYCA/wABAAKA/YADAICAAAAAAgAAAAABAAOAAAMABwAAMREzEQM1IRWAgAEAAoD9gAMAgIAABAAAAAACgAOAAAMABwALAA8AACERMxEBNTMVITUzFSU1IRUBAID+gIABgID+AAGAAoD9gAKAgICAgICAgAAAAAMAgAAAAgADgAADAAcACwAAIREzEQE1MxUzNTMVAQCA/wCAgIACgP2AAwCAgICAAAQAAAAAAwADgAADAA8AEwAXAAAhETMRIREzFSE1IRUjFSEZATUhFSE1MxUCAID9gIABAAEAgP6AAQABAIACAP4AAwCAgICA/gADAICAgIAABQAAAAACgAOAAAMABwALAA8AEwAAMzUhFSURMxEhETMRATUhFQE1IRWAAYD+AIABgID+AAGA/gABAICAgAGA/oABgP6AAYCAgAEAgIAAAAAFAAAAAAKAA4AAAwAHAAsADwATAAAzNSEVJREzESERMxEBNSEVAzUhFYABgP4AgAGAgP4AAYCAAQCAgIABgP6AAYD+gAGAgIABAICAAAAAAAcAAAAAAoADgAADAAcACwAPABMAFwAbAAAzNSEVJREzESERMxEBNSEVJTUzFSE1MxUlNSEVgAGA/gCAAYCA/gABgP4AgAGAgP4AAYCAgIABgP6AAYD+gAGAgICAgICAgICAgAAHAAAAAAMAA4AAAwAHAAsADwAXABsAHwAAMzUhFSURMxEhETMRATUzHQE1ITUhFSMVATUhFSE1MxWAAYD+AIABgID9gIABAAEAgP6AAQABAICAgIABgP6AAYD+gAIAgICAgICAgAEAgICAgAAGAAAAAAKAA4AAAwAHAAsADwATABcAADM1IRUlETMRIREzEQE1IRUBNTMVMzUzFYABgP4AgAGAgP4AAYD+gICAgICAgAGA/oABgP6AAYCAgAEAgICAgAAAAwAAAIACgAMAAAMABwALAAAlNTMVATUhFQE1MxUBAID+gAKA/oCAgICAAQCAgAEAgIAAAAMAAAAAAoACgAADAA0AFwAAATUzFQE1IxEzETMVIRU1ESM1ITUhFTMRAQCA/wCAgIABAID/AAGAgAEAgID/AIABgP8AgICAAQCAgID+gAAAAwAAAAACgAOAAAMACQANAAA1ETMRFTUhETMRATUhFYABgID9gAEAgAIA/gCAgAIA/YADAICAAAADAAAAAAKAA4AAAwAJAA0AADURMxEVNSERMxEBNSEVgAGAgP8AAQCAAgD+AICAAgD9gAMAgIAAAAUAAAAAAoADgAADAAkADQARABUAADURMxEVNSERMxEBNTMVITUzFSU1IRWAAYCA/YCAAYCA/gABgIABgP6AgIABgP4AAoCAgICAgICAAAAABAAAAAACgAOAAAMACQANABEAADURMxEVNSERMxEBNTMVMzUzFYABgID+AICAgIACAP4AgIACAP2AAwCAgICAAAQAAP+AAoADgAADAAcADwATAAAXNSEVAREzEQE1ITUhETMRATUhFYABgP4AgAGA/oABgID9gAEAgICAAYABgP6A/wCAgAGA/YADAICAAAAAAwAA/4ACgAOAAAMABwATAAAlETMRATUhFQERMxEzFSMRIRUhFQIAgP6AAQD+AICAgAGA/oCAAYD+gAGAgID9gAQA/oCA/wCAgAAAAAUAAP+AAoADgAADAAcADwATABcAABc1IRUBETMRATUhNSERMxEBNTMVMzUzFYABgP4AgAGA/oABgID+AICAgICAgAGAAYD+gP8AgIABgP2AAwCAgICAAAACAAAAAAKAA4AAAwATAAA1ETMRFTUzESM1IRUhFTMVIxEhFYCAgAIA/wCAgAEAgAKA/YCAgAKAgICAgP6AgAAABQAAAAACgAKAAAMABwALAA8AGwAAMzUzFTM1IRUlETMZATUzFRkBMxUzNSM1IREhFYCAgAEA/YCAgICAgAEA/wCAgICAgAGA/oABgICA/oABgICAgP6AgAAAAAAHAAAAAAKAA4AAAwAHAAsADwATABcAGwAAIREzEQE1MxUzNTMVJTUzFSE1MxUBNTMVMzUzFQEAgP8AgICA/gCAAYCA/gCAgIABgP6AAYCAgICAgICAgIABAICAgIAAAAABAAABgAMAAgAAAwAAETUhFQMAAYCAgAACAAACAAEAA4AAAwAHAAAZATMZATUzFYCAAgABAP8AAQCAgAACAAACAAEAA4AAAwAHAAARNTMVNREzEYCAAgCAgIABAP8AAAACAAD/gAEAAQAAAwAHAAAVNTMVNREzEYCAgICAgAEA/wAAAAACAAACAAEAA4AAAwAHAAATNTMVJREzEYCA/wCAAgCAgIABAP8AAAAABAAAAgACAAOAAAMABwALAA8AABkBMxEzETMRATUzFTM1MxWAgID/AICAgAIAAQD/AAEA/wABAICAgIAABAAAAgACAAOAAAMABwALAA8AABE1MxUzNTMVJREzETMRMxGAgID/AICAgAIAgICAgIABAP8AAQD/AAAABAAA/4ACAAEAAAMABwALAA8AABU1MxUzNTMVJREzETMRMxGAgID/AICAgICAgICAgAEA/wABAP8AAAAAAQAAAAABgAMAAAsAADMRIzUzETMRMxUjEYCAgICAgAGAgAEA/wCA/oAAAAABAAABgAEAAoAAAwAAGQEhEQEAAYABAP8AAAAAAwAAAAACgACAAAMABwALAAAxNTMVMzUzFTM1MxWAgICAgICAgICAgAAAAAADAAAAAAEAAYAAAwAHAAsAADM1MxUlNTMVPQEzFYCA/wCAgICAgICAgICAAAMAAAAAAQABgAADAAcACwAAMTUzFT0BMxUlNTMVgID/AICAgICAgICAgAAAAwAAAAACgAOAAAMAFwAbAAAhNSEVJTUjNTM1IzUzNTMVIRUhFSEVIRURNSEVAQABgP4AgICAgIABAP8AAQD/AAGAgICAgICAgICAgICAgAKAgIAAAgAAAgAEgAOAAAcAEwAAExEjNSEVIxEhESERIxEjFSM1IxGAgAGAgAEAAoCAgICAAgABAICA/wABgP6AAQCAgP8AAAAAACABhgABAAAAAAAAASUCTAABAAAAAAABAAkDhgABAAAAAAACAAcDoAABAAAAAAADABEDzAABAAAAAAAEABEEAgABAAAAAAAFAAsELAABAAAAAAAGAAkETAABAAAAAAAHAGMFHgABAAAAAAAIABYFsAABAAAAAAAJAAUF0wABAAAAAAAKASUIJQABAAAAAAALAB8JiwABAAAAAAAMABEJzwABAAAAAAANACgKMwABAAAAAAAOAC4KugABAAAAAAATABsLIQADAAEECQAAAkoAAAADAAEECQABABIDcgADAAEECQACAA4DkAADAAEECQADACIDqAADAAEECQAEACID3gAD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IgAgAGYAbwBuAHQAIABpAHMAIAB1AG4AZABlAHIAIABDAHIAZQBhAHQAaQB2AGUAIABDAG8AbQBtAG8AbgBzACAATABpAGMAZQBuAHMAZQAgACgAUwBoAGEAcgBlACAAQQBsAGkAawBlACkALgANAAoADQAKAFQAaABlACAAIgBEAGoARABDAEgAIgAgAG4AYQBtAGUAIABpAHMAIABvAHcAbgAgAGIAeQAgAG0AZQAgACgAZABqAGQAYwBoAC4AYwBvAG0AKQAuAA0ACgANAAoAVABoAGUAIAAiAE0AaQBuAGUAYwByAGEAZgB0ACIAIABmAG8AbgB0ACAAcwB0AHkAbABlACAAdwBhAHMAIABtAGEAZABlACAAYgB5ACAATgBvAHQAYwBoAC4ADQAKAA0ACgBUAGgAZQAgACIATQBpAG4AZQBjAHIAYQBmAHQAIgAgAGcAYQBtAGUAIABpAHMAIABvAHcAbgAgAGIAeQAgAE0AbwBqAGEAbgBnACAAUwBwAGUAYwBpAGYAaQBjAGEAdABpAG8AbgBzAC4AAFRoaXMgIk1pbmVjcmFmdCIgZm9udCB3YXMgYWRhcHRlZCBpbnRvIFRydWVUeXBlIGZpbGUgYnkgbWUgKERqRENIKS4NCg0KVGhpcyAiTWluZWNyYWZ0IiBmb250IGlzIHVuZGVyIENyZWF0aXZlIENvbW1vbnMgTGljZW5zZSAoU2hhcmUgQWxpa2UpLg0KDQpUaGUgIkRqRENIIiBuYW1lIGlzIG93biBieSBtZSAoZGpkY2guY29tKS4NCg0KVGhlICJNaW5lY3JhZnQiIGZvbnQgc3R5bGUgd2FzIG1hZGUgYnkgTm90Y2guDQoNClRoZSAiTWluZWNyYWZ0IiBnYW1lIGlzIG93biBieSBNb2phbmcgU3BlY2lmaWNhdGlvbnMuAABoAHQAdABwADoALwAvAGYAbwBuAHQAcwB0AHIAdQBjAHQALgBmAG8AbgB0AHMAaABvAHAALgBjAG8AbQAvAABodHRwOi8vZm9udHN0cnVjdC5mb250c2hvcC5jb20vAABoAHQAdABwADoALwAvAGQAagBkAGMAaAAuAGMAbwBtAC8AAGh0dHA6Ly9kamRjaC5jb20vAABDAHIAZQBhAHQAaQB2AGUAIABDAG8AbQBtAG8AbgBzACAAQQB0AHQAcgBpAGIAdQB0AGkAbwBuACAAUwBoAGEAcgBlACAAQQBsAGkAawBlAABDcmVhdGl2ZSBDb21tb25zIEF0dHJpYnV0aW9uIFNoYXJlIEFsaWtlAABoAHQAdABwADoALwAvAGMAcgBlAGEAdABpAHYAZQBjAG8AbQBtAG8AbgBzAC4AbwByAGcALwBsAGkAYwBlAG4AcwBlAHMALwBiAHkALQBzAGEALwAzAC4AMAAvAABodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9ieS1zYS8zLjAvAABNAGkAbgBlAGMAcgBhAGYAdAAgAGkAcwAgAGoAdQBzAHQAIABhAHcAZQBzAG8AbQBlACAAIQAATWluZWNyYWZ0IGlzIGp1c3QgYXdlc29tZSAhAAAAAgAAAAAAAABlADMAAAAAAAAAAAAAAAAAAAAAAAAAAADQAAABAgEDAAMABAAFAAYABwAIAAkACgALAAwADQAOAA8AEAARABIAEwAUABUAFgAXABgAGQAaABsAHAAdAB4AHwAgACEAIgAjACQAJQAmACcAKAApACoAKwAsAC0ALgAvADAAMQAyADMANAA1ADYANwA4ADkAOgA7ADwAPQA+AD8AQABBAEIAQwBEAEUARgBHAEgASQBKAEsATABNAE4ATwBQAFEAUgBTAFQAVQBWAFcAWABZAFoAWwBcAF0AXgBfAGAAYQCjAIQAhQC9AJYA6ACOAIsAnQCpAKQBBACKANoAgwCTAQUBBgCNAQcAiADDAN4BCACeAKoA9QD0APYAogCtAMkAxwCuAGIAYwCQAGQAywBlAMgAygDPAMwAzQDOAOkAZgDTANAA0QCvAGcA8ACRANYA1ADVAGgA6wDtAGoAaQBrAG0AbABuAKAAbwBxAHAAcgBzAHUAdAB2AHcAeAB6AHkAewB9AHwAuAChAH8AfgCAAIEA7ADuALoAsACxALsAswC2ALcAxAEJALQAtQDFAIIAhwCrAL4AvwEKAIwGZ2x5cGgxB3VuaTAwMEQHdW5pMDBBRAd1bmkwMEIyB3VuaTAwQjMHdW5pMDBCNQd1bmkwMEI5DXF1b3RlcmV2ZXJzZWQERXVybwAAAAH//wACAAEAAAAOAAAAGAAAAAAAAgABAAEAzwABAAQAAAACAAAAAAABAAAAAMw9os8AAAAAyO86mAAAAADI8I+a";
-
-//########################################################################################################################################################
-// START CREATION OF RESOURCES
-//########################################################################################################################################################
-
-new java.lang.Thread(new java.lang.Runnable()
-{
-	run: function()
-	{
-		try
-		{
-			MinecraftButtonLibrary.createNinePatchDrawables();
-			MinecraftButtonLibrary.createTypeface();
-
-			MinecraftButtonLibrary.removeResources();
 		} catch(e)
 		{
 			print("Error " + e);

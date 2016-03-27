@@ -7006,7 +7006,7 @@ var SoundsInstaller = {};
 
 SoundsInstaller.sounds = {
 
-	version: 2,
+	version: 3,
 
 	soundArray: [
 			// { fileName: "" },

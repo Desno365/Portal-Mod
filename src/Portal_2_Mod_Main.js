@@ -41,6 +41,7 @@ var previousSlotId = 0;
 
 // settings for audio
 var generalVolume = 1;
+const MAX_LOGARITHMIC_VOLUME = 30;
 
 // buttons UI settings variables
 const BUTTONS_SIZE_DEFAULT = 24;
@@ -613,6 +614,7 @@ function createOtherBlocks()
 
 	Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 	Block.setDestroyTime(PROPULSION_GEL_ID, 1);
+	Block.setFriction(CUBE_NORMAL_ID, 0.111);
 	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.MATERIAL);
 	Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
@@ -717,7 +719,7 @@ function newLevel()
 	clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
 
 	if(playWelcomeSoundAtStartup)
-		Sound.playFromPath("game-entry1.mp3");
+		playSoundFromFileName("game-entry1.mp3");
 }
 
 function leaveGame()
@@ -797,7 +799,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	if(itemId == PORTAL_GUN_WOOD_AND_STONE_ID)
 	{
 		var random = Math.floor((Math.random() * 3) + 1);
-		Sound.playFromPath("portals/portal_open" + random + ".mp3");
+		playSoundFromFileName("portals/portal_open" + random + ".mp3");
 
 		var placeX = x, placeY = y, placeZ = z;
 		// get correct block
@@ -869,7 +871,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		} else
 		{
-			Sound.playFromPath("gravitygun/fail.ogg");
+			playSoundFromFileName("gravitygun/fail.ogg");
 			ModPE.showTipMessage("This block can't be picked");
 		}
 		return;
@@ -896,7 +898,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			}
 		} else
 		{
-			Sound.playFromPath("gravitygun/fail.ogg");
+			playSoundFromFileName("gravitygun/fail.ogg");
 			ModPE.showTipMessage("This block can't be picked");
 		}
 		return;
@@ -1473,7 +1475,7 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 			if(!isItemPortalGun(previousItem))
 				showPortalGunUI();
 			if(!((previousItem == PORTAL_GUN_BLUE_ID && currentItem == PORTAL_GUN_ORANGE_ID) || (previousItem == PORTAL_GUN_ORANGE_ID && currentItem == PORTAL_GUN_BLUE_ID)))
-				Sound.playFromPath("portalgun/portalgun_powerup1.mp3");
+				playSoundFromFileName("portalgun/portalgun_powerup1.mp3");
 			break;
 		}
 
@@ -1637,7 +1639,7 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the blueBullet hit an entity
-					Sound.playFromPath("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
+					playSoundFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
 
 					Entity.remove(blueBullet.entity);
 					blueBullet = null;
@@ -1668,7 +1670,7 @@ var ModTickFunctions = {
 				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
 				{
 					// the orangeBullet hit an entity
-					Sound.playFromPath("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
+					playSoundFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
 
 					Entity.remove(orangeBullet.entity);
 					orangeBullet = null;
@@ -2092,7 +2094,7 @@ function showPortalGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromPath("gravitygun/fail.ogg");
+						playSoundFromFileName("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -2133,7 +2135,7 @@ function showPortalGunUI()
 
 function shootBluePortal()
 {
-	Sound.playFromPath("portalgun/portalgun_shoot_red1.mp3");
+	playSoundFromFileName("portalgun/portalgun_shoot_red1.mp3");
 
 	var gunShootDir = DesnoUtils.getVector(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
@@ -2156,7 +2158,7 @@ function shootBluePortal()
 
 function shootOrangePortal()
 {
-	Sound.playFromPath("portalgun/portalgun_shoot_blue1.mp3");
+	playSoundFromFileName("portalgun/portalgun_shoot_blue1.mp3");
 
 	var gunShootDir = DesnoUtils.getVector(getYaw(), getPitch());
 	var bullet = Level.spawnMob(Player.getX() + (gunShootDir.x * 2), Player.getY() + (gunShootDir.y * 2.5), Player.getZ() + (gunShootDir.z * 2), 80);
@@ -2360,7 +2362,7 @@ function pickWithPortalGun()
 		updateDropButtonPortalGun();
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.damageCarriedItem();
-		Sound.playFromPath("gravitygun/pickup.ogg");
+		playSoundFromFileName("gravitygun/pickup.ogg");
 	}
 }
 
@@ -2394,7 +2396,7 @@ function dropPortalGun()
 		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
 		{
 			isPortalGunPicking = false;
-			Sound.playFromPath("gravitygun/drop.ogg");
+			playSoundFromFileName("gravitygun/drop.ogg");
 			updateDropButtonPortalGun();
 
 			Level.setTileNotInAir(x, y, z, pgBlockId, pgBlockData);
@@ -2402,13 +2404,13 @@ function dropPortalGun()
 			pgEntity = null;
 		} else
 		{
-			Sound.playFromPath("gravitygun/fail.ogg");
+			playSoundFromFileName("gravitygun/fail.ogg");
 			ModPE.showTipMessage("There is another block in this position.");
 		}
 	} else
 	{
 		isPortalGunPicking = false;
-		Sound.playFromPath("gravitygun/drop.ogg");
+		playSoundFromFileName("gravitygun/drop.ogg");
 		updateDropButtonPortalGun();
 		pgEntity = null;
 	}
@@ -2423,7 +2425,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 	if(Math.floor(x) == orangePortal.x1 && Math.floor(y) == orangePortal.y1 && Math.floor(z) == orangePortal.z1 || Math.floor(x) == orangePortal.x2 && Math.floor(y) == orangePortal.y2 && Math.floor(z) == orangePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromPath("portals/portal_exit" + random + ".mp3", x, y, z);
+		playSoundFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
 
 		if(orangePortal.type == 2)
 		{
@@ -2733,7 +2735,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 	if(Math.floor(x) == bluePortal.x1 && Math.floor(y) == bluePortal.y1 && Math.floor(z) == bluePortal.z1 || Math.floor(x) == bluePortal.x2 && Math.floor(y) == bluePortal.y2 && Math.floor(z) == bluePortal.z2)
 	{
 		var random = Math.floor((Math.random() * 2) + 1);
-		Sound.playFromPath("portals/portal_exit" + random + ".mp3", x, y, z);
+		playSoundFromFileName("portals/portal_exit" + random + ".mp3", x, y, z);
 
 		if(bluePortal.type == 2)
 		{
@@ -3046,7 +3048,7 @@ function setPortalOrange(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		Sound.playFromPath("portals/portal_invalid_surface.mp3", x, y, z);
+		playSoundFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW
@@ -3328,7 +3330,7 @@ function setPortalBlue(x, y ,z)
 
 	if(Level.getTile(x, y ,z) != 0)
 	{
-		Sound.playFromPath("portals/portal_invalid_surface.mp3", x, y, z);
+		playSoundFromFileName("portals/portal_invalid_surface.mp3", x, y, z);
 	}else
 	{
 		//ARROW
@@ -3768,7 +3770,7 @@ function canBlockBePicked(blockId)
 //########## GRAVITY GUN functions ##########
 function initializeAndShowGravityGunUI()
 {
-	Sound.playFromPath("gravitygun/equip.ogg");
+	playSoundFromFileName("gravitygun/equip.ogg");
 
 	currentActivity.runOnUiThread(new java.lang.Runnable()
 	{
@@ -3792,7 +3794,7 @@ function initializeAndShowGravityGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromPath("gravitygun/fail.ogg");
+						playSoundFromFileName("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -3841,7 +3843,7 @@ function initializeAndShowGravityGunUI()
 				{
 					onClick: function(v)
 					{
-						Sound.playFromPath("gravitygun/fail.ogg");
+						playSoundFromFileName("gravitygun/fail.ogg");
 						ModPE.showTipMessage("You are not picking any entity.");
 					}
 				});
@@ -3884,7 +3886,7 @@ function shootGravityGun()
 {
 	isGravityGunPicking = false;
 
-	Sound.playFromPath("gravitygun/fire.ogg");
+	playSoundFromFileName("gravitygun/fire.ogg");
 
 	if(ggIsBlock)
 	{
@@ -3928,7 +3930,7 @@ function dropGravityGun()
 		if(Level.getTile(Math.floor(x), Math.floor(y), Math.floor(z)) == 0)
 		{
 			isGravityGunPicking = false;
-			Sound.playFromPath("gravitygun/drop.ogg");
+			playSoundFromFileName("gravitygun/drop.ogg");
 			updateEnabledGravityGunButtons();
 
 			Level.setTileNotInAir(x, y, z, ggBlockId, ggBlockData);
@@ -3936,13 +3938,13 @@ function dropGravityGun()
 			ggEntity = null;
 		} else
 		{
-			Sound.playFromPath("gravitygun/fail.ogg");
+			playSoundFromFileName("gravitygun/fail.ogg");
 			ModPE.showTipMessage("There is another block in this position.");
 		}
 	} else
 	{
 		isGravityGunPicking = false;
-		Sound.playFromPath("gravitygun/drop.ogg");
+		playSoundFromFileName("gravitygun/drop.ogg");
 		updateEnabledGravityGunButtons();
 		ggEntity = null;
 	}
@@ -4004,7 +4006,7 @@ function pickWithGravityGun()
 		updateEnabledGravityGunButtons();
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.damageCarriedItem();
-		Sound.playFromPath("gravitygun/pickup.ogg");
+		playSoundFromFileName("gravitygun/pickup.ogg");
 	}
 }
 
@@ -4031,7 +4033,7 @@ function removeGravityGunUI()
 function makeLongFallBootsSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromPath("long_fall_boots/futureshoes" + random + ".mp3");
+	playSoundFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
 }
 //########## LONG FALl BOOTS functions - END ##########
 
@@ -4248,7 +4250,7 @@ function spawnTurret(x, y, z)
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
-	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true); // 	Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
 
 	turrets.push(new TurretClass(turret));
 	turrets[turrets.length - 1].x = Entity.getX(turret);
@@ -4268,7 +4270,7 @@ function spawnTurretDefective(x, y, z)
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
-	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true);
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true); // 	Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
 
 	turretsDefective.push(new TurretDefectiveClass(turret));
 	turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
@@ -4746,7 +4748,7 @@ function getFileNameFromDiscId(discId)
 function makeBounceSound()
 {
 	var random = Math.floor((Math.random() * 2) + 1);
-	Sound.playFromPath("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
+	playSoundFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
 }
 //########## BLUE GEL functions - END ##########
 
@@ -4755,7 +4757,7 @@ function makeBounceSound()
 function makeJumperJump(angle)
 {
 	var random = Math.floor((Math.random() * 3) + 4);
-	Sound.playFromPath("jumper/alyx_gun_fire" + random + ".mp3");
+	playSoundFromFileName("jumper/alyx_gun_fire" + random + ".mp3");
 
 	var jumperDir = DesnoUtils.getVector(angle, 0);
 	Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
@@ -7704,7 +7706,7 @@ function startup()
 {
 	// custom variables for DesnoUtils Library (must be set immediately or the default tag will remain)
 	DesnoUtils.MOD_NAME = "Portal Mod";
-	DesnoUtils.MAX_LOGARITHMIC_VOLUME = 30;
+	DesnoUtils.MAX_LOGARITHMIC_VOLUME = MAX_LOGARITHMIC_VOLUME;
 
 	// add all items
 	createPortalItems();

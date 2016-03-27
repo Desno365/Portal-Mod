@@ -20,6 +20,10 @@ const DEBUG = false;
 const CURRENT_VERSION = "r013";
 var latestVersion;
 
+// activity and other Android variables
+var currentActivity = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+var sdcard = android.os.Environment.getExternalStorageDirectory();
+
 // minecraft variables
 const GameMode = {
 	SURVIVAL: 0,
@@ -29,35 +33,14 @@ const VEL_Y_OFFSET = -0.07840000092983246;
 var isInGame = false;
 
 // textures variables
-var textureUiShowed = false;
-
-// activity and other Android variables
-var currentActivity = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-var sdcard = android.os.Environment.getExternalStorageDirectory();
-
-// display size and density variables
-var metrics = new android.util.DisplayMetrics();
-currentActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-var Screen.getHeight() = metrics.heightPixels;
-var Screen.getWidth() = metrics.widthPixels;
-var Screen.getDensity() = metrics.density;
-if(Screen.getHeight() > Screen.getWidth()) // fix auto-rotation disabled bug
-{
-	var x = Screen.getHeight();
-	Screen.getHeight() = Screen.getWidth();
-	Screen.getWidth() = x;
-}
-metrics = null;
-
-// sounds variables
-const MAX_LOGARITHMIC_VOLUME = 30;
-
-// settings for audio
-var generalVolume = 1;
+var errorWithModResourcesShowed = false;
 
 // change carried item variables
 var previousCarriedItem = 0;
 var previousSlotId = 0;
+
+// settings for audio
+var generalVolume = 1;
 
 // buttons UI settings variables
 const BUTTONS_SIZE_DEFAULT = 24;
@@ -72,7 +55,6 @@ var playWelcomeSoundAtStartup = true;
 // map-makers settings
 var indestructibleBlocks = false;
 var alwaysFullHungerBar = false;
-var fullHungerBarTick = 0;
 
 // all the entities array
 var entities = [];
@@ -99,7 +81,6 @@ var playStorePng = "iVBORw0KGgoAAAANSUhEUgAAAfQAAACuCAYAAADAtP+vAAAABmJLR0QA/wD/
 /* credits to Designmodo for the settings icon that is licensed under the Creative Commons Attribution 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by/3.0/ */
 var settingsPng = "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";
 
-
 // decoded images variables
 var bluePortalScaled;
 var orangePortalScaled;
@@ -115,52 +96,15 @@ var settingsPngScaled;
 // background of layouts
 var background;
 
-// item functions needed on load
-Item.defineItem = function(id, textureName, textureNumber, name, stackLimit)
-{
-	try
-	{
-		ModPE.setItem(id, textureName, textureNumber, name, stackLimit);
-	}catch(e)
-	{
-		// user hasn't installed the texture pack
-		if(!textureUiShowed)
-			pleaseInstallTextureUI();
 
-		ModPE.setItem(id, "skull_zombie", 0, name, stackLimit);
-	}
-}
-Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType)
-{
-	try
-	{
-		//Item.defineArmor(int id, String iconName, int iconIndex, String name, String texture, int damageReduceAmount, int maxDamage, int armorType)
-		Item.defineArmor(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType);
-	}catch(e)
-	{
-		// user hasn't installed the texture pack
-		if(!textureUiShowed)
-			pleaseInstallTextureUI();
-
-		Item.defineArmor(id, "skull_zombie", 0, name, "armor/chain_2.png", damageReduceAmount, maxDamage, armorType);
-	}
-}
+//########################################################################################################################################################
+// Items
+//########################################################################################################################################################
 
 const PORTAL_GUN_ORANGE_ID = 3649;
 const PORTAL_GUN_DAMAGE = 1000;
-Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGun ");
-Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
-Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
-Item.setCategory(PORTAL_GUN_ORANGE_ID, ItemCategory.TOOL);
 
 const PORTAL_INFORMATION_ID = 3650;
-Item.defineItem(PORTAL_INFORMATION_ID, "portalinfo", 0, "Portal Information");
-Item.addShapedRecipe(PORTAL_INFORMATION_ID, 1, 0, [
-	"   ",
-	" w ",
-	"   "], ["w", 17, 0]);
-Item.setCategory(PORTAL_INFORMATION_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_INFORMATION_ID, 1);
 
 // portal guns variables
 var blueBullet;
@@ -196,64 +140,86 @@ var pgBlockId;
 var pgBlockData;
 
 const PORTAL_GUN_BLUE_ID = 3651;
-Item.defineItem(PORTAL_GUN_BLUE_ID, "portalgunblue", 0, "PortalGun");
-Item.setMaxDamage(PORTAL_GUN_BLUE_ID, PORTAL_GUN_DAMAGE);
-Item.addShapedRecipe(PORTAL_GUN_BLUE_ID, 1, 0, [
-	"f f",
-	" d ",
-	"f f"], ["f", 265, 0, "d", 264, 0]);
-Item.setVerticalRender(PORTAL_GUN_BLUE_ID);
-Item.setCategory(PORTAL_GUN_BLUE_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_GUN_BLUE_ID, 1);
 
 const PORTAL_GUN_GOLD_ID = 3652;
 const PORTAL_GUN_GOLD_DAMAGE = 500;
-Item.defineItem(PORTAL_GUN_GOLD_ID, "portalgungold", 0, "PortalGun Gold");
-Item.setMaxDamage(PORTAL_GUN_GOLD_ID, PORTAL_GUN_GOLD_DAMAGE);
-Item.addShapedRecipe(PORTAL_GUN_GOLD_ID, 1, 0, [
-	"f f",
-	" g ",
-	"f f"], ["f", 265, 0, "g", 266, 0]);
-Item.setVerticalRender(PORTAL_GUN_GOLD_ID);
-Item.setCategory(PORTAL_GUN_GOLD_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_GUN_GOLD_ID, 1);
 
 const PORTAL_GUN_IRON_ID = 3653;
 const PORTAL_GUN_IRON_DAMAGE = 250;
-Item.defineItem(PORTAL_GUN_IRON_ID, "portalguniron", 0, "PortalGun Iron");
-Item.setMaxDamage(PORTAL_GUN_IRON_ID, PORTAL_GUN_IRON_DAMAGE);
-Item.addShapedRecipe(PORTAL_GUN_IRON_ID, 1, 0, [
-	"fff",
-	"f f",
-	"fff"], ["f", 265, 0]);
-Item.setVerticalRender(PORTAL_GUN_IRON_ID);
-Item.setCategory(PORTAL_GUN_IRON_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_GUN_IRON_ID, 1);
 
 const PORTAL_GUN_LAVA_ID = 3654;
 const PORTAL_GUN_LAVA_DAMAGE = 200;
-Item.defineItem(PORTAL_GUN_LAVA_ID, "portalgunlava", 0, "PortalGun Lava");
-Item.setMaxDamage(PORTAL_GUN_LAVA_ID, PORTAL_GUN_LAVA_DAMAGE);
-Item.addShapedRecipe(PORTAL_GUN_LAVA_ID, 1, 0, [
-	"f f",
-	" a ",
-	"f f"], ["f", 265, 0, "a", 259, 0]);
-Item.setVerticalRender(PORTAL_GUN_LAVA_ID);
-Item.setCategory(PORTAL_GUN_LAVA_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
 
 const PORTAL_GUN_WOOD_AND_STONE_ID = 3655;
 const PORTAL_GUN_WOOD_AND_STONE_DAMAGE = 100;
-Item.defineItem(PORTAL_GUN_WOOD_AND_STONE_ID, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
-Item.setMaxDamage(PORTAL_GUN_WOOD_AND_STONE_ID, PORTAL_GUN_WOOD_AND_STONE_DAMAGE);
-Item.addShapedRecipe(PORTAL_GUN_WOOD_AND_STONE_ID, 1, 0, [
-	"sws",
-	"s s",
-	"sws"], ["s", 98, 0, "w", 17, 0]);
-Item.setVerticalRender(PORTAL_GUN_WOOD_AND_STONE_ID);
-Item.setCategory(PORTAL_GUN_WOOD_AND_STONE_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
 
+function createPortalItems()
+{
+	Item.defineItem(PORTAL_GUN_ORANGE_ID, "portalgunorange", 0, "PortalGun ");
+	Item.setMaxDamage(PORTAL_GUN_ORANGE_ID, PORTAL_GUN_DAMAGE);
+	Item.setVerticalRender(PORTAL_GUN_ORANGE_ID);
+	Item.setCategory(PORTAL_GUN_ORANGE_ID, ItemCategory.TOOL);
+
+	Item.defineItem(PORTAL_INFORMATION_ID, "portalinfo", 0, "Portal Information");
+	Item.addShapedRecipe(PORTAL_INFORMATION_ID, 1, 0, [
+		"   ",
+		" w ",
+		"   "], ["w", 17, 0]);
+	Item.setCategory(PORTAL_INFORMATION_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_INFORMATION_ID, 1);
+
+	Item.defineItem(PORTAL_GUN_BLUE_ID, "portalgunblue", 0, "PortalGun");
+	Item.setMaxDamage(PORTAL_GUN_BLUE_ID, PORTAL_GUN_DAMAGE);
+	Item.addShapedRecipe(PORTAL_GUN_BLUE_ID, 1, 0, [
+		"f f",
+		" d ",
+		"f f"], ["f", 265, 0, "d", 264, 0]);
+	Item.setVerticalRender(PORTAL_GUN_BLUE_ID);
+	Item.setCategory(PORTAL_GUN_BLUE_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_GUN_BLUE_ID, 1);
+
+	Item.defineItem(PORTAL_GUN_GOLD_ID, "portalgungold", 0, "PortalGun Gold");
+	Item.setMaxDamage(PORTAL_GUN_GOLD_ID, PORTAL_GUN_GOLD_DAMAGE);
+	Item.addShapedRecipe(PORTAL_GUN_GOLD_ID, 1, 0, [
+		"f f",
+		" g ",
+		"f f"], ["f", 265, 0, "g", 266, 0]);
+	Item.setVerticalRender(PORTAL_GUN_GOLD_ID);
+	Item.setCategory(PORTAL_GUN_GOLD_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_GUN_GOLD_ID, 1);
+
+	Item.defineItem(PORTAL_GUN_IRON_ID, "portalguniron", 0, "PortalGun Iron");
+	Item.setMaxDamage(PORTAL_GUN_IRON_ID, PORTAL_GUN_IRON_DAMAGE);
+	Item.addShapedRecipe(PORTAL_GUN_IRON_ID, 1, 0, [
+		"fff",
+		"f f",
+		"fff"], ["f", 265, 0]);
+	Item.setVerticalRender(PORTAL_GUN_IRON_ID);
+	Item.setCategory(PORTAL_GUN_IRON_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_GUN_IRON_ID, 1);
+
+	Item.defineItem(PORTAL_GUN_LAVA_ID, "portalgunlava", 0, "PortalGun Lava");
+	Item.setMaxDamage(PORTAL_GUN_LAVA_ID, PORTAL_GUN_LAVA_DAMAGE);
+	Item.addShapedRecipe(PORTAL_GUN_LAVA_ID, 1, 0, [
+		"f f",
+		" a ",
+		"f f"], ["f", 265, 0, "a", 259, 0]);
+	Item.setVerticalRender(PORTAL_GUN_LAVA_ID);
+	Item.setCategory(PORTAL_GUN_LAVA_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_GUN_LAVA_ID, 1);
+
+	Item.defineItem(PORTAL_GUN_WOOD_AND_STONE_ID, "portalgunwoodandstone", 0, "PortalGun Wood & Stone");
+	Item.setMaxDamage(PORTAL_GUN_WOOD_AND_STONE_ID, PORTAL_GUN_WOOD_AND_STONE_DAMAGE);
+	Item.addShapedRecipe(PORTAL_GUN_WOOD_AND_STONE_ID, 1, 0, [
+		"sws",
+		"s s",
+		"sws"], ["s", 98, 0, "w", 17, 0]);
+	Item.setVerticalRender(PORTAL_GUN_WOOD_AND_STONE_ID);
+	Item.setCategory(PORTAL_GUN_WOOD_AND_STONE_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(PORTAL_GUN_WOOD_AND_STONE_ID, 1);
+}
+
+// other portal items
 var isGravityGunPicking = false;
 var ggShootButtonFalse;
 var ggShootButtonTrue;
@@ -266,26 +232,11 @@ var ggBlockData;
 var ggShotBlocksToBePlaced = [];
 const GRAVITY_GUN_ID = 3656;
 const GRAVITY_GUN_MAX_DAMAGE = 400;
-Item.defineItem(GRAVITY_GUN_ID, "gravitygun", 0, "GravityGun");
-Item.setMaxDamage(GRAVITY_GUN_ID, GRAVITY_GUN_MAX_DAMAGE);
-Item.addShapedRecipe(GRAVITY_GUN_ID, 1, 0, [
-	"frf",
-	"r r",
-	"frf"], ["f", 265, 0, "r", 331, 0]);
-Item.setVerticalRender(GRAVITY_GUN_ID);
-Item.setCategory(GRAVITY_GUN_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
 
 const ID_TURRET_OPTIONS = 3657;
-Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
-Item.setCategory(ID_TURRET_OPTIONS, ItemCategory.TOOL);
-Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
 
 var turretsDefective = [];
 const ID_TURRET_DEFECTIVE = 3666;
-Item.defineItem(ID_TURRET_DEFECTIVE, "turretdefective", 0, "Turret Defective");
-Item.setCategory(ID_TURRET_DEFECTIVE, ItemCategory.TOOL);
-Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
 
 var turrets = [];
 var areTurretsSinging = false;
@@ -295,25 +246,14 @@ var turretsSongX;
 var turretsSongY;
 var turretsSongZ;
 const ID_TURRET = 3658;
-Item.defineItem(ID_TURRET, "turret", 0, "Turret");
-Item.setCategory(ID_TURRET, ItemCategory.TOOL);
-Player.addItemCreativeInv(ID_TURRET, 1);
 
 const LONG_FALL_BOOT_ID = 3659;
-Item.defineItem(LONG_FALL_BOOT_ID, "longfallboot", 0, "Long Fall Boot");
-Item.addShapedRecipe(LONG_FALL_BOOT_ID, 1, 0, [
-	"   ",
-	"f f",
-	"r r"], ["f", 265, 0, "r", 331, 0]);
 
 var isFalling = false;
 const LONG_FALL_BOOTS_ID = 3660;
 const LONG_FALL_BOOTS_MAX_DAMAGE = 1500;
-Item.newArmor(LONG_FALL_BOOTS_ID, "longfallboots", 0, "Long Fall Boots", "armor/longfallboots.png", 1, LONG_FALL_BOOTS_MAX_DAMAGE, ArmorType.boots);
-Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
-	"   ",
-	"   ",
-	"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
+
+const JUMPER_ITEM_ID = 3665;
 
 const MAX_LOGARITHMIC_VOLUME_RADIO = 25;
 var radioPlayer = new android.media.MediaPlayer();
@@ -323,183 +263,274 @@ var radioX;
 var radioY;
 var radioZ;
 const RADIO_ID = 3661;
-Item.defineItem(RADIO_ID, "portalradio", 0, "Aperture Radio");
-Item.addShapedRecipe(RADIO_ID, 1, 0, [
-	"   ",
-	"iii",
-	"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
-Item.setCategory(RADIO_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(RADIO_ID, 1);
 
+function createOtherPortalItems()
+{
+	Item.defineItem(GRAVITY_GUN_ID, "gravitygun", 0, "GravityGun");
+	Item.setMaxDamage(GRAVITY_GUN_ID, GRAVITY_GUN_MAX_DAMAGE);
+	Item.addShapedRecipe(GRAVITY_GUN_ID, 1, 0, [
+		"frf",
+		"r r",
+		"frf"], ["f", 265, 0, "r", 331, 0]);
+	Item.setVerticalRender(GRAVITY_GUN_ID);
+	Item.setCategory(GRAVITY_GUN_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(GRAVITY_GUN_ID, 1);
+
+	Item.defineItem(ID_TURRET_OPTIONS, "turretoptions", 0, "Turret Options");
+	Item.setCategory(ID_TURRET_OPTIONS, ItemCategory.TOOL);
+	Player.addItemCreativeInv(ID_TURRET_OPTIONS, 1);
+
+	Item.defineItem(ID_TURRET_DEFECTIVE, "turretdefective", 0, "Turret Defective");
+	Item.setCategory(ID_TURRET_DEFECTIVE, ItemCategory.TOOL);
+	Player.addItemCreativeInv(ID_TURRET_DEFECTIVE, 1);
+
+	Item.defineItem(ID_TURRET, "turret", 0, "Turret");
+	Item.setCategory(ID_TURRET, ItemCategory.TOOL);
+	Player.addItemCreativeInv(ID_TURRET, 1);
+
+	Item.defineItem(LONG_FALL_BOOT_ID, "longfallboot", 0, "Long Fall Boot");
+	Item.addShapedRecipe(LONG_FALL_BOOT_ID, 1, 0, [
+		"   ",
+		"f f",
+		"r r"], ["f", 265, 0, "r", 331, 0]);
+
+	Item.newArmor(LONG_FALL_BOOTS_ID, "longfallboots", 0, "Long Fall Boots", "armor/longfallboots.png", 1, LONG_FALL_BOOTS_MAX_DAMAGE, ArmorType.boots);
+	Item.addShapedRecipe(LONG_FALL_BOOTS_ID, 1, 0, [
+		"   ",
+		"   ",
+		"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
+
+	Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
+	Item.setCategory(JUMPER_ITEM_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
+
+	Item.defineItem(RADIO_ID, "portalradio", 0, "Aperture Radio");
+	Item.addShapedRecipe(RADIO_ID, 1, 0, [
+		"   ",
+		"iii",
+		"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
+	Item.setCategory(RADIO_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(RADIO_ID, 1);
+}
+
+// discs
 const STILL_ALIVE_DISC_ID = 3662;
-Item.defineItem(STILL_ALIVE_DISC_ID, "discstillalive", 0, "Still Alive Disc");
-Item.setCategory(STILL_ALIVE_DISC_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
-
 const WANT_YOU_GONE_DISC_ID = 3663;
-Item.defineItem(WANT_YOU_GONE_DISC_ID, "discwantyougone", 0, "Want You Gone Disc");
-Item.setCategory(WANT_YOU_GONE_DISC_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
-
 const CARA_MIA_ADDIO_DISC_ID = 3664;
-Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "disccaramiaaddio", 0, "Cara Mia Addio Disc");
-Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ItemCategory.TOOL);
-Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
 
-const JUMPER_ITEM_ID = 3665;
-Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
-Item.setCategory(JUMPER_ITEM_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
+function createDiscItems()
+{
+	Item.defineItem(STILL_ALIVE_DISC_ID, "discstillalive", 0, "Still Alive Disc");
+	Item.setCategory(STILL_ALIVE_DISC_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(STILL_ALIVE_DISC_ID, 1);
+
+	Item.defineItem(WANT_YOU_GONE_DISC_ID, "discwantyougone", 0, "Want You Gone Disc");
+	Item.setCategory(WANT_YOU_GONE_DISC_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(WANT_YOU_GONE_DISC_ID, 1);
+
+	Item.defineItem(CARA_MIA_ADDIO_DISC_ID, "disccaramiaaddio", 0, "Cara Mia Addio Disc");
+	Item.setCategory(CARA_MIA_ADDIO_DISC_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(CARA_MIA_ADDIO_DISC_ID, 1);
+}
 
 
 //########################################################################################################################################################
 // Blocks
 //########################################################################################################################################################
 
-// block functions needed on load
-Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
-{
-	try
-	{
-		Block.defineBlock(id, name, textureNames, sourceId, opaque, renderType);
-	} catch(e)
-	{
-		// user hasn't installed the texture pack
-		if(!textureUiShowed)
-			pleaseInstallTextureUI();
-
-		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
-	}
-}
-Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, zMax)
-{
-	Block.newBlock(id, name, textureName, 0, false, 0);
-	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
-	Block.setDestroyTime(id, 3);
-	Block.setRenderLayer(id, 4); // recently changed from 3 to 4
-	Block.setLightLevel(id, 3);
-	Block.setLightOpacity(id, 0);
-	Block.setExplosionResistance(id, 30);
-}
-
 // Type 1
 //orange z min down
 const ORANGE_Z_MIN_D = 200;
-Block.newPortal(ORANGE_Z_MIN_D, "Orange portal z-min-d", "portalorangedown", 0, 0, 1/16, 1, 1, 1/16);
 
 //orange z min up
 const ORANGE_Z_MIN_U = 201;
-Block.newPortal(ORANGE_Z_MIN_U, "Orange portal z-min-up", "portalorangeup", 0, 0, 1/16, 1, 1, 1/16)
 
 
 // Type 2
 //orange z max down
 const ORANGE_Z_MAX_D = 202;
-Block.newPortal(ORANGE_Z_MAX_D, "Orange portal z-max-d", "portalorangedown", 0, 0, 15/16, 1, 1, 15/16);
 
 //orange z max up
 const ORANGE_Z_MAX_U = 203;
-Block.newPortal(ORANGE_Z_MAX_U, "Orange portal z-max-up", "portalorangeup", 0, 0, 15/16, 1, 1, 15/16);
 
 
 // Type 3
 //orange y min down
 const ORANGE_Y_MIN_D = 204;
-Block.newPortal(ORANGE_Y_MIN_D, "Orange portal y-min-d", "portalorangedown", 0, 1/16, 0, 1, 1/16, 1);
 
 //orange y min up
 const ORANGE_Y_MIN_U = 205;
-Block.newPortal(ORANGE_Y_MIN_U, "Orange portal y-min-up", "portalorangeup", 0, 1/16, 0, 1, 1/16, 1);
 
 
 // Type 4
 //orange y max down
 const ORANGE_Y_MAX_D = 206;
-Block.newPortal(ORANGE_Y_MAX_D, "Orange portal y-max-d", "portalorangedown", 0, 15/16, 0, 1, 15/16, 1);
 
 //orange y max up
 const ORANGE_Y_MAX_U = 207;
-Block.newPortal(ORANGE_Y_MAX_U, "Orange portal y-max-up", "portalorangeup", 0, 15/16, 0, 1, 15/16, 1);
 
 
 // Type 5
 //orange x min down
 const ORANGE_X_MIN_D = 208;
-Block.newPortal(ORANGE_X_MIN_D, "Orange portal x-min-d", "portalorangedown", 1/16, 0, 0, 1/16, 1, 1);
 
 //orange x min up
 const ORANGE_X_MIN_U = 209;
-Block.newPortal(ORANGE_X_MIN_U, "Orange portal x-min-up", "portalorangeup", 1/16, 0, 0, 1/16, 1, 1);
 
 
 // Type 6
 //orange x max down
 const ORANGE_X_MAX_D = 210;
-Block.newPortal(ORANGE_X_MAX_D, "Orange portal x-max-d", "portalorangedown", 15/16, 0, 0, 15/16, 1, 1);
 
 //orange x max up
 const ORANGE_X_MAX_U = 211;
-Block.newPortal(ORANGE_X_MAX_U, "Orange portal x-max-up", "portalorangeup", 15/16, 0, 0, 15/16, 1, 1);
 
 
 // Type 1
 //blue z min down
 const BLUE_Z_MIN_D = 212;
-Block.newPortal(BLUE_Z_MIN_D, "Blue portal z-min-d", "portalbluedown", 0, 0, 1/16, 1, 1, 1/16);
 
 //blue z min up
 const BLUE_Z_MIN_U = 213;
-Block.newPortal(BLUE_Z_MIN_U, "Blue portal z-min-up", "portalblueup", 0, 0, 1/16, 1, 1, 1/16);
 
 
 // Type 2
 //blue z max down
 const BLUE_Z_MAX_D = 214;
-Block.newPortal(BLUE_Z_MAX_D, "Blue portal z-max-d", "portalbluedown", 0, 0, 15/16, 1, 1, 15/16);
 
 //blue z max up
 const BLUE_Z_MAX_U = 215;
-Block.newPortal(BLUE_Z_MAX_U, "Blue portal z-max-up", "portalblueup", 0, 0, 15/16, 1, 1, 15/16);
 
 
 // Type 3
 //blue y min down
 const BLUE_Y_MIN_D = 216;
-Block.newPortal(BLUE_Y_MIN_D, "Blue portal y-min-d", "portalbluedown", 0, 1/16, 0, 1, 1/16, 1);
 
 //blue y min up
 const BLUE_Y_MIN_U = 217;
-Block.newPortal(BLUE_Y_MIN_U, "Blue portal y-min-up", "portalblueup", 0, 1/16, 0, 1, 1/16, 1);
 
 
 // Type 4
 //blue y max down
 const BLUE_Y_MAX_D = 218;
-Block.newPortal(BLUE_Y_MAX_D, "Blue portal y-max-d", "portalbluedown", 0, 15/16, 0, 1, 15/16, 1);
 
 //blue y max up
 const BLUE_Y_MAX_U = 219;
-Block.newPortal(BLUE_Y_MAX_U, "Blue portal y-max-up", "portalblueup", 0, 15/16, 0, 1, 15/16, 1);
 
 
 // Type 5
 //blue x min down
 const BLUE_X_MIN_D = 220;
-Block.newPortal(BLUE_X_MIN_D, "Blue portal x-min-d", "portalbluedown", 1/16, 0, 0, 1/16, 1, 1);
 
 //blue x min up
 const BLUE_X_MIN_U = 221;
-Block.newPortal(BLUE_X_MIN_U, "Blue portal x-min-up", "portalblueup", 1/16, 0, 0, 1/16, 1, 1);
 
 
 // Type 6
 //blue x max down
 const BLUE_X_MAX_D = 222;
-Block.newPortal(BLUE_X_MAX_D, "Blue portal x-max-d", "portalbluedown", 15/16, 0, 0, 15/16, 1, 1);
 
 //blue x max up
 const BLUE_X_MAX_U = 223;
-Block.newPortal(BLUE_X_MAX_U, "Blue portal x-max-up", "portalblueup", 15/16, 0, 0, 15/16, 1, 1);
+
+
+function createPortalBlocks()
+{
+	// Type 1
+	//orange z min down
+	Block.newPortal(ORANGE_Z_MIN_D, "Orange portal z-min-d", "portalorangedown", 0, 0, 1/16, 1, 1, 1/16);
+
+	//orange z min up
+	Block.newPortal(ORANGE_Z_MIN_U, "Orange portal z-min-up", "portalorangeup", 0, 0, 1/16, 1, 1, 1/16)
+
+
+	// Type 2
+	//orange z max down
+	Block.newPortal(ORANGE_Z_MAX_D, "Orange portal z-max-d", "portalorangedown", 0, 0, 15/16, 1, 1, 15/16);
+
+	//orange z max up
+	Block.newPortal(ORANGE_Z_MAX_U, "Orange portal z-max-up", "portalorangeup", 0, 0, 15/16, 1, 1, 15/16);
+
+
+	// Type 3
+	//orange y min down
+	Block.newPortal(ORANGE_Y_MIN_D, "Orange portal y-min-d", "portalorangedown", 0, 1/16, 0, 1, 1/16, 1);
+
+	//orange y min up
+	Block.newPortal(ORANGE_Y_MIN_U, "Orange portal y-min-up", "portalorangeup", 0, 1/16, 0, 1, 1/16, 1);
+
+
+	// Type 4
+	//orange y max down
+	Block.newPortal(ORANGE_Y_MAX_D, "Orange portal y-max-d", "portalorangedown", 0, 15/16, 0, 1, 15/16, 1);
+
+	//orange y max up
+	Block.newPortal(ORANGE_Y_MAX_U, "Orange portal y-max-up", "portalorangeup", 0, 15/16, 0, 1, 15/16, 1);
+
+
+	// Type 5
+	//orange x min down
+	Block.newPortal(ORANGE_X_MIN_D, "Orange portal x-min-d", "portalorangedown", 1/16, 0, 0, 1/16, 1, 1);
+
+	//orange x min up
+	Block.newPortal(ORANGE_X_MIN_U, "Orange portal x-min-up", "portalorangeup", 1/16, 0, 0, 1/16, 1, 1);
+
+
+	// Type 6
+	//orange x max down
+	Block.newPortal(ORANGE_X_MAX_D, "Orange portal x-max-d", "portalorangedown", 15/16, 0, 0, 15/16, 1, 1);
+
+	//orange x max up
+	Block.newPortal(ORANGE_X_MAX_U, "Orange portal x-max-up", "portalorangeup", 15/16, 0, 0, 15/16, 1, 1);
+
+
+	// Type 1
+	//blue z min down
+	Block.newPortal(BLUE_Z_MIN_D, "Blue portal z-min-d", "portalbluedown", 0, 0, 1/16, 1, 1, 1/16);
+
+	//blue z min up
+	Block.newPortal(BLUE_Z_MIN_U, "Blue portal z-min-up", "portalblueup", 0, 0, 1/16, 1, 1, 1/16);
+
+
+	// Type 2
+	//blue z max down
+	Block.newPortal(BLUE_Z_MAX_D, "Blue portal z-max-d", "portalbluedown", 0, 0, 15/16, 1, 1, 15/16);
+
+	//blue z max up
+	Block.newPortal(BLUE_Z_MAX_U, "Blue portal z-max-up", "portalblueup", 0, 0, 15/16, 1, 1, 15/16);
+
+
+	// Type 3
+	//blue y min down
+	Block.newPortal(BLUE_Y_MIN_D, "Blue portal y-min-d", "portalbluedown", 0, 1/16, 0, 1, 1/16, 1);
+
+	//blue y min up
+	Block.newPortal(BLUE_Y_MIN_U, "Blue portal y-min-up", "portalblueup", 0, 1/16, 0, 1, 1/16, 1);
+
+
+	// Type 4
+	//blue y max down
+	Block.newPortal(BLUE_Y_MAX_D, "Blue portal y-max-d", "portalbluedown", 0, 15/16, 0, 1, 15/16, 1);
+
+	//blue y max up
+	Block.newPortal(BLUE_Y_MAX_U, "Blue portal y-max-up", "portalblueup", 0, 15/16, 0, 1, 15/16, 1);
+
+
+	// Type 5
+	//blue x min down
+	Block.newPortal(BLUE_X_MIN_D, "Blue portal x-min-d", "portalbluedown", 1/16, 0, 0, 1/16, 1, 1);
+
+	//blue x min up
+	Block.newPortal(BLUE_X_MIN_U, "Blue portal x-min-up", "portalblueup", 1/16, 0, 0, 1/16, 1, 1);
+
+
+	// Type 6
+	//blue x max down
+	Block.newPortal(BLUE_X_MAX_D, "Blue portal x-max-d", "portalbluedown", 15/16, 0, 0, 15/16, 1, 1);
+
+	//blue x max up
+	Block.newPortal(BLUE_X_MAX_U, "Blue portal x-max-up", "portalblueup", 15/16, 0, 0, 15/16, 1, 1);
+}
 
 
 
@@ -509,80 +540,92 @@ var nowPlayingMessage = "";
 var currentColor = 0;
 var jukeboxes = [];
 const JUKEBOX_ID = 84;
-Block.defineBlock(JUKEBOX_ID, "Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]], 17);
-Block.setDestroyTime(JUKEBOX_ID, 2);
-Block.setExplosionResistance(JUKEBOX_ID, 30);
-Item.setCategory(JUKEBOX_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(JUKEBOX_ID, 1);
 
 // jumper
 const JUMPER_DIRECTION_ID = 224;
-Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0, false);
-Block.setDestroyTime(JUMPER_DIRECTION_ID, 1);
-Block.setLightOpacity(JUMPER_DIRECTION_ID, 0.01);
-Block.setShape(JUMPER_DIRECTION_ID, 0, 0, 0, 1, 1/16, 1);
-
 const JUMPER_ID = 225;
-Block.newBlock(JUMPER_ID, "Jumper", "jumper", 0, false);
-Block.setDestroyTime(JUMPER_ID, 1);
-Block.setLightOpacity(JUMPER_ID, 0.01);
-Block.setShape(JUMPER_ID, 0, 0, 0, 1, 1/16, 1);
 
 // radio
 const PORTAL_RADIO_A = 226;
-Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]], 0, false, 0);
-Block.setDestroyTime(PORTAL_RADIO_A, 1);
-Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
-Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
-Block.setExplosionResistance(PORTAL_RADIO_A, 30);
 const PORTAL_RADIO_B = 227;
-Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
-Block.setDestroyTime(PORTAL_RADIO_B, 1);
-Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
-Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
-Block.setExplosionResistance(PORTAL_RADIO_B, 30);
 const PORTAL_RADIO_C = 228;
-Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
-Block.setDestroyTime(PORTAL_RADIO_C, 1);
-Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
-Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
-Block.setExplosionResistance(PORTAL_RADIO_C, 30);
 const PORTAL_RADIO_D = 229;
-Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
-Block.setDestroyTime(PORTAL_RADIO_D, 1);
-Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
-Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
-Block.setExplosionResistance(PORTAL_RADIO_D, 30);
 
 // blue gel
 const REPULSION_GEL_ID = 230;
-Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
-Block.setDestroyTime(REPULSION_GEL_ID, 1);
-Item.setCategory(REPULSION_GEL_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 
 // orange gel
 const SPEED_MULTIPLIER_MIN = 1.35;
 const SPEED_MULTIPLIER_MAX = 1.65;
 var speedMultiplier = SPEED_MULTIPLIER_MIN;
 const PROPULSION_GEL_ID = 231;
-Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
-Block.setDestroyTime(PROPULSION_GEL_ID, 1);
-Item.setCategory(PROPULSION_GEL_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
 // cubes
 const CUBE_NORMAL_ID = 232;
-Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
-Block.setDestroyTime(CUBE_NORMAL_ID, 1);
-Item.setCategory(CUBE_NORMAL_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
-
 const CUBE_COMPANION_ID = 233;
-Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
-Block.setDestroyTime(CUBE_COMPANION_ID, 1);
-Item.setCategory(CUBE_COMPANION_ID, ItemCategory.MATERIAL);
-Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
+
+function createOtherBlocks()
+{
+	Block.defineBlock(JUKEBOX_ID, "Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]], 17);
+	Block.setDestroyTime(JUKEBOX_ID, 2);
+	Block.setExplosionResistance(JUKEBOX_ID, 30);
+	Item.setCategory(JUKEBOX_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(JUKEBOX_ID, 1);
+
+	Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0, false);
+	Block.setDestroyTime(JUMPER_DIRECTION_ID, 1);
+	Block.setLightOpacity(JUMPER_DIRECTION_ID, 0.01);
+	Block.setShape(JUMPER_DIRECTION_ID, 0, 0, 0, 1, 1/16, 1);
+
+	Block.newBlock(JUMPER_ID, "Jumper", "jumper", 0, false);
+	Block.setDestroyTime(JUMPER_ID, 1);
+	Block.setLightOpacity(JUMPER_ID, 0.01);
+	Block.setShape(JUMPER_ID, 0, 0, 0, 1, 1/16, 1);
+
+	Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]], 0, false, 0);
+	Block.setDestroyTime(PORTAL_RADIO_A, 1);
+	Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
+	Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
+	Block.setExplosionResistance(PORTAL_RADIO_A, 30);
+
+	Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
+	Block.setDestroyTime(PORTAL_RADIO_B, 1);
+	Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
+	Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
+	Block.setExplosionResistance(PORTAL_RADIO_B, 30);
+
+	Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
+	Block.setDestroyTime(PORTAL_RADIO_C, 1);
+	Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
+	Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
+	Block.setExplosionResistance(PORTAL_RADIO_C, 30);
+
+	Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
+	Block.setDestroyTime(PORTAL_RADIO_D, 1);
+	Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
+	Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
+	Block.setExplosionResistance(PORTAL_RADIO_D, 30);
+
+	Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
+	Block.setDestroyTime(REPULSION_GEL_ID, 1);
+	Item.setCategory(REPULSION_GEL_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
+
+	Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
+	Block.setDestroyTime(PROPULSION_GEL_ID, 1);
+	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
+
+	Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
+	Block.setDestroyTime(CUBE_NORMAL_ID, 1);
+	Item.setCategory(CUBE_NORMAL_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
+
+	Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
+	Block.setDestroyTime(CUBE_COMPANION_ID, 1);
+	Item.setCategory(CUBE_COMPANION_ID, ItemCategory.MATERIAL);
+	Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
+}
 
 
 // blacklist variables
@@ -989,7 +1032,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			{
 				if(turrets[turrets.length - 1].isThereTurretAtDistance(3))
 				{
-					turrets[turrets.length - 1].playSound("portal-music/portal_turret_song.mp3");
+					turrets[turrets.length - 1].playSound("portal-mod-sounds/music/portal_turret_song.mp3");
 					ModPE.showTipMessage("Singing...");
 					turretsSongX = Entity.getX(turrets[turrets.length - 1].entity);
 					turretsSongY = Entity.getY(turrets[turrets.length - 1].entity);
@@ -1016,7 +1059,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		// turretsDefective[turretsDefective.length - 1] is the latest spawned turret
 
 		var random = Math.floor((Math.random() * 16) + 1);
-		turretsDefective[turretsDefective.length - 1].playSound("portal-sounds/turrets_defective/turret_defective_spawn_" + random + ".wav");
+		turretsDefective[turretsDefective.length - 1].playSound("portal-mod-sounds/turrets_defective/turret_defective_spawn_" + random + ".wav");
 
 		if(turretsDefective.length >= 20)
 			ModPE.showTipMessage("§cWARNING§f: So many turrets can slow down your device");
@@ -1141,7 +1184,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-mod-sounds/turrets/turret_pickup_" + random + ".mp3");
 
 					if(areTurretsSinging)
 						turretsStopSinging();
@@ -1156,7 +1199,7 @@ function attackHook(attacker, victim)
 				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-mod-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					break turretsDefectiveLoop;
 				}
 			}
@@ -1178,7 +1221,7 @@ function attackHook(attacker, victim)
 				if(victim == turrets[i].entity)
 				{
 					var random = Math.floor((Math.random() * 10) + 1);
-					turrets[i].playSound("portal-sounds/turrets/turret_pickup_" + random + ".mp3");
+					turrets[i].playSound("portal-mod-sounds/turrets/turret_pickup_" + random + ".mp3");
 
 					if(areTurretsSinging)
 						turretsStopSinging();
@@ -1193,7 +1236,7 @@ function attackHook(attacker, victim)
 				if(victim == turretsDefective[i].entity)
 				{
 					var random = Math.floor((Math.random() * 4) + 1);
-					turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
+					turretsDefective[i].playSound("portal-mod-sounds/turrets_defective/turret_defective_pickup_" + random + ".wav");
 					break turretsDefectiveLoop;
 				}
 			}
@@ -1292,7 +1335,7 @@ function deathHook(murderer, victim)
 			} else
 			{
 				var random = Math.floor((Math.random() * 9) + 1);
-				turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
+				turrets[i].playSound("portal-mod-sounds/turrets/turret_disabled_" + random + ".mp3");
 
 				if(areTurretsSinging)
 					turretsStopSinging();
@@ -1316,7 +1359,7 @@ function deathHook(murderer, victim)
 			} else
 			{
 				var random = Math.floor((Math.random() * 7) + 1);
-				turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
+				turretsDefective[i].playSound("portal-mod-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 			}
 
 			turretsDefective.splice(i, 1);
@@ -1521,14 +1564,7 @@ var ModTickFunctions = {
 	{
 		if(alwaysFullHungerBar)
 		{
-			fullHungerBarTick++;
-
-			if(fullHungerBarTick >= 50)
-			{
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-					Entity.addEffect(Player.getEntity(), MobEffect.saturation, 1, 19, false, false);
-				fullHungerBarTick = 0;
-			}
+			Player.setHunger(20);
 		}
 	},
 
@@ -3871,7 +3907,7 @@ function shootGravityGun()
 			if(turrets[i].entity == ggEntity)
 			{
 				var random = Math.floor((Math.random() * 8) + 1);
-				turrets[i].playSound("portal-sounds/turrets/turret_launched_" + random + ".mp3");
+				turrets[i].playSound("portal-mod-sounds/turrets/turret_launched_" + random + ".mp3");
 				break turretsLoop;
 			}
 		}
@@ -4082,7 +4118,7 @@ function loadCustomMobs()
 						customMobs[i].stringId = String(properties.getProperty("mob_" + i + "_string_id", "0"));
 
 						// custom properties
-						var customPropertiesArray = stringToArray(properties.getProperty("mob_" + i + "_custom_properties", "null"));
+						var customPropertiesArray = Convert.stringToArrayOfStrings(properties.getProperty("mob_" + i + "_custom_properties", "null"));
 						if(customPropertiesArray.length > 0 && customPropertiesArray[0] != "null")
 						{
 							for(var j in customPropertiesArray)
@@ -4293,7 +4329,7 @@ function TurretClass(turret)
 				{
 					Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
 					var random = Math.floor((Math.random() * 9) + 1);
-					this.playSound("portal-sounds/turrets/turret_active_" + random + ".mp3");
+					this.playSound("portal-mod-sounds/turrets/turret_active_" + random + ".mp3");
 				}
 				if(this.countdownToAttack == 10)
 					Entity.setRenderType(this.entity, TurretShooting2RenderType.renderType);
@@ -4308,7 +4344,7 @@ function TurretClass(turret)
 						Entity.setRenderType(this.entity, TurretLaserRenderType.renderType);
 						this.countdownToAttack = 0;
 						var random = Math.floor((Math.random() * 3) + 1);
-						this.playSound("portal-sounds/turrets/turret_search_" + random + ".mp3");
+						this.playSound("portal-mod-sounds/turrets/turret_search_" + random + ".mp3");
 					}else
 					{
 						Entity.setRenderType(this.entity, TurretShooting1RenderType.renderType);
@@ -4424,8 +4460,8 @@ function TurretClass(turret)
 			turretSoundPlayer.start();
 		} catch(err)
 		{
-			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
+			ModPE.showTipMessage(Log.getLogPrefix() + "Sounds not installed!");
+			Log.log("Error while playing a turret sound: " + err);
 		}
 	}
 
@@ -4508,7 +4544,7 @@ function TurretDefectiveClass(turret)
 
 			var soundPlayer = new android.media.MediaPlayer();
 			soundPlayer.reset();
-			soundPlayer.setDataSource(sdcard + "/games/com.mojang/portal-sounds/turrets_defective/turret_defective_shoot_" + random + ".wav");
+			soundPlayer.setDataSource(sdcard + "/games/com.mojang/portal-mod-sounds/turrets_defective/turret_defective_shoot_" + random + ".wav");
 			soundPlayer.setVolume(volume, volume);
 			soundPlayer.prepare();
 			soundPlayer.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
@@ -4518,7 +4554,7 @@ function TurretDefectiveClass(turret)
 					var random = Math.floor((Math.random() * 20) + 1);
 
 					mp.reset();
-					mp.setDataSource(sdcard + "/games/com.mojang/portal-sounds/turrets_defective/turret_defective_after_shoot_" + random + ".wav");
+					mp.setDataSource(sdcard + "/games/com.mojang/portal-mod-sounds/turrets_defective/turret_defective_after_shoot_" + random + ".wav");
 					mp.setVolume(volume, volume);
 					mp.prepare();
 					mp.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
@@ -4535,8 +4571,8 @@ function TurretDefectiveClass(turret)
 			soundPlayer.start();
 		} catch(err)
 		{
-			ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-			ModPE.log(getLogText() + "Error while playing a turret sound: " + err);
+			ModPE.showTipMessage(Log.getLogPrefix() + "Sounds not installed!");
+			Log.log("Error while playing a turret sound: " + err);
 		}
 	}
 
@@ -4571,15 +4607,15 @@ function startRadioMusic()
 	try
 	{
 		radioPlayer.reset();
-		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-sounds/radio/looping_radio_mix.mp3");
+		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-mod-sounds/radio/looping_radio_mix.mp3");
 		radioPlayer.prepare();
 		radioPlayer.setLooping(true);
 		radioPlayer.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
 		radioPlayer.start();
 	} catch(err)
 	{
-		ModPE.showTipMessage(getLogText() + "Sounds not installed!");
-		ModPE.log(getLogText() + "Error in startRadioMusic: " + err);
+		ModPE.showTipMessage(Log.getLogPrefix() + "Sounds not installed!");
+		Log.log("Error in startRadioMusic: " + err);
 		stopRadioMusic();
 	}
 }
@@ -4610,7 +4646,7 @@ function JukeboxClass(x, y, z, disc)
 
 	this.player = new android.media.MediaPlayer();
 	this.player.reset();
-	this.player.setDataSource(sdcard + "/games/com.mojang/portal-music/" + getFileNameFromDiscId(disc));
+	this.player.setDataSource(sdcard + "/games/com.mojang/portal-mod-sounds/music/" + getFileNameFromDiscId(disc));
 	this.player.prepare();
 	this.player.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
 	this.player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
@@ -4789,7 +4825,7 @@ function loadMapOptions()
 
 					indestructibleBlocks = Convert.stringToBoolean(properties.getProperty("indestructible_blocks", "0"));
 					alwaysFullHungerBar = Convert.stringToBoolean(properties.getProperty("full_hunger_bar", "0"));
-					pickBlocksBlacklist = stringToIntArray(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID));
+					pickBlocksBlacklist = Convert.stringToArrayOfIntegers(properties.getProperty("pick_blacklist", "" + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID));
 
 					// close streams
 					streamReader.close();
@@ -4809,9 +4845,10 @@ function loadMapOptions()
 function playSoundFromFileName(fileName, x, y, z, volumeMultiplier)
 {
 	//
-	Sound.playFromPath(sdcard + "/games/com.mojang/portal-sounds/" + fileName, x, y, z, volumeMultiplier);
+	Sound.playFromPath(sdcard + "/games/com.mojang/portal-mod-sounds/" + fileName, x, y, z, generalVolume);
 }
 //########## SOUND functions - END ##########
+
 
 //########## INFO ITEM functions ##########
 function displayInfoItemUI()
@@ -5051,6 +5088,60 @@ Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
 //########## LEVEL functions - END ##########
 
 
+//########## ITEM functions ##########
+Item.defineItem = function(id, textureName, textureNumber, name, stackLimit)
+{
+	try
+	{
+		ModPE.setItem(id, textureName, textureNumber, name, stackLimit);
+	}catch(e)
+	{
+		errorWithModResources();
+
+		ModPE.setItem(id, "skull_zombie", 0, name, stackLimit);
+	}
+}
+
+Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType)
+{
+	try
+	{
+		//Item.defineArmor(int id, String iconName, int iconIndex, String name, String texture, int damageReduceAmount, int maxDamage, int armorType)
+		Item.defineArmor(id, iconName, iconIndex, name, texture, damageReduceAmount, maxDamage, armorType);
+	}catch(e)
+	{
+		errorWithModResources();
+
+		Item.defineArmor(id, "skull_zombie", 0, name, "armor/chain_2.png", damageReduceAmount, maxDamage, armorType);
+	}
+}
+//########## ITEM functions - END ##########
+
+//########## BLOCK functions ##########
+Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
+{
+	try
+	{
+		Block.defineBlock(id, name, textureNames, sourceId, opaque, renderType);
+	} catch(e)
+	{
+		errorWithModResources();
+
+		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
+	}
+}
+Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, zMax)
+{
+	Block.newBlock(id, name, textureName, 0, false, 0);
+	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
+	Block.setDestroyTime(id, 3);
+	Block.setRenderLayer(id, 4); // recently changed from 3 to 4
+	Block.setLightLevel(id, 3);
+	Block.setLightOpacity(id, 0);
+	Block.setExplosionResistance(id, 30);
+}
+//########## BLOCK functions - END ##########
+
 //########## INTERNET functions ##########
 function updateLatestVersionMod()
 {
@@ -5079,29 +5170,10 @@ function updateLatestVersionMod()
 	} catch(err)
 	{
 		clientMessage("Portal Mod: Can't check for updates, please check your Internet connection.");
-		ModPE.log(getLogText() + "updateLatestVersionMod(): caught an error: " + err);
+		Log.log("updateLatestVersionMod(): caught an error: " + err);
 	}
 }
 //########## INTERNET functions - END ##########
-
-
-//########## DIRECTION functions ##########
-function vector3d(x, y, z)
-{
-	this.x = x;
-	this.y = y;
-	this.z = z;
-}
-
-function DesnoUtils.getVector(yaw, pitch)
-{
-	var direction = new vector3d(0, 0, 0);
-	direction.y = -Math.sin(java.lang.Math.toRadians(pitch));
-	direction.x = -Math.sin(java.lang.Math.toRadians(yaw)) * Math.cos(java.lang.Math.toRadians(pitch));
-	direction.z = Math.cos(java.lang.Math.toRadians(yaw)) * Math.cos(java.lang.Math.toRadians(pitch));
-	return direction;
-}
-//########## DIRECTION functions - END ##########
 
 
 //########## IMAGE functions ##########
@@ -5187,40 +5259,6 @@ function defaultColoredMinecraftButton(text, colorString)
 
 
 //########## MISC functions ##########
-function getLogText()
-{
-	//
-	return("Portal Mod: ");
-}
-
-function stringToArray(string)
-{
-	string = String(string);
-	string = string.replace(/ /g, "");
-
-	var stringArray = string.split(",");
-
-	return stringArray;
-}
-
-function stringToIntArray(string)
-{
-	string = String(string);
-	string = string.replace(/ /g, "");
-
-	var stringArray = string.split(",");
-	var intArray = [];
-
-	for(var i in stringArray)
-	{
-		var value = parseInt(stringArray[i]);
-		if(value > 0)
-			intArray.push(value);
-	}
-
-	return intArray;
-}
-
 function getSavedBoolean(name, defaultValue, debug)
 {
 	var savedDataTest = ModPE.readData(name);
@@ -5560,6 +5598,7 @@ function informationUI()
 				var layout = defaultLayout("Information");
 
 				var informationText1 = new android.widget.TextView(currentActivity);
+				informationText1.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				informationText1.setText(new android.text.Html.fromHtml("<b>Portal guns:</b>" +
 					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, can be used " + PORTAL_GUN_DAMAGE + " times." +
 					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, can be used " + PORTAL_GUN_GOLD_DAMAGE + " times." +
@@ -5571,6 +5610,7 @@ function informationUI()
 				layout.addView(portalDivider());
 
 				var informationText2 = new android.widget.TextView(currentActivity);
+				informationText2.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				informationText2.setText(new android.text.Html.fromHtml("<b>Other Items:</b>" +
 					"<br>-<i>GravityGun</i>: Hit a mob with this item to pick it, then you can bring it everywhere or shoot it." +
 					"<br>-<i>Turret</i>: Spawn a Turret." +
@@ -5591,6 +5631,7 @@ function informationUI()
 				layout.addView(portalDivider());
 				
 				var informationText3 = new android.widget.TextView(currentActivity);
+				informationText3.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				informationText3.setText(new android.text.Html.fromHtml("<b>Tips and tricks:</b>" +
 					"<br>-<i>Turrets</i>: Place 4 turrets in a row, they will start to sing \"Cara Mia Addio\"."));
 				layout.addView(informationText3);
@@ -6027,7 +6068,6 @@ function settingsMapMakersUI()
 					onCheckedChanged: function()
 					{
 						alwaysFullHungerBar = !alwaysFullHungerBar;
-						fullHungerBarTick = 50;
 						saveMapOptions();
 					}
 				});
@@ -6100,6 +6140,7 @@ function settingsMapMakersUI()
 				var inputText1 = new android.widget.EditText(currentActivity);
 				inputText1.setHint("Example: " + REPULSION_GEL_ID + ", " + PROPULSION_GEL_ID + ", " + JUMPER_ID + ", " + JUMPER_DIRECTION_ID);
 				inputText1.setText(pickBlocksBlacklist.toString());
+				inputText1.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				inputText1.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 7));
 				layoutH.addView(inputText1);
 
@@ -6109,7 +6150,7 @@ function settingsMapMakersUI()
 				{
 					onClick: function()
 					{
-						pickBlocksBlacklist = stringToIntArray(String(inputText1.getText()));
+						pickBlocksBlacklist = Convert.stringToArrayOfIntegers(String(inputText1.getText()));
 						saveMapOptions();
 						android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("Saved blacklist " + pickBlocksBlacklist.toString()), 1).show();
 					}
@@ -6463,7 +6504,7 @@ function turretOptionsUI(i)
 						Entity.remove(turrets[i].entity);
 
 						var random = Math.floor((Math.random() * 9) + 1);
-						turrets[i].playSound("portal-sounds/turrets/turret_disabled_" + random + ".mp3");
+						turrets[i].playSound("portal-mod-sounds/turrets/turret_disabled_" + random + ".mp3");
 
 						customMobs.splice(findPositionInCustomMobs(turrets[i].entity), 1);
 						turrets.splice(i, 1);
@@ -6572,7 +6613,7 @@ function turretDefectiveOptionsUI(i)
 						Entity.remove(turretsDefective[i].entity);
 
 						var random = Math.floor((Math.random() * 7) + 1);
-						turretsDefective[i].playSound("portal-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
+						turretsDefective[i].playSound("portal-mod-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
 
 						customMobs.splice(findPositionInCustomMobs(turretsDefective[i].entity), 1);
 						turretsDefective.splice(i, 1);
@@ -6614,55 +6655,74 @@ function turretDefectiveOptionsUI(i)
 }
 
 // No Minecraft Layout because this UI can be showed at startup
-function pleaseInstallTextureUI()
+function errorWithModResources()
 {
-	textureUiShowed = true;
-	currentActivity.runOnUiThread(new java.lang.Runnable()
+	if(!errorWithModResourcesShowed)
 	{
-		run: function()
+		errorWithModResourcesShowed = true;
+
+		currentActivity.runOnUiThread(new java.lang.Runnable()
 		{
-			try
+			run: function()
 			{
-				var layout = new android.widget.LinearLayout(currentActivity);
-				var padding = Convert.convertDpToPixels(8);
-				layout.setPadding(padding, padding, padding, padding);
-				layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-
-				var scroll = new android.widget.ScrollView(currentActivity);
-				scroll.addView(layout);
-
-				var popup = new android.app.Dialog(currentActivity);
-				popup.setContentView(scroll);
-				popup.setTitle(new android.text.Html.fromHtml("Texture not installed"));
-				popup.setCanceledOnTouchOutside(false);
-
-				var text = new android.widget.TextView(currentActivity);
-				text.setText(new android.text.Html.fromHtml("Seems that you haven't installed the Portal 2 Mod texture pack.<br><br>Please install the Texture Pack of the mod and <b>restart BlockLauncher</b> to enjoy all the features of the Portal 2 Mod."));
-				layout.addView(text);
-
-				layout.addView(dividerText());
-
-				var exitButton = new android.widget.Button(currentActivity);
-				exitButton.setText("OK");
-				exitButton.setOnClickListener(new android.view.View.OnClickListener()
+				try
 				{
-					onClick: function()
+					var layout = new android.widget.LinearLayout(currentActivity);
+					var padding = Convert.convertDpToPixels(8);
+					layout.setPadding(padding, padding, padding, padding);
+					layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+
+					var scroll = new android.widget.ScrollView(currentActivity);
+					scroll.addView(layout);
+
+					var popup = new android.app.Dialog(currentActivity);
+					popup.setContentView(scroll);
+					popup.setTitle(new android.text.Html.fromHtml("Restart BlockLauncher"));
+					popup.setCanceledOnTouchOutside(false);
+
+					var text = new android.widget.TextView(currentActivity);
+					text.setText(new android.text.Html.fromHtml("Resources for the Portal 2 Mod aren't available now, please <b>restart BlockLauncher</b> to load them."));
+					layout.addView(text);
+					Ui.setMarginsToViewInLinearLayout(text, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_BIG);
+
+
+					var nowButton = new android.widget.Button(currentActivity);
+					nowButton.setText("Restart now!");
+					nowButton.setOnClickListener(new android.view.View.OnClickListener()
 					{
-						textureUiShowed = false;
-						popup.dismiss();
-					}
-				});
-				layout.addView(exitButton);
+						onClick: function()
+						{
+							DesnoUtils.killBlockLauncher();
+							errorWithModResourcesShowed = false;
+							popup.dismiss();
+						}
+					});
+					layout.addView(nowButton);
+					Ui.setMarginsToViewInLinearLayout(nowButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
+
+					var laterButton = new android.widget.Button(currentActivity);
+					laterButton.setText("Restart later");
+					laterButton.setOnClickListener(new android.view.View.OnClickListener()
+					{
+						onClick: function()
+						{
+							errorWithModResourcesShowed = false;
+							popup.dismiss();
+						}
+					});
+					layout.addView(laterButton);
+					Ui.setMarginsToViewInLinearLayout(laterButton, 0, MARGIN_HORIZONTAL_SMALL, 0, MARGIN_HORIZONTAL_SMALL);
 
 
-				Popup.showImmersivePopup(popup);
+					Popup.showImmersivePopup(popup);
 
-			} catch(err)
-			{
-				print("Error: " + err);
+				} catch(err)
+				{
+					print("Error: " + err);
+				}
 			}
-		}
-	});
+		});
+	}
 }
 
 
@@ -6942,11 +7002,13 @@ addTurretShooting2RenderType(TurretShooting2RenderType);
 // Sounds installation
 //########################################################################################################################################################
 
-var SoundsInstaller = {
-	sounds:
-	{
-		version: 1,
-		soundArray: [
+var SoundsInstaller = {};
+
+SoundsInstaller.sounds = {
+
+	version: 2,
+
+	soundArray: [
 			// { fileName: "" },
 			// { fileName: "", fileDirectory: "" },
 
@@ -7000,6 +7062,18 @@ var SoundsInstaller = {
 			{
 				fileName: "futureshoes2.mp3",
 				fileDirectory: "long_fall_boots"
+			},
+			{
+				fileName: "portal_still_alive.mp3",
+				fileDirectory: "music"
+			},
+			{
+				fileName: "portal_turret_song.mp3",
+				fileDirectory: "music"
+			},
+			{
+				fileName: "portal_want_you_gone.mp3",
+				fileDirectory: "music"
 			},
 			{
 				fileName: "portalgun_powerup1.mp3",
@@ -7406,405 +7480,257 @@ var SoundsInstaller = {
 				fileDirectory: "turrets_defective"
 			},
 		]
-	},
-
-	progressDialog: null,
-
-	versionFileName: "version.txt",
-
-
-	checkAtStartup: function()
-	{
-		ModPE.log(getLogText() + "checkAtStartup(): started check.");
-
-		if(SoundsInstaller.needsInstallation())
-		{
-			if(DEBUG)
-				print("Portal 2 Debug: checkAtStartup(): sounds NOT correctly installed!");
-
-			SoundsInstaller.installUI();
-		} else
-		{
-			if(DEBUG)
-				print("Portal 2 Debug: checkAtStartup(): sounds correctly installed.");
-			ModPE.log(getLogText() + "checkAtStartup(): sounds correctly installed.");
-		}
-	},
-
-
-	needsInstallation: function()
-	{
-		if(File.doesFileExist(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName))
-		{
-			var versionOfSounds = SoundsInstaller.getInstalledVersion();
-			ModPE.log(getLogText() + "needsInstallation(): version file found, version: " + versionOfSounds);
-
-			// check version
-			if(versionOfSounds == SoundsInstaller.sounds.version)
-			{
-				ModPE.log(getLogText() + "needsInstallation(): version of the file matches saved version.");
-				return !SoundsInstaller.areSoundsPresent();
-			} else
-			{
-				ModPE.log(getLogText() + "needsInstallation(): version of the file is different than saved version.");
-				return true;
-			}
-		} else
-		{
-			ModPE.log(getLogText() + "needsInstallation(): version file not found.");
-			return true;
-		}
-	},
-
-	getInstalledVersion: function()
-	{
-		var versionFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName);
-		if(versionFile.exists())
-		{
-			var loadedVersion = "";
-			var streamVersionInput = new java.io.FileInputStream(versionFile);
-			var bufferedVersionReader = new java.io.BufferedReader(new java.io.InputStreamReader(streamVersionInput));
-			var rowVersion = "";
-			while((rowVersion = bufferedVersionReader.readLine()) != null)
-			{
-				loadedVersion += rowVersion;
-			}
-			var loadedVersion = loadedVersion.split(" ");
-			bufferedVersionReader.close();
-
-			ModPE.log(getLogText() + "getInstalledVersion(): text on the version file: " + loadedVersion);
-			return parseInt(loadedVersion);
-		} else
-		{
-			print("Bug found: remember that getInstalledVersion() should be used only when version file exists.");
-			return -1;
-		}
-	},
-
-	areSoundsPresent: function()
-	{
-		var arrayOfMissingSounds = SoundsInstaller.checkMissingSounds();
-
-		if(arrayOfMissingSounds.length == 0)
-		{
-			// yeah, all sounds needed have been found
-			ModPE.log(getLogText() + "areSoundsPresent(): all sounds present.");
-			return true;
-		} else
-		{
-			// not correctly installed :(
-			ModPE.log(getLogText() + "areSoundsPresent(): some sounds are missing.");
-			ModPE.log(getLogText() + "areSoundsPresent(): missing: " + arrayOfMissingSounds.toString());
-			return false;
-		}
-	},
-
-	checkMissingSounds: function()
-	{
-		var tmpPath = sdcard + "/games/com.mojang/portal-sounds/";
-		var arrayOfErrors = [];
-		for(var i in SoundsInstaller.sounds.soundArray)
-		{
-			if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
-			{
-				// file is inside the general sound folder
-				if(!File.doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
-				{
-					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
-						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
-				} else
-				{
-					// file exists, maybe is empty?
-					if(File.isEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileName))
-					{
-						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
-							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
-					}
-				}
-			} else
-			{
-				// file is inside another folder
-				if(!File.doesFileExist(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
-				{
-					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
-						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
-				} else
-				{
-					// file exists, maybe is empty?
-					if(File.isEmpty(tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
-					{
-						if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
-							arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
-					}
-				}
-			}
-		}
-
-		return arrayOfErrors;
-	},
-
-
-	installUI: function()
-	{
-		currentActivity.runOnUiThread(new java.lang.Runnable()
-		{
-			run: function()
-			{
-				try
-				{
-					ModPE.log(getLogText() + "installUI(): displayed installation for sounds UI.");
-
-					var layout = new android.widget.LinearLayout(currentActivity);
-					layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-					var padding = Convert.convertDpToPixels(8);
-					layout.setPadding(padding, padding, padding, padding);
-
-					var scroll = new android.widget.ScrollView(currentActivity);
-					scroll.addView(layout);
-
-					var popup = new android.app.AlertDialog.Builder(currentActivity);
-					popup.setView(scroll);
-					popup.setTitle("Download sounds?");
-
-					var helpTextInstallation = new android.widget.TextView(currentActivity);
-					helpTextInstallation.setText(android.text.Html.fromHtml("<br>Would you like to download and install Portal 2 Mod sounds now?<br><br>" +
-						"A total of approximately 3 MB of data will be saved on your internal storage.<br>" +
-						"The installation may take up to one minute.<br><br>" +
-						"An active Internet connection is needed to install sounds.<br>"));
-					layout.addView(helpTextInstallation);
-
-					popup.setPositiveButton("Install", new android.content.DialogInterface.OnClickListener()
-					{
-						onClick: function(viewarg)
-						{
-							SoundsInstaller.installingUI();
-							ModPE.log(getLogText() + "installUI(): Sounds installation started by the user.");
-						}
-					});
-
-					popup.setNegativeButton("Cancel", new android.content.DialogInterface.OnClickListener()
-					{
-						onClick: function(viewarg)
-						{
-							android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: Some features may not work properly without sounds."), android.widget.Toast.LENGTH_LONG).show();
-							ModPE.log(getLogText() + "installUI(): Sounds installation canceled.");
-						}
-					});
-
-
-					var alertDialog = popup.create();
-					alertDialog.setCanceledOnTouchOutside(false);
-					alertDialog.show();
-
-				} catch(err)
-				{
-					print("Error: " + err);
-				}
-			}
-		});
-	},
-
-	installingUI: function()
-	{
-		currentActivity.runOnUiThread(new java.lang.Runnable()
-		{
-			run: function()
-			{
-				try
-				{
-					SoundsInstaller.progressDialog = new android.app.ProgressDialog(currentActivity);
-					SoundsInstaller.progressDialog.setTitle("Downloading...");
-					SoundsInstaller.progressDialog.setMessage("Downloading sound 1 of " + SoundsInstaller.sounds.soundArray.length);
-					SoundsInstaller.progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_HORIZONTAL);
-					SoundsInstaller.progressDialog.setCancelable(false);
-					SoundsInstaller.progressDialog.setCanceledOnTouchOutside(false);
-					SoundsInstaller.progressDialog.setIndeterminate(false);
-					SoundsInstaller.progressDialog.setMax(SoundsInstaller.sounds.soundArray.length);
-					SoundsInstaller.progressDialog.setProgress(0);
-					SoundsInstaller.progressDialog.show();
-
-					SoundsInstaller.install();
-				} catch(err)
-				{
-					print("Error: " + err);
-				}
-			}
-		});
-	},
-
-	install: function()
-	{
-		new java.lang.Thread(new java.lang.Runnable()
-		{
-			run: function()
-			{
-				var githubUrl = "https://raw.githubusercontent.com/DesnoSoftware/Portal-Mod-sounds-installer/master/version" + SoundsInstaller.sounds.version + "/portal-sounds/";
-				var tmpPath = sdcard + "/games/com.mojang/portal-sounds/";
-
-				File.delete(tmpPath); //delete previous files if present
-
-				// creates directories
-				new java.io.File(tmpPath).mkdirs();
-				new java.io.File(tmpPath + "gelblue/").mkdirs();
-				new java.io.File(tmpPath + "gravitygun/").mkdirs();
-				new java.io.File(tmpPath + "jumper/").mkdirs();
-				new java.io.File(tmpPath + "long_fall_boots/").mkdirs();
-				new java.io.File(tmpPath + "portalgun/").mkdirs();
-				new java.io.File(tmpPath + "portals/").mkdirs();
-				new java.io.File(tmpPath + "radio/").mkdirs();
-				new java.io.File(tmpPath + "turrets/").mkdirs();
-				new java.io.File(tmpPath + "turrets_defective/").mkdirs();
-
-				for(var i in SoundsInstaller.sounds.soundArray)
-				{
-					// display progress
-					currentActivity.runOnUiThread(new java.lang.Runnable()
-					{
-						run: function()
-						{
-							var progress = parseInt(i) + 1;
-							SoundsInstaller.progressDialog.setMessage("Downloading sound " + (progress) + " of " + SoundsInstaller.sounds.soundArray.length);
-							SoundsInstaller.progressDialog.setProgress(progress);
-
-						}
-					});
-
-					// save file on the sdcard
-					if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
-					{
-						// file is inside the general sound folder
-						//File.writeByteArrayToFile(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
-						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileName);
-					} else
-					{
-						// file is inside another folder
-						//File.writeByteArrayToFile(android.util.Base64.decode(SoundsInstaller.sounds.soundArray[i].file, 0), tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
-						SoundsInstaller.downloadFile(githubUrl + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName, tmpPath + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
-					}
-				}
-
-				var nomediaFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/.nomedia");
-				if(!nomediaFile.exists())
-					nomediaFile.createNewFile();
-
-				// put file version
-				SoundsInstaller.saveFileWithVersion();
-
-				// END INSTALLATION
-				SoundsInstaller.onFinishInstallation();
-			}
-		}).start();
-	},
-
-
-	downloadFile: function(url, savePath)
-	{
-		try
-		{
-			// download content
-			var url = new java.net.URL(url);
-			var connection = url.openConnection();
-
-			// create file
-			var file = new java.io.File(savePath);
-			if(file.exists())
-				file.delete();
-			file.createNewFile();
-	 
-			// get content
-			inputStream = connection.getInputStream();
-
-			// write to file
-			var outputStream = new java.io.FileOutputStream(file);
-			var read = 0;
-			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-			while ((read = inputStream.read(bytes)) != -1) {
-				outputStream.write(bytes, 0, read);
-			}
-	 
-			// close what needs to be closed
-			outputStream.close();
-		} catch(err)
-		{
-			ModPE.log(getLogText() + "downloadFile(): caught an error: " + err);
-		}
-	},
-
-
-	onFinishInstallation: function()
-	{
-		SoundsInstaller.progressDialog.dismiss();
-
-		ModPE.log(getLogText() + "Finished sounds installation. Re-checking sounds...");
-
-		var notSuccess = SoundsInstaller.needsInstallation();
-		if(notSuccess)
-		{
-			currentActivity.runOnUiThread(new java.lang.Runnable()
-			{
-				run: function()
-				{
-					android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: An error has happened during installation, so sounds aren't correctly installed, please check your Internet connection and try again."), android.widget.Toast.LENGTH_LONG).show();
-				}
-			});
-			ModPE.log(getLogText() + "Sounds HAVEN'T been correctly installed!");
-		} else
-		{
-			currentActivity.runOnUiThread(new java.lang.Runnable()
-			{
-				run: function()
-				{
-					android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2</b>: Congratulations, sounds are now correctly installed. You can start playing with the <i>Portal 2 Mod</i>."), android.widget.Toast.LENGTH_LONG).show();
-				}
-			});
-			ModPE.log(getLogText() + "Sounds have been correctly installed. Very good.");
-		}
-
-		removeSoundsInstaller();
-	},
-
-	saveFileWithVersion: function()
-	{
-		var versionSaveFile = new java.io.File(sdcard + "/games/com.mojang/portal-sounds/" + SoundsInstaller.versionFileName);
-		if(versionSaveFile.exists())
-			versionSaveFile.delete();
-		versionSaveFile.createNewFile();
-
-		var streamOutputVersion = new java.io.FileOutputStream(versionSaveFile);
-		var streamWriterVersion = new java.io.OutputStreamWriter(streamOutputVersion);
-
-		streamWriterVersion.append(SoundsInstaller.sounds.version + " Is anyone there?");
-		streamWriterVersion.close();
-		streamOutputVersion.close();
-	}
 };
 
-function removeSoundsInstaller()
+SoundsInstaller.versionFileName = "version.txt";
+SoundsInstaller.pathInSdcard = sdcard + "/games/com.mojang/portal-mod-sounds/";
+SoundsInstaller.pathInTexturePack = "/portal-mod-sounds/";
+
+
+SoundsInstaller.checkAtStartup = function()
 {
-	// this should allow the GC to free the memory that all the sounds were using
-	SoundsInstaller = null;
+	Log.log("checkAtStartup(): started check.");
+
+	if(SoundsInstaller.needsInstallation())
+	{
+		Log.log("checkAtStartup(): sounds NOT correctly installed!");
+
+		SoundsInstaller.install();
+	} else
+	{
+		Log.log("checkAtStartup(): sounds correctly installed.");
+	}
+}
+
+SoundsInstaller.needsInstallation = function()
+{
+	if(File.doesFileExist(SoundsInstaller.pathInSdcard + SoundsInstaller.versionFileName))
+	{
+		var versionOfSounds = SoundsInstaller.getInstalledVersion();
+		Log.log("needsInstallation(): version file found, version: " + versionOfSounds);
+
+		// check version
+		if(versionOfSounds == SoundsInstaller.sounds.version)
+		{
+			Log.log("needsInstallation(): version of the file matches saved version.");
+			return !SoundsInstaller.areSoundsPresent();
+		} else
+		{
+			Log.log("needsInstallation(): version of the file is different than saved version.");
+			return true;
+		}
+	} else
+	{
+		Log.log("needsInstallation(): version file not found.");
+		return true;
+	}
+}
+
+SoundsInstaller.getInstalledVersion = function()
+{
+	var versionFile = new java.io.File(SoundsInstaller.pathInSdcard + SoundsInstaller.versionFileName);
+	if(versionFile.exists())
+	{
+		var loadedVersion = "";
+		var streamVersionInput = new java.io.FileInputStream(versionFile);
+		var bufferedVersionReader = new java.io.BufferedReader(new java.io.InputStreamReader(streamVersionInput));
+		var rowVersion = "";
+		while((rowVersion = bufferedVersionReader.readLine()) != null)
+		{
+			loadedVersion += rowVersion;
+		}
+		var loadedVersion = loadedVersion.split(" ");
+		bufferedVersionReader.close();
+
+		Log.log("getInstalledVersion(): text on the version file: " + loadedVersion);
+		return parseInt(loadedVersion);
+	} else
+	{
+		print("Bug found: remember that getInstalledVersion() should be used only when version file exists.");
+		return -1;
+	}
+}
+
+SoundsInstaller.areSoundsPresent = function()
+{
+	var arrayOfMissingSounds = SoundsInstaller.checkMissingSounds();
+
+	if(arrayOfMissingSounds.length == 0)
+	{
+		// yeah, all sounds needed have been found
+		Log.log("areSoundsPresent(): all sounds present.");
+		return true;
+	} else
+	{
+		// not correctly installed :(
+		Log.log("areSoundsPresent(): some sounds are missing.");
+		Log.log("areSoundsPresent(): missing: " + arrayOfMissingSounds.toString());
+		return false;
+	}
+}
+
+SoundsInstaller.checkMissingSounds = function()
+{
+	var arrayOfErrors = [];
+	for(var i in SoundsInstaller.sounds.soundArray)
+	{
+		if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
+		{
+			// file is inside the general sound folder
+			if(!File.doesFileExist(SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileName))
+			{
+				if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+					arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+			} else
+			{
+				// file exists, maybe is empty?
+				if(File.isEmpty(SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileName))
+				{
+					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+				}
+			}
+		} else
+		{
+			// file is inside another folder
+			if(!File.doesFileExist(SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+			{
+				if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+					arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+			} else
+			{
+				// file exists, maybe is empty?
+				if(File.isEmpty(SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName))
+				{
+					if(arrayOfErrors.indexOf(SoundsInstaller.sounds.soundArray[i].fileName) == -1)
+						arrayOfErrors.push(SoundsInstaller.sounds.soundArray[i].fileName);
+				}
+			}
+		}
+	}
+
+	return arrayOfErrors;
+}
+
+SoundsInstaller.install = function()
+{
+	new java.lang.Thread(new java.lang.Runnable()
+	{
+		run: function()
+		{
+			File.delete(SoundsInstaller.pathInSdcard); //delete previous files if present
+
+			for(var i in SoundsInstaller.sounds.soundArray)
+			{
+				// save file on the sdcard
+				if(SoundsInstaller.sounds.soundArray[i].fileDirectory == undefined || SoundsInstaller.sounds.soundArray[i].fileDirectory == null)
+				{
+					// file is inside the general sound folder
+					try
+					{
+						File.writeInputStreamToFile(ModPE.openInputStreamFromTexturePack(SoundsInstaller.pathInTexturePack + SoundsInstaller.sounds.soundArray[i].fileName), SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileName);
+					} catch(e)
+					{
+						// probably texture pack not installed
+						Log.log("error while writing sound to sdcard (1): " + e);
+					}
+				} else
+				{
+					// file is inside another folder
+					try
+					{
+						File.writeInputStreamToFile(ModPE.openInputStreamFromTexturePack(SoundsInstaller.pathInTexturePack + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName), SoundsInstaller.pathInSdcard + SoundsInstaller.sounds.soundArray[i].fileDirectory + "/" + SoundsInstaller.sounds.soundArray[i].fileName);
+					} catch(e)
+					{
+						// probably texture pack not installed
+						Log.log("error while writing sound to sdcard (2): " + e);
+					}
+				}
+			}
+
+			var nomediaFile = new java.io.File(SoundsInstaller.pathInSdcard + ".nomedia");
+			if(!nomediaFile.exists())
+				nomediaFile.createNewFile();
+
+			// put file version
+			SoundsInstaller.saveFileWithVersion();
+
+			// END INSTALLATION
+			SoundsInstaller.onFinishInstallation();
+		}
+	}).start();
+}
+
+SoundsInstaller.saveFileWithVersion = function()
+{
+	var versionSaveFile = new java.io.File(SoundsInstaller.pathInSdcard + SoundsInstaller.versionFileName);
+	if(versionSaveFile.exists())
+		versionSaveFile.delete();
+	versionSaveFile.createNewFile();
+
+	var streamOutputVersion = new java.io.FileOutputStream(versionSaveFile);
+	var streamWriterVersion = new java.io.OutputStreamWriter(streamOutputVersion);
+
+	streamWriterVersion.append(SoundsInstaller.sounds.version + " Is anyone there?");
+	streamWriterVersion.close();
+	streamOutputVersion.close();
+}
+
+SoundsInstaller.onFinishInstallation = function()
+{
+	Log.log("Finished sounds installation. Re-checking sounds...");
+
+	var notSuccess = SoundsInstaller.needsInstallation();
+	if(notSuccess)
+	{
+		currentActivity.runOnUiThread(new java.lang.Runnable() {
+			run: function() {
+				android.widget.Toast.makeText(currentActivity, new android.text.Html.fromHtml("<b>Portal 2 Mod</b>: An error has happened during sounds installation of the Portal 2 Mod, please check if the internal storage of your device is available."), android.widget.Toast.LENGTH_LONG).show();
+			}
+		});
+		Log.log("Sounds HAVEN'T been correctly installed!");
+	} else
+	{
+		Log.log("Sounds have been correctly installed. Very good.");
+	}
 }
 
 
 //########################################################################################################################################################
-// Things to do at startup
+// Things to do at startup, will be called at the end of the script
 //########################################################################################################################################################
 
-// check sounds
-SoundsInstaller.checkAtStartup();
-
-// create images from base64
-new java.lang.Thread(new java.lang.Runnable()
+function startup()
 {
-	run: function()
+	// custom variables for DesnoUtils Library (must be set immediately or the default tag will remain)
+	DesnoUtils.MOD_NAME = "Portal Mod";
+	DesnoUtils.MAX_LOGARITHMIC_VOLUME = 30;
+
+	// add all items
+	createPortalItems();
+	createOtherPortalItems();
+	createDiscItems();
+	createPortalBlocks();
+	createOtherBlocks();
+
+	// check sounds
+	SoundsInstaller.checkAtStartup();
+
+	// create images from base64
+	new java.lang.Thread(new java.lang.Runnable()
 	{
-		try
+		run: function()
 		{
-			createImages();
-		} catch(e)
-		{
-			print("Error " + e);
+			try
+			{
+				createImages();
+			} catch(e)
+			{
+				print("Error in thread at startup" + e);
+				Log.log("Error in thread at startup: " + e)
+			}
 		}
-	}
-}).start();
+	}).start();
+}
+
 

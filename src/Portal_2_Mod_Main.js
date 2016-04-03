@@ -302,7 +302,7 @@ function createOtherPortalItems()
 		"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
 
 	Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
-	Item.setCategory(JUMPER_ITEM_ID, ItemCategory.MATERIAL);
+	Item.setCategory(JUMPER_ITEM_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(JUMPER_ITEM_ID, 1);
 
 	Item.defineItem(RADIO_ID, "portalradio", 0, "Aperture Radio");
@@ -310,7 +310,7 @@ function createOtherPortalItems()
 		"   ",
 		"iii",
 		"iri"], ["i", 265, 0, "r", 331, 0]); // i = iron; r = redstone;
-	Item.setCategory(RADIO_ID, ItemCategory.MATERIAL);
+	Item.setCategory(RADIO_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(RADIO_ID, 1);
 }
 
@@ -570,7 +570,7 @@ function createOtherBlocks()
 	Block.defineBlock(JUKEBOX_ID, "Jukebox", [["jukebox_side", 0], ["jukebox_top", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0], ["jukebox_side", 0]], 17);
 	Block.setDestroyTime(JUKEBOX_ID, 2);
 	Block.setExplosionResistance(JUKEBOX_ID, 30);
-	Item.setCategory(JUKEBOX_ID, ItemCategory.MATERIAL);
+	Item.setCategory(JUKEBOX_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(JUKEBOX_ID, 1);
 
 	Block.newBlock(JUMPER_DIRECTION_ID, "Jumper Direction", "jumperdirection", 0, false);
@@ -609,23 +609,23 @@ function createOtherBlocks()
 
 	Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
 	Block.setDestroyTime(REPULSION_GEL_ID, 1);
-	Item.setCategory(REPULSION_GEL_ID, ItemCategory.MATERIAL);
+	Item.setCategory(REPULSION_GEL_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(REPULSION_GEL_ID, 1);
 
 	Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 	Block.setDestroyTime(PROPULSION_GEL_ID, 1);
 	Block.setFriction(CUBE_NORMAL_ID, 0.111);
-	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.MATERIAL);
+	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
 	Block.newBlock(CUBE_NORMAL_ID, "Cube", "cubenormal");
 	Block.setDestroyTime(CUBE_NORMAL_ID, 1);
-	Item.setCategory(CUBE_NORMAL_ID, ItemCategory.MATERIAL);
+	Item.setCategory(CUBE_NORMAL_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(CUBE_NORMAL_ID, 1);
 
 	Block.newBlock(CUBE_COMPANION_ID, "Companion Cube", "cubecompanion");
 	Block.setDestroyTime(CUBE_COMPANION_ID, 1);
-	Item.setCategory(CUBE_COMPANION_ID, ItemCategory.MATERIAL);
+	Item.setCategory(CUBE_COMPANION_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(CUBE_COMPANION_ID, 1);
 }
 

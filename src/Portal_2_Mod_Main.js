@@ -784,6 +784,8 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	x = Math.floor(x);
 	y = Math.floor(y);
 	z = Math.floor(z);
+	var sidePosition = Level.getUseItemSideBlockPosition(x, y, z, side);
+
 	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
 
 	//clientMessage("x " + x + " y " + y + " z " + z);
@@ -801,49 +803,13 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		var random = Math.floor((Math.random() * 3) + 1);
 		playSoundFromFileName("portals/portal_open" + random + ".mp3");
 
-		var placeX = x, placeY = y, placeZ = z;
-		// get correct block
-		switch(side)
-		{
-			case 0: // down
-			{
-				placeY--;
-				break;
-			}
-			case 1: // up
-			{
-				placeY++;
-				break;
-			}
-			case 2:
-			{
-				placeZ--;
-				break;
-			}
-			case 3:
-			{
-				placeZ++;
-				break;
-			}
-			case 4:
-			{
-				placeX--;
-				break;
-			}
-			case 5:
-			{
-				placeX++;
-				break;
-			}
-		}
-
 		if(portalWithUseItem)
 		{
-			setPortalOrange(placeX, placeY, placeZ);
+			setPortalOrange(sidePosition.x, sidePosition.y, sidePosition.z);
 			portalWithUseItem = false;
 		} else
 		{
-			setPortalBlue(placeX, placeY, placeZ);
+			setPortalBlue(sidePosition.x, sidePosition.y, sidePosition.z);
 			portalWithUseItem = true;
 		}
 		if(Level.getGameMode() == GameMode.SURVIVAL)
@@ -1020,11 +986,11 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// turrets
-	if(itemId == ID_TURRET && Level.getTile(x, y + 1, z) == 0 && Level.getTile(x, y + 2, z) == 0)
+	if(itemId == ID_TURRET && Level.getTile(sidePosition.x, sidePosition.y + 1, sidePosition.z) == 0 && Level.getTile(sidePosition.x, sidePosition.y + 2, sidePosition.z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
-		spawnTurret(x, y, z);
+		spawnTurret(sidePosition.x, sidePosition.y, sidePosition.z);
 
 		// turrets[turrets.length - 1] is the latest spawned turret
 
@@ -1052,11 +1018,11 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// defective turrets
-	if(itemId == ID_TURRET_DEFECTIVE && Level.getTile(x, y + 1, z) == 0 && Level.getTile(x, y + 2, z) == 0)
+	if(itemId == ID_TURRET_DEFECTIVE && Level.getTile(sidePosition.x, sidePosition.y + 1, sidePosition.z) == 0 && Level.getTile(sidePosition.x, sidePosition.y + 2, sidePosition.z) == 0)
 	{
 		ModPE.showTipMessage("Hit the turret with \"Turret Options\" to make it aggressive.");
 
-		spawnTurretDefective(x, y, z);
+		spawnTurretDefective(sidePosition.x, sidePosition.y, sidePosition.z);
 
 		// turretsDefective[turretsDefective.length - 1] is the latest spawned turret
 
@@ -1798,7 +1764,7 @@ var ModTickFunctions = {
 									speedMultiplier = speedMultiplier + 0.025;
 							}
 						}
-					}), ((speedMultiplier - SPEED_MULTIPLIER_MIN) * 1000));
+					}), ((speedMultiplier - SPEED_MULTIPLIER_MIN) * 900));
 				}
 			}));
 		}else
@@ -2454,7 +2420,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
@@ -2502,7 +2468,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
@@ -2558,10 +2524,10 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
-					Entity.setVelY(entity, Entity.getVelY(velBeforeY) - 0.15);
+					Entity.setVelY(entity, velBeforeY - 0.15);
 				else
 					Entity.setVelY(entity, 0);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
@@ -2613,9 +2579,9 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
-				Entity.setVelY(entity, Entity.getVelY(entity));
+				Entity.setVelY(entity, -Entity.getVelY(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
 			if(bluePortal.type == 5)
@@ -2659,7 +2625,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
@@ -2707,7 +2673,7 @@ function entityIsInPortalOrange(entity, x, y, z)
 			if(bluePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 0.05, bluePortal.z1 + 0.5);
+				Entity.setPosition(entity, bluePortal.x1 + 0.5, bluePortal.y1 - 1.05, bluePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
@@ -2764,7 +2730,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 180, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
@@ -2812,7 +2778,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
@@ -2868,10 +2834,10 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
 				if(entity == Player.getEntity())
-					Entity.setVelY(entity, Entity.getVelY(velBeforeY) - 0.15);
+					Entity.setVelY(entity, velBeforeY - 0.15);
 				else
 					Entity.setVelY(entity, 0);
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
@@ -2923,9 +2889,9 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity), Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, Entity.getVelX(entity));
-				Entity.setVelY(entity, Entity.getVelY(entity));
+				Entity.setVelY(entity, -Entity.getVelY(entity));
 				Entity.setVelZ(entity, Entity.getVelZ(entity));	
 			}
 			if(orangePortal.type == 5)
@@ -2969,7 +2935,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 90, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);	
@@ -3017,7 +2983,7 @@ function entityIsInPortalBlue(entity, x, y, z)
 			if(orangePortal.type == 4)
 			{
 				Entity.setRot(entity, Entity.getYaw(entity) + 270, Entity.getPitch(entity));
-				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 0.05, orangePortal.z1 + 0.5);
+				Entity.setPosition(entity, orangePortal.x1 + 0.5, orangePortal.y1 - 1.05, orangePortal.z1 + 0.5);
 				Entity.setVelX(entity, 0);
 				Entity.setVelY(entity, -0.15);
 				Entity.setVelZ(entity, 0);
@@ -4246,7 +4212,7 @@ function spawnTurret(x, y, z)
 	y = Math.floor(y);
 	z = Math.floor(z);
 
-	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
+	var turret = Level.spawnMob(x + 0.5, y + 0.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
@@ -4266,7 +4232,7 @@ function spawnTurretDefective(x, y, z)
 	y = Math.floor(y);
 	z = Math.floor(z);
 
-	var turret = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
+	var turret = Level.spawnMob(x + 0.5, y + 0.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
@@ -5037,52 +5003,13 @@ Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
 
 	var canBePlaced = true;
 
-	switch(side)
-	{
-		case 0: // down
-		{
-			y--;
-			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
-				canBePlaced = false;
-			break;
-		}
-		case 1: // up
-		{
-			y++;
-			break;
-		}
-		case 2:
-		{
-			z--;
-			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
-				canBePlaced = false;
-			break;
-		}
-		case 3:
-		{
-			z++;
-			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
-				canBePlaced = false;
-			break;
-		}
-		case 4:
-		{
-			x--;
-			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
-				canBePlaced = false;
-			break;
-		}
-		case 5:
-		{
-			x++;
-			if(canBePlacedOnAir || Level.getTile(x, y - 1, z) == 0)
-				canBePlaced = false;
-			break;
-		}
-	}
+	var position = Level.getUseItemSideBlockPosition(x, y, z, side);
+	if(canBePlacedOnAir || Level.getTile(position.x, position.y - 1, position.z) == 0)
+		canBePlaced = false;
+
 	if(canBePlaced)
 	{
-		Level.setTile(x, y, z, blockId);
+		Level.setTile(position.x, position.y, position.z, blockId);
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
 	}

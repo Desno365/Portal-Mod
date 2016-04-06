@@ -17,7 +17,7 @@ SOFTWARE.
 const DEBUG = false;
 
 // updates variables
-const CURRENT_VERSION = "r013";
+const CURRENT_VERSION = "r014";
 var latestVersion;
 
 // activity and other Android variables

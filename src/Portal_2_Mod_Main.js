@@ -300,6 +300,8 @@ function createOtherPortalItems()
 		"   ",
 		"   ",
 		"l l"], ["l", LONG_FALL_BOOT_ID, 0,]);
+	Item.setCategory(LONG_FALL_BOOTS_ID, ItemCategory.TOOL);
+	Player.addItemCreativeInv(LONG_FALL_BOOTS_ID, 1);
 
 	Item.defineItem(JUMPER_ITEM_ID, "jumperitem", 0, "Aerial Faith Plate");
 	Item.setCategory(JUMPER_ITEM_ID, ItemCategory.DECORATION);

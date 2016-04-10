@@ -414,8 +414,7 @@ const JUMPER_DIRECTION_ID = 224;
 const JUMPER_ID = 225;
 
 // radio
-const PORTAL_RADIO_A = 226;
-const PORTAL_RADIO_B = 227;
+const PORTAL_RADIO = 229; // 4 directions with dame values
 
 // blue gel
 const REPULSION_GEL_ID = 230;
@@ -448,23 +447,19 @@ function createOtherBlocks()
 	Block.setLightOpacity(JUMPER_ID, 0.01);
 	Block.setShape(JUMPER_ID, 0, 0, 0, 1, 1/16, 1);
 
-	Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [
-		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0],
-		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]
+	Block.newBlock(PORTAL_RADIO, "Portal Radio", [
+		["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], // damage 0
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], // damage 1
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], // damage 2
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]  // damage 3
 	], 0, false, 0);
-	Block.setDestroyTime(PORTAL_RADIO_A, 1);
-	Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
-	Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
-	Block.setExplosionResistance(PORTAL_RADIO_A, 30);
-
-	Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [
-		["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0],
-		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]
-	], 0, false, 0);
-	Block.setDestroyTime(PORTAL_RADIO_B, 1);
-	Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
-	Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
-	Block.setExplosionResistance(PORTAL_RADIO_B, 30);
+	Block.setDestroyTime(PORTAL_RADIO, 1);
+	Block.setShape(PORTAL_RADIO, 0, 0, 5/16, 1, 10/16, 11/16, 0); // shape for damage 0
+	Block.setShape(PORTAL_RADIO, 0, 0, 5/16, 1, 10/16, 11/16, 1); // shape for damage 1
+	Block.setShape(PORTAL_RADIO, 5/16, 0, 0, 11/16, 10/16, 1, 2); // shape for damage 2
+	Block.setShape(PORTAL_RADIO, 5/16, 0, 0, 11/16, 10/16, 1, 3); // shape for damage 3
+	Block.setLightOpacity(PORTAL_RADIO, 0.01);
+	Block.setExplosionResistance(PORTAL_RADIO, 30);
 
 	Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
 	Block.setDestroyTime(REPULSION_GEL_ID, 1);
@@ -684,7 +679,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
 
 			// prevent radio bug
-			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
+			if(blockId == PORTAL_RADIO)
 				stopRadioMusic();
 
 			// prevent jukebox bug
@@ -711,7 +706,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
 
 			// prevent radio bug
-			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
+			if(blockId == PORTAL_RADIO)
 				stopRadioMusic();
 
 			// prevent jukebox bug
@@ -774,7 +769,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// radio
-	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
+	if(blockId == PORTAL_RADIO)
 	{
 		preventDefault();
 		if(isRadioPlaying && Math.floor(radioX) == Math.floor(x) && Math.floor(radioY) == Math.floor(y) && Math.floor(radioZ) == Math.floor(z))
@@ -796,19 +791,19 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
 			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
 			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_B, 0);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 0);
 			}
 			if(angle >= 45 && angle < 135)
 			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_A, 0);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 3);
 			}
 			if(angle >= 135 && angle < 225)
 			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_B, 1);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 1);
 			}
 			if(angle >= 225 && angle < 315)
 			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_A, 1);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 2);
 			}
 		}
 	}

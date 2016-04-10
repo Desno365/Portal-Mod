@@ -342,197 +342,62 @@ function createDiscItems()
 //########################################################################################################################################################
 
 // Type 1
-//orange z min down
-const ORANGE_Z_MIN_D = 200;
-
-//orange z min up
-const ORANGE_Z_MIN_U = 201;
-
+//portal z min
+const PORTAL_Z_MIN = 200;
 
 // Type 2
-//orange z max down
-const ORANGE_Z_MAX_D = 202;
-
-//orange z max up
-const ORANGE_Z_MAX_U = 203;
-
+//portal z max
+const PORTAL_Z_MAX = 202;
 
 // Type 3
-//orange y min down
-const ORANGE_Y_MIN_D = 204;
-
-//orange y min up
-const ORANGE_Y_MIN_U = 205;
-
+//portal y min
+const PORTAL_Y_MIN = 204;
 
 // Type 4
-//orange y max down
-const ORANGE_Y_MAX_D = 206;
-
-//orange y max up
-const ORANGE_Y_MAX_U = 207;
-
+//portal y max
+const PORTAL_Y_MAX = 206;
 
 // Type 5
-//orange x min down
-const ORANGE_X_MIN_D = 208;
-
-//orange x min up
-const ORANGE_X_MIN_U = 209;
-
+//portal x min
+const PORTAL_X_MIN = 208;
 
 // Type 6
-//orange x max down
-const ORANGE_X_MAX_D = 210;
-
-//orange x max up
-const ORANGE_X_MAX_U = 211;
-
-
-// Type 1
-//blue z min down
-const BLUE_Z_MIN_D = 212;
-
-//blue z min up
-const BLUE_Z_MIN_U = 213;
-
-
-// Type 2
-//blue z max down
-const BLUE_Z_MAX_D = 214;
-
-//blue z max up
-const BLUE_Z_MAX_U = 215;
-
-
-// Type 3
-//blue y min down
-const BLUE_Y_MIN_D = 216;
-
-//blue y min up
-const BLUE_Y_MIN_U = 217;
-
-
-// Type 4
-//blue y max down
-const BLUE_Y_MAX_D = 218;
-
-//blue y max up
-const BLUE_Y_MAX_U = 219;
-
-
-// Type 5
-//blue x min down
-const BLUE_X_MIN_D = 220;
-
-//blue x min up
-const BLUE_X_MIN_U = 221;
-
-
-// Type 6
-//blue x max down
-const BLUE_X_MAX_D = 222;
-
-//blue x max up
-const BLUE_X_MAX_U = 223;
+//portal x max
+const PORTAL_X_MAX = 210;
 
 
 function createPortalBlocks()
 {
+
+	var portalTexture = [
+		["portalorangedown", 0], ["portalorangedown", 0], ["portalorangedown", 0], ["portalorangedown", 0], ["portalorangedown", 0], ["portalorangedown", 0],
+		["portalorangeup", 0], ["portalorangeup", 0], ["portalorangeup", 0], ["portalorangeup", 0], ["portalorangeup", 0], ["portalorangeup", 0],
+		["portalbluedown", 0], ["portalbluedown", 0], ["portalbluedown", 0], ["portalbluedown", 0], ["portalbluedown", 0], ["portalbluedown", 0],
+		["portalblueup", 0], ["portalblueup", 0], ["portalblueup", 0], ["portalblueup", 0], ["portalblueup", 0], ["portalblueup", 0]
+	];
 	// Type 1
-	//orange z min down
-	Block.newPortal(ORANGE_Z_MIN_D, "Orange portal z-min-d", "portalorangedown", 0, 0, 1/16, 1, 1, 1/16);
-
-	//orange z min up
-	Block.newPortal(ORANGE_Z_MIN_U, "Orange portal z-min-up", "portalorangeup", 0, 0, 1/16, 1, 1, 1/16)
-
+	//portal z min
+	Block.newPortal(PORTAL_Z_MIN, "portal z-min", portalTexture, 0, 0, 1/16, 1, 1, 1/16);
 
 	// Type 2
-	//orange z max down
-	Block.newPortal(ORANGE_Z_MAX_D, "Orange portal z-max-d", "portalorangedown", 0, 0, 15/16, 1, 1, 15/16);
-
-	//orange z max up
-	Block.newPortal(ORANGE_Z_MAX_U, "Orange portal z-max-up", "portalorangeup", 0, 0, 15/16, 1, 1, 15/16);
-
+	//portal z max
+	Block.newPortal(PORTAL_Z_MAX, "portal z-max", portalTexture, 0, 0, 15/16, 1, 1, 15/16);
 
 	// Type 3
-	//orange y min down
-	Block.newPortal(ORANGE_Y_MIN_D, "Orange portal y-min-d", "portalorangedown", 0, 1/16, 0, 1, 1/16, 1);
-
-	//orange y min up
-	Block.newPortal(ORANGE_Y_MIN_U, "Orange portal y-min-up", "portalorangeup", 0, 1/16, 0, 1, 1/16, 1);
-
+	//portal y min
+	Block.newPortal(PORTAL_Y_MIN, "portal y-min", portalTexture, 0, 1/16, 0, 1, 1/16, 1);
 
 	// Type 4
-	//orange y max down
-	Block.newPortal(ORANGE_Y_MAX_D, "Orange portal y-max-d", "portalorangedown", 0, 15/16, 0, 1, 15/16, 1);
-
-	//orange y max up
-	Block.newPortal(ORANGE_Y_MAX_U, "Orange portal y-max-up", "portalorangeup", 0, 15/16, 0, 1, 15/16, 1);
-
+	//portal y max
+	Block.newPortal(PORTAL_Y_MAX, "portal y-max", portalTexture, 0, 15/16, 0, 1, 15/16, 1);
 
 	// Type 5
-	//orange x min down
-	Block.newPortal(ORANGE_X_MIN_D, "Orange portal x-min-d", "portalorangedown", 1/16, 0, 0, 1/16, 1, 1);
-
-	//orange x min up
-	Block.newPortal(ORANGE_X_MIN_U, "Orange portal x-min-up", "portalorangeup", 1/16, 0, 0, 1/16, 1, 1);
-
+	//portal x min
+	Block.newPortal(PORTAL_X_MIN, "portal x-min", portalTexture, 1/16, 0, 0, 1/16, 1, 1);
 
 	// Type 6
-	//orange x max down
-	Block.newPortal(ORANGE_X_MAX_D, "Orange portal x-max-d", "portalorangedown", 15/16, 0, 0, 15/16, 1, 1);
-
-	//orange x max up
-	Block.newPortal(ORANGE_X_MAX_U, "Orange portal x-max-up", "portalorangeup", 15/16, 0, 0, 15/16, 1, 1);
-
-
-	// Type 1
-	//blue z min down
-	Block.newPortal(BLUE_Z_MIN_D, "Blue portal z-min-d", "portalbluedown", 0, 0, 1/16, 1, 1, 1/16);
-
-	//blue z min up
-	Block.newPortal(BLUE_Z_MIN_U, "Blue portal z-min-up", "portalblueup", 0, 0, 1/16, 1, 1, 1/16);
-
-
-	// Type 2
-	//blue z max down
-	Block.newPortal(BLUE_Z_MAX_D, "Blue portal z-max-d", "portalbluedown", 0, 0, 15/16, 1, 1, 15/16);
-
-	//blue z max up
-	Block.newPortal(BLUE_Z_MAX_U, "Blue portal z-max-up", "portalblueup", 0, 0, 15/16, 1, 1, 15/16);
-
-
-	// Type 3
-	//blue y min down
-	Block.newPortal(BLUE_Y_MIN_D, "Blue portal y-min-d", "portalbluedown", 0, 1/16, 0, 1, 1/16, 1);
-
-	//blue y min up
-	Block.newPortal(BLUE_Y_MIN_U, "Blue portal y-min-up", "portalblueup", 0, 1/16, 0, 1, 1/16, 1);
-
-
-	// Type 4
-	//blue y max down
-	Block.newPortal(BLUE_Y_MAX_D, "Blue portal y-max-d", "portalbluedown", 0, 15/16, 0, 1, 15/16, 1);
-
-	//blue y max up
-	Block.newPortal(BLUE_Y_MAX_U, "Blue portal y-max-up", "portalblueup", 0, 15/16, 0, 1, 15/16, 1);
-
-
-	// Type 5
-	//blue x min down
-	Block.newPortal(BLUE_X_MIN_D, "Blue portal x-min-d", "portalbluedown", 1/16, 0, 0, 1/16, 1, 1);
-
-	//blue x min up
-	Block.newPortal(BLUE_X_MIN_U, "Blue portal x-min-up", "portalblueup", 1/16, 0, 0, 1/16, 1, 1);
-
-
-	// Type 6
-	//blue x max down
-	Block.newPortal(BLUE_X_MAX_D, "Blue portal x-max-d", "portalbluedown", 15/16, 0, 0, 15/16, 1, 1);
-
-	//blue x max up
-	Block.newPortal(BLUE_X_MAX_U, "Blue portal x-max-up", "portalblueup", 15/16, 0, 0, 15/16, 1, 1);
+	//portal x max
+	Block.newPortal(PORTAL_X_MAX, "portal x-max", portalTexture, 15/16, 0, 0, 15/16, 1, 1);
 }
 
 
@@ -551,8 +416,6 @@ const JUMPER_ID = 225;
 // radio
 const PORTAL_RADIO_A = 226;
 const PORTAL_RADIO_B = 227;
-const PORTAL_RADIO_C = 228;
-const PORTAL_RADIO_D = 229;
 
 // blue gel
 const REPULSION_GEL_ID = 230;
@@ -585,29 +448,23 @@ function createOtherBlocks()
 	Block.setLightOpacity(JUMPER_ID, 0.01);
 	Block.setShape(JUMPER_ID, 0, 0, 0, 1, 1/16, 1);
 
-	Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]], 0, false, 0);
+	Block.newBlock(PORTAL_RADIO_A, "Portal Radio", [
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0],
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0]
+	], 0, false, 0);
 	Block.setDestroyTime(PORTAL_RADIO_A, 1);
 	Block.setShape(PORTAL_RADIO_A, 5/16, 0, 0, 11/16, 10/16, 1);
 	Block.setLightOpacity(PORTAL_RADIO_A, 0.01);
 	Block.setExplosionResistance(PORTAL_RADIO_A, 30);
 
-	Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
+	Block.newBlock(PORTAL_RADIO_B, "Portal Radio", [
+		["radiotop", 0], ["radiotop", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0],
+		["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]
+	], 0, false, 0);
 	Block.setDestroyTime(PORTAL_RADIO_B, 1);
 	Block.setShape(PORTAL_RADIO_B, 0, 0, 5/16, 1, 10/16, 11/16);
 	Block.setLightOpacity(PORTAL_RADIO_B, 0.01);
 	Block.setExplosionResistance(PORTAL_RADIO_B, 30);
-
-	Block.newBlock(PORTAL_RADIO_C, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radioside", 0], ["radioside", 0], ["radiodisplay", 0]], 0, false, 0);
-	Block.setDestroyTime(PORTAL_RADIO_C, 1);
-	Block.setShape(PORTAL_RADIO_C, 5/16, 0, 0, 11/16, 10/16, 1);
-	Block.setLightOpacity(PORTAL_RADIO_C, 0.01);
-	Block.setExplosionResistance(PORTAL_RADIO_C, 30);
-
-	Block.newBlock(PORTAL_RADIO_D, "Portal Radio", [["radiotop", 0], ["radiotop", 0], ["radioside", 0], ["radiodisplay", 0], ["radioside", 0], ["radioside", 0]], 0, false, 0);
-	Block.setDestroyTime(PORTAL_RADIO_D, 1);
-	Block.setShape(PORTAL_RADIO_D, 0, 0, 5/16, 1, 10/16, 11/16);
-	Block.setLightOpacity(PORTAL_RADIO_D, 0.01);
-	Block.setExplosionResistance(PORTAL_RADIO_D, 30);
 
 	Block.newBlock(REPULSION_GEL_ID, "Repulsion Gel Block", [["wool", 3]]);
 	Block.setDestroyTime(REPULSION_GEL_ID, 1);
@@ -633,7 +490,7 @@ function createOtherBlocks()
 
 
 // blacklist variables
-var pickBuggedBlocksBlacklist = [7, 26, 52, 54, 59, 61, 62, 63, 64, 68, 71, 83, 90, 96, 104, 105, 106, 111, 115, 141, 142, 207, ORANGE_Z_MIN_D, ORANGE_Z_MIN_U, ORANGE_Z_MAX_D, ORANGE_Z_MAX_U, ORANGE_Y_MIN_D, ORANGE_Y_MIN_U, ORANGE_Y_MAX_D, ORANGE_Y_MAX_U, ORANGE_X_MIN_D, ORANGE_X_MIN_U, ORANGE_X_MAX_D, ORANGE_X_MAX_U, BLUE_Z_MIN_D, BLUE_Z_MIN_U, BLUE_Z_MAX_D, BLUE_Z_MAX_U, BLUE_Y_MIN_D, BLUE_Y_MIN_U, BLUE_Y_MAX_D, BLUE_Y_MAX_U, BLUE_X_MIN_D, BLUE_X_MIN_U, BLUE_X_MAX_D, BLUE_X_MAX_U];
+var pickBuggedBlocksBlacklist = [7, 26, 52, 54, 59, 61, 62, 63, 64, 68, 71, 83, 90, 96, 104, 105, 106, 111, 115, 141, 142, 207, PORTAL_Z_MIN, PORTAL_Z_MAX, PORTAL_Y_MIN, PORTAL_Y_MAX, PORTAL_X_MIN, PORTAL_X_MAX];
 var pickBlocksBlacklist = [REPULSION_GEL_ID, PROPULSION_GEL_ID, JUMPER_ID, JUMPER_DIRECTION_ID];
 
 
@@ -827,7 +684,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
 
 			// prevent radio bug
-			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
 				stopRadioMusic();
 
 			// prevent jukebox bug
@@ -854,7 +711,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			Level.setTile(Math.floor(x), Math.floor(y), Math.floor(z), 0);
 
 			// prevent radio bug
-			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+			if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
 				stopRadioMusic();
 
 			// prevent jukebox bug
@@ -917,7 +774,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 
 	// radio
-	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B || blockId == PORTAL_RADIO_C || blockId == PORTAL_RADIO_D)
+	if(blockId == PORTAL_RADIO_A || blockId == PORTAL_RADIO_B)
 	{
 		preventDefault();
 		if(isRadioPlaying && Math.floor(radioX) == Math.floor(x) && Math.floor(radioY) == Math.floor(y) && Math.floor(radioZ) == Math.floor(z))
@@ -939,19 +796,19 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
 			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
 			{
-				Level.placeBlockFromItem(x, y, z, side, 227);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_B, 0);
 			}
 			if(angle >= 45 && angle < 135)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 228);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_A, 0);
 			}
 			if(angle >= 135 && angle < 225)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 229);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_B, 1);
 			}
 			if(angle >= 225 && angle < 315)
 			{
-				Level.placeBlockFromItem(x, y, z, side, 226);
+				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO_A, 1);
 			}
 		}
 	}
@@ -1063,7 +920,7 @@ function destroyBlock(x, y, z)
 	}
 
 	// radio
-	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B || tile == PORTAL_RADIO_C || tile == PORTAL_RADIO_D)
+	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B)
 	{
 		preventDefault();
 		Level.setTile(x, y, z, 0);
@@ -3024,15 +2881,15 @@ function setPortalOrange(x, y ,z)
 		{
 			if(Level.getTile(x, y - 1, z) != 0)
 			{
-				Level.setTile(x, y, z, ORANGE_Y_MIN_U);
-				Level.setTile(x, y, z + 1, ORANGE_Y_MIN_D);
+				Level.setTile(x, y, z, PORTAL_Y_MIN, 1);
+				Level.setTile(x, y, z + 1, PORTAL_Y_MIN, 0);
 				savePortalAndDeleteOrange(x, y, z, x, y, z+1, 3);
 				return;
 			}else
 			if(Level.getTile(x, y + 1, z) != 0)
 			{
-				Level.setTile(x, y, z, ORANGE_Y_MAX_U);
-				Level.setTile(x, y, z + 1, ORANGE_Y_MAX_D);
+				Level.setTile(x, y, z, PORTAL_Y_MAX, 1);
+				Level.setTile(x, y, z + 1, PORTAL_Y_MAX, 0);
 				savePortalAndDeleteOrange(x, y, z, x, y, z+1, 4);
 				return;
 			}
@@ -3043,16 +2900,16 @@ function setPortalOrange(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
-					Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+					Level.setTile(x, y, z, PORTAL_X_MAX, 0);
+					Level.setTile(x, y + 1, z, PORTAL_X_MAX, 1);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z, 6);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
-						Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 1);
+						Level.setTile(x, y - 1, z, PORTAL_X_MAX, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z, 6);
 						return;
 					}
@@ -3063,16 +2920,16 @@ function setPortalOrange(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
-					Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+					Level.setTile(x, y, z, PORTAL_Z_MAX, 0);
+					Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 1);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z, 2);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
-						Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 1);
+						Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z, 2);
 						return;
 					}
@@ -3083,16 +2940,16 @@ function setPortalOrange(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
-					Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+					Level.setTile(x, y, z, PORTAL_X_MIN, 0);
+					Level.setTile(x, y + 1, z, PORTAL_X_MIN, 1);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z, 5);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
-						Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 1);
+						Level.setTile(x, y - 1, z, PORTAL_X_MIN, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z, 5);
 						return;
 					}
@@ -3103,16 +2960,16 @@ function setPortalOrange(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
-					Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+					Level.setTile(x, y, z, PORTAL_Z_MIN, 0);
+					Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 1);
 					savePortalAndDeleteOrange(x, y, z, x, y+1, z, 1);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
-						Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 1);
+						Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 0);
 						savePortalAndDeleteOrange(x, y, z, x, y-1, z, 1);
 						return;
 					}
@@ -3125,16 +2982,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 0);
+						Level.setTile(x, y + 1, z, PORTAL_X_MAX, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 6);
 					return;
 					} else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MAX, 1);
+							Level.setTile(x, y - 1, z, PORTAL_X_MAX, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 6);
 							return;
 						}
@@ -3144,16 +3001,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 0);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 2);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MAX, 1);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 2);
 							return;
 						}
@@ -3167,16 +3024,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MAX_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_X_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 0);
+						Level.setTile(x, y + 1, z, PORTAL_X_MAX, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 6);
 					return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_X_MAX_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_X_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MAX, 1);
+							Level.setTile(x, y - 1, z, PORTAL_X_MAX, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 6);
 							return;
 						}
@@ -3186,16 +3043,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 0);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 1);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MIN, 1);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 1);
 							return;
 						}
@@ -3209,16 +3066,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 0);
+						Level.setTile(x, y + 1, z, PORTAL_X_MIN, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 5);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MIN, 1);
+							Level.setTile(x, y - 1, z, PORTAL_X_MIN, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 5);
 							return;
 						}
@@ -3228,16 +3085,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MIN_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_Z_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 0);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 1);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_Z_MIN_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_Z_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MIN, 1);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 1);
 							return;
 						}
@@ -3251,16 +3108,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_X_MIN_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_X_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 0);
+						Level.setTile(x, y + 1, z, PORTAL_X_MIN, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 5);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_X_MIN_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_X_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MIN, 1);
+							Level.setTile(x, y - 1, z, PORTAL_X_MIN, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 5);
 							return;
 						}
@@ -3270,16 +3127,16 @@ function setPortalOrange(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, ORANGE_Z_MAX_D, 0);
-						Level.setTile(x, y + 1, z, ORANGE_Z_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 0);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 1);
 						savePortalAndDeleteOrange(x, y, z, x, y+1, z, 2);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, ORANGE_Z_MAX_U, 0);
-							Level.setTile(x, y - 1, z, ORANGE_Z_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MAX, 1);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 0);
 							savePortalAndDeleteOrange(x, y, z, x, y-1, z, 2);
 							return;
 						}
@@ -3306,15 +3163,15 @@ function setPortalBlue(x, y ,z)
 		{
 			if(Level.getTile(x, y - 1, z) != 0)
 			{
-				Level.setTile(x, y, z, BLUE_Y_MIN_U);
-				Level.setTile(x, y, z + 1, BLUE_Y_MIN_D);
+				Level.setTile(x, y, z, PORTAL_Y_MIN, 3);
+				Level.setTile(x, y, z + 1, PORTAL_Y_MIN, 2);
 				savePortalAndDeleteBlue(x, y, z, x, y, z+1, 3);
 			return;
 			}else
 			if(Level.getTile(x, y + 1, z) != 0)
 			{
-				Level.setTile(x, y, z, BLUE_Y_MAX_U);
-				Level.setTile(x, y, z + 1, BLUE_Y_MAX_D);
+				Level.setTile(x, y, z, PORTAL_Y_MAX, 3);
+				Level.setTile(x, y, z + 1, PORTAL_Y_MAX, 2);
 				savePortalAndDeleteBlue(x, y, z, x, y, z+1, 4);
 				return;
 			}
@@ -3325,16 +3182,16 @@ function setPortalBlue(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
-					Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+					Level.setTile(x, y, z, PORTAL_X_MAX, 2);
+					Level.setTile(x, y + 1, z, PORTAL_X_MAX, 3);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z, 6);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
-						Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 3);
+						Level.setTile(x, y - 1, z, PORTAL_X_MAX, 2);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z, 6);
 						return;
 					}
@@ -3345,16 +3202,16 @@ function setPortalBlue(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
-					Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+					Level.setTile(x, y, z, PORTAL_Z_MAX, 2);
+					Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 3);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z, 2);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
-						Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 3);
+						Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 2);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z, 2);
 						return;
 					}
@@ -3365,16 +3222,16 @@ function setPortalBlue(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
-					Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+					Level.setTile(x, y, z, PORTAL_X_MIN, 2);
+					Level.setTile(x, y + 1, z, PORTAL_X_MIN, 3);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z, 5);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
-						Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 3);
+						Level.setTile(x, y - 1, z, PORTAL_X_MIN, 2);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z, 5);
 						return;
 					}
@@ -3385,16 +3242,16 @@ function setPortalBlue(x, y ,z)
 
 				if(Level.getTile(x, y + 1, z) == 0)
 				{
-					Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
-					Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+					Level.setTile(x, y, z, PORTAL_Z_MIN, 2);
+					Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 3);
 					savePortalAndDeleteBlue(x, y, z, x, y+1, z, 1);
 					return;
 				}else
 				{
 					if(Level.getTile(x, y - 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
-						Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 3);
+						Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 2);
 						savePortalAndDeleteBlue(x, y, z, x, y-1, z, 1);
 						return;
 					}
@@ -3407,16 +3264,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 2);
+						Level.setTile(x, y + 1, z, PORTAL_X_MAX, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 6);
 					return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MAX, 3);
+							Level.setTile(x, y - 1, z, PORTAL_X_MAX, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 6);
 							return;
 						}
@@ -3426,16 +3283,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 2);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 2);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MAX, 3);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 2);
 							return;
 						}
@@ -3449,16 +3306,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MAX_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_X_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MAX, 2);
+						Level.setTile(x, y + 1, z, PORTAL_X_MAX, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 6);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_X_MAX_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_X_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MAX, 3);
+							Level.setTile(x, y - 1, z, PORTAL_X_MAX, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 6);
 							return;
 						}
@@ -3468,16 +3325,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 2);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 1);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MIN, 3);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 1);
 							return;
 						}
@@ -3491,16 +3348,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 2);
+						Level.setTile(x, y + 1, z, PORTAL_X_MIN, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 5);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MIN, 3);
+							Level.setTile(x, y - 1, z, PORTAL_X_MIN, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 5);
 							return;
 						}
@@ -3510,16 +3367,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MIN_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_Z_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MIN, 2);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MIN, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 1);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_Z_MIN_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_Z_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MIN, 3);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MIN, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 1);
 							return;
 						}
@@ -3533,16 +3390,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_X_MIN_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_X_MIN_U, 0);
+						Level.setTile(x, y, z, PORTAL_X_MIN, 2);
+						Level.setTile(x, y + 1, z, PORTAL_X_MIN, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 5);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_X_MIN_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_X_MIN_D, 0);
+							Level.setTile(x, y, z, PORTAL_X_MIN, 3);
+							Level.setTile(x, y - 1, z, PORTAL_X_MIN, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 5);
 							return;
 						}
@@ -3552,16 +3409,16 @@ function setPortalBlue(x, y ,z)
 
 					if(Level.getTile(x, y + 1, z) == 0)
 					{
-						Level.setTile(x, y, z, BLUE_Z_MAX_D, 0);
-						Level.setTile(x, y + 1, z, BLUE_Z_MAX_U, 0);
+						Level.setTile(x, y, z, PORTAL_Z_MAX, 2);
+						Level.setTile(x, y + 1, z, PORTAL_Z_MAX, 3);
 						savePortalAndDeleteBlue(x, y, z, x, y+1, z, 2);
 						return;
 					}else
 					{
 						if(Level.getTile(x, y - 1, z) == 0)
 						{
-							Level.setTile(x, y, z, BLUE_Z_MAX_U, 0);
-							Level.setTile(x, y - 1, z, BLUE_Z_MAX_D, 0);
+							Level.setTile(x, y, z, PORTAL_Z_MAX, 3);
+							Level.setTile(x, y - 1, z, PORTAL_Z_MAX, 2);
 							savePortalAndDeleteBlue(x, y, z, x, y-1, z, 2);
 							return;
 						}
@@ -4998,7 +4855,7 @@ Level.setTileNotInAir = function(x, y, z, id, data)
 	Level.setTile(x, y, z, id, data);
 }
 
-Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
+Level.placeBlockFromItem = function(x, y, z, side, blockId, blockdamage, canBePlacedOnAir)
 {
 	if(canBePlacedOnAir == null)
 		canBePlacedOnAir = false; // must be placed on a block
@@ -5011,7 +4868,7 @@ Level.placeBlockFromItem = function(x, y, z, side, blockId, canBePlacedOnAir)
 
 	if(canBePlaced)
 	{
-		Level.setTile(position.x, position.y, position.z, blockId);
+		Level.setTile(position.x, position.y, position.z, blockId, blockdamage);
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
 	}

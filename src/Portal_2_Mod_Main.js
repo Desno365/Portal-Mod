@@ -915,7 +915,7 @@ function destroyBlock(x, y, z)
 	}
 
 	// radio
-	if(tile == PORTAL_RADIO_A || tile == PORTAL_RADIO_B)
+	if(tile == PORTAL_RADIO)
 	{
 		preventDefault();
 		Level.setTile(x, y, z, 0);

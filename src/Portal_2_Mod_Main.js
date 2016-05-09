@@ -414,7 +414,7 @@ const JUMPER_DIRECTION_ID = 224;
 const JUMPER_ID = 225;
 
 // radio
-const PORTAL_RADIO = 229; // 4 directions with dame values
+const PORTAL_RADIO = 229; // 4 directions with damage values
 
 // blue gel
 const REPULSION_GEL_ID = 230;
@@ -6475,7 +6475,7 @@ function errorWithModResources()
 					{
 						onClick: function()
 						{
-							DesnoUtils.killBlockLauncher();
+							Launcher.killLauncher();
 							errorWithModResourcesShowed = false;
 							popup.dismiss();
 						}

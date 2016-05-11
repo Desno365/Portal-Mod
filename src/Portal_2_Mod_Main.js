@@ -3534,7 +3534,7 @@ function savePortalsToDelete()
 				// create file
 				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portals.dat");
 				if(saveFile.exists())
-					saveFile.delete();
+					saveFile['delete']();
 				saveFile.createNewFile();
 
 				// load streams
@@ -3874,7 +3874,7 @@ function saveCustomMobs()
 				// create file
 				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/mobs.dat");
 				if(saveFile.exists())
-					saveFile.delete();
+					saveFile['delete']();
 				saveFile.createNewFile();
 
 				// load streams
@@ -4603,7 +4603,7 @@ function saveMapOptions()
 				// create file
 				var saveFile = new java.io.File(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/portal-mod/portal-mod-options.dat");
 				if(saveFile.exists())
-					saveFile.delete();
+					saveFile['delete']();
 				saveFile.createNewFile();
 
 				// load streams
@@ -7401,7 +7401,7 @@ SoundsInstaller.install = function()
 	{
 		run: function()
 		{
-			File.delete(SoundsInstaller.pathInSdcard); //delete previous files if present
+			File.deleteFile(SoundsInstaller.pathInSdcard); //delete previous files if present
 
 			for(var i in SoundsInstaller.sounds.soundArray)
 			{
@@ -7448,7 +7448,7 @@ SoundsInstaller.saveFileWithVersion = function()
 {
 	var versionSaveFile = new java.io.File(SoundsInstaller.pathInSdcard + SoundsInstaller.versionFileName);
 	if(versionSaveFile.exists())
-		versionSaveFile.delete();
+		versionSaveFile['delete']();
 	versionSaveFile.createNewFile();
 
 	var streamOutputVersion = new java.io.FileOutputStream(versionSaveFile);

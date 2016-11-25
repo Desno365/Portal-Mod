@@ -4175,7 +4175,7 @@ function TurretClass(turret)
 	turretObject.shouldShoot = function()
 	{
 		//
-		return checkProximity(Player.getEntity(), this.entity, 10, 3);
+		return Level.checkEntityProximity(Player.getEntity(), this.entity, 10, 3);
 	}
 
 	turretObject.shoot = function(victim)
@@ -4290,7 +4290,7 @@ function TurretDefectiveClass(turret)
 
 		if(this.aggressive)
 		{
-			if(checkProximity(Player.getEntity(), this.entity, 8, 3))
+			if(this.shouldShoot())
 			{
 				this.countdownToAttack++;
 				if(this.countdownToAttack == 1)
@@ -4329,7 +4329,7 @@ function TurretDefectiveClass(turret)
 	turretObject.shouldShoot = function()
 	{
 		//
-		return checkProximity(Player.getEntity(), this.entity, 8, 3);
+		return Level.checkEntityProximity(Player.getEntity(), this.entity, 8, 3);
 	}
 
 	turretObject.shoot = function()
@@ -4388,17 +4388,6 @@ function TurretDefectiveClass(turret)
 	}
 
 	return turretObject;
-}
-
-function checkProximity(entity1, entity2, distanceXZ, distanceY)
-{
-	if(!(Math.abs(Entity.getX(entity1) - Entity.getX(entity2)) <= distanceXZ))
-		return false;
-	if(!(Math.abs(Entity.getY(entity1) - Entity.getY(entity2)) <= distanceY))
-		return false;
-	if(!(Math.abs(Entity.getZ(entity1) - Entity.getZ(entity2)) <= distanceXZ))
-		return false;
-	return true;
 }
 
 function turretsStopSinging()

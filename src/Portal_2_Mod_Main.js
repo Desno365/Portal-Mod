@@ -525,29 +525,18 @@ function newLevel()
 
 	loadMapOptions();
 
-	var bSizeTest = ModPE.readData("pref_portal_buttons_size");
-	if(bSizeTest != "" && bSizeTest != null && bSizeTest != undefined)
-		buttonsSize = parseFloat(bSizeTest);
-
-	var imageSizeTest = ModPE.readData("pref_portal_image_buttons_size");
-	if(imageSizeTest != "" && imageSizeTest != null && imageSizeTest != undefined)
-		imageSize = parseFloat(imageSizeTest);
-
-	var mButtonsTest = ModPE.readData("pref_portal_y_offset");
-	if(mButtonsTest != "" && mButtonsTest != null && mButtonsTest != undefined)
-		pixelsOffsetButtons = parseFloat(mButtonsTest);
-
-	var generalVolumeTest = ModPE.readData("pref_portal_general_volume");
-	if(generalVolumeTest != "" && generalVolumeTest != null && generalVolumeTest != undefined)
-		generalVolume = parseFloat(generalVolumeTest);
+	buttonsSize = ModPE.readFloatFromData("pref_portal_buttons_size", BUTTONS_SIZE_DEFAULT);
+	imageSize = ModPE.readFloatFromData("pref_portal_image_buttons_size", 1);
+	pixelsOffsetButtons = ModPE.readFloatFromData("pref_portal_y_offset", 0);
+	generalVolume = ModPE.readFloatFromData("pref_portal_general_volume", 1);
 	if(generalVolume < 0 || generalVolume > 1)
 		generalVolume = 1;
 
 	// load saved boolean settings
-	// getSavedBoolean(name, defaultValue, debug);
-	minecraftStyleForButtons = getSavedBoolean("pref_portal_buttons_style", false);
-	playWelcomeSoundAtStartup = getSavedBoolean("pref_portal_welcome_sound", true);
-	entitiesSupportForPortals = getSavedBoolean("pref_portal_entities_support", ENTITIES_SUPPORT_DEFAULT);
+	// ModPE.readBooleanFromData(key, defaultValue)
+	minecraftStyleForButtons = ModPE.readBooleanFromData("pref_portal_buttons_style", false);
+	playWelcomeSoundAtStartup = ModPE.readBooleanFromData("pref_portal_welcome_sound", true);
+	entitiesSupportForPortals = ModPE.readBooleanFromData("pref_portal_entities_support", ENTITIES_SUPPORT_DEFAULT);
 
 	new java.lang.Thread(new java.lang.Runnable()
 	{
@@ -5042,73 +5031,6 @@ function defaultColoredMinecraftButton(text, colorString)
 
 
 //########## MISC functions ##########
-function getSavedBoolean(name, defaultValue, debug)
-{
-	var savedDataTest = ModPE.readData(name);
-	debug = debug || false;
-
-	// debug code
-	if(DEBUG)
-	{
-		var debugTest;
-
-		if(typeof savedDataTest == "boolean")
-		{
-			clientMessage(name + " is bool");
-			debugTest = savedDataTest;
-		} else
-		{
-			if(typeof savedDataTest == "string")
-			{
-				clientMessage(name + " is string");
-				debugTest = Convert.stringToBoolean(savedDataTest);
-			} else
-			{
-				clientMessage(name + " is " + typeof savedDataTest);
-			}
-		}
-
-		clientMessage(name + ": " + debugTest);
-
-		if(typeof debugTest == "boolean")
-		{
-			if(debugTest)
-				clientMessage(name + " true");
-			else
-				clientMessage(name + " false");
-		} else
-		{
-			clientMessage(name + ", something really wrong here!");
-		}
-	}
-
-	// return the saved boolean
-	if(typeof savedDataTest == "boolean")
-	{
-		return savedDataTest;
-	} else
-	{
-		if(typeof savedDataTest == "string")
-		{
-			if(savedDataTest != "" && savedDataTest != null && savedDataTest != undefined)
-			{
-				return Convert.stringToBoolean(savedDataTest);
-			} else
-			{
-				// this setting has never been saved.
-				if(typeof defaultValue == "boolean")
-					return defaultValue;
-				else
-					return Convert.stringToBoolean(defaultValue)
-			}
-		} else
-		{
-			clientMessage("Error in getSavedBoolean() for " + name);
-			return false;
-		}
-	}
-}
-
 function normalizeAngle(angle)
 {
 	var newAngle = angle;

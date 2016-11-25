@@ -7399,6 +7399,11 @@ function startup()
 	// custom variables for DesnoUtils Library (must be set immediately or the default tag will remain)
 	DesnoUtils.MOD_NAME = "Portal Mod";
 	DesnoUtils.MAX_LOGARITHMIC_VOLUME = MAX_LOGARITHMIC_VOLUME;
+	DesnoUtils.CHECK_LAUNCHER_AT_START = true;
+	DesnoUtils.CHECK_LAUNCHER_AT_START_CUSTOM_MESSAGE = "The Launcher you're using is not supported!<br>" +
+			"The Portal 2 Mod may still work but you may find bugs.<br>" +
+			"Please <b>use BlockLauncher</b> (free or pro) to enjoy all the features of the mod.";
+	DesnoUtils.CHECK_LAUNCHER_AT_START_INSTRUCTIONS_LINK = "http://desno365.net/minecraft/portal2-mod/#installation-instructions";
 
 	// add all items
 	createPortalItems();

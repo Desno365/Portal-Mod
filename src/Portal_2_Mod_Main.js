@@ -810,13 +810,13 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 			return;
 		}
 
-		//is the player carrying a disc?
+		// is the player carrying a disc?
 		if(itemId == STILL_ALIVE_DISC_ID || itemId == WANT_YOU_GONE_DISC_ID || itemId == CARA_MIA_ADDIO_DISC_ID)
 		{
-			//jukebox: start playing
+			// jukebox: start playing
 			try
 			{
-				jukeboxes.push(new JukeboxClass(Math.floor(x) + 0.5, Math.floor(y), Math.floor(z) + 0.5, itemId));
+				jukeboxes.push(new JukeboxPlayerClass(Math.floor(x) + 0.5, Math.floor(y), Math.floor(z) + 0.5, itemId));
 				if(Level.getGameMode() == GameMode.SURVIVAL)
 					Player.decreaseByOneCarriedItem();
 			}
@@ -1554,16 +1554,7 @@ var ModTickFunctions = {
 			if(jukeboxes[i].countdown >= 10)
 			{
 				jukeboxes[i].countdown = 0;
-				var distancePJ = Math.sqrt( (Math.pow(jukeboxes[i].x - Player.getX(), 2)) + (Math.pow(jukeboxes[i].y - Player.getY(), 2)) + (Math.pow(jukeboxes[i].z - Player.getZ(), 2) ));
-				if(distancePJ > MAX_LOGARITHMIC_VOLUME_JUKEBOX)
-				{
-					jukeboxes[i].player.setVolume(0.0, 0.0);
-				}
-				else
-				{
-					var volume = 1 - (Math.log(distancePJ) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
-					jukeboxes[i].player.setVolume(volume * generalVolume, volume * generalVolume);
-				}
+				jukeboxes[i].setVolumeBasedOnDistance();
 			}
 		}
 	},
@@ -4365,7 +4356,7 @@ function stopRadioMusic()
 
 
 //########## JUKEBOX functions ##########
-function JukeboxClass(x, y, z, disc)
+function JukeboxPlayerClass(x, y, z, disc)
 {
 	this.x = x;
 	this.y = y;
@@ -4374,13 +4365,12 @@ function JukeboxClass(x, y, z, disc)
 	this.disc = disc;
 
 	this.player = new android.media.MediaPlayer();
-	this.player.reset();
 	this.player.setDataSource(sdcard + "/games/com.mojang/portal-mod-sounds/music/" + getFileNameFromDiscId(disc));
-	this.player.prepare();
 	this.player.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
+	this.player.prepare();
 	this.player.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener()
 	{
-		onCompletion: function()
+		onCompletion: function(mp)
 		{
 			var jukebox = getJukeboxObjectFromXYZ(x, y, z);
 			if(jukebox != -1)
@@ -4389,6 +4379,7 @@ function JukeboxClass(x, y, z, disc)
 	});
 	this.player.start();
 
+	// show Now playing message
 	nowPlayingMessage = "Now playing: " + Item.getName(disc, 0, false);
 	currentActivity.runOnUiThread(new java.lang.Runnable(
 	{
@@ -4424,11 +4415,26 @@ function JukeboxClass(x, y, z, disc)
 		}
 	}));
 
+	// set volume of the player based on distance of the player from the jukebox
+	this.setVolumeBasedOnDistance = function()
+	{
+		var distancePlayerJukebox = Math.sqrt( Math.pow(this.x - Player.getX(), 2) + Math.pow(this.y - Player.getY(), 2) + Math.pow(this.z - Player.getZ(), 2) );
+		if(distancePlayerJukebox > MAX_LOGARITHMIC_VOLUME_JUKEBOX)
+		{
+			this.player.setVolume(0.0, 0.0);
+		} else
+		{
+			var volume = 1 - (Math.log(distancePlayerJukebox) / Math.log(MAX_LOGARITHMIC_VOLUME_JUKEBOX));
+			this.player.setVolume(volume * generalVolume, volume * generalVolume);
+		}
+	}
 
+	// eject the disc, stop the player and remove the Jukebox object
 	this.stopJukebox = function()
 	{
+		this.player.release();
+		this.player = null;
 		this.ejectDisc();
-		this.player.reset();
 		jukeboxes.splice(jukeboxes.indexOf(this), 1);
 	}
 

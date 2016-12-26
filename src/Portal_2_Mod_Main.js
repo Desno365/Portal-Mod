@@ -343,27 +343,27 @@ function createDiscItems()
 
 // Type 1
 //portal z min
-const PORTAL_Z_MIN = 200;
+const PORTAL_Z_MIN = 221;
 
 // Type 2
 //portal z max
-const PORTAL_Z_MAX = 202;
+const PORTAL_Z_MAX = 222;
 
 // Type 3
 //portal y min
-const PORTAL_Y_MIN = 204;
+const PORTAL_Y_MIN = 223;
 
 // Type 4
 //portal y max
-const PORTAL_Y_MAX = 206;
+const PORTAL_Y_MAX = 226;
 
 // Type 5
 //portal x min
-const PORTAL_X_MIN = 208;
+const PORTAL_X_MIN = 227;
 
 // Type 6
 //portal x max
-const PORTAL_X_MAX = 210;
+const PORTAL_X_MAX = 228;
 
 
 function createPortalBlocks()
@@ -1308,10 +1308,10 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 	}
 }
 
-function jumpHook() // not really an hook
+function jumpHook(blockId) // not really an hook, blockId is the id of the block under the player
 {
 	// repulsion gel block
-	if(blockUnderPlayerBefore == REPULSION_GEL_ID)
+	if(blockId == REPULSION_GEL_ID)
 	{
 		makeBounceSound();
 	}
@@ -1399,7 +1399,7 @@ var ModTickFunctions = {
 	{
 		if(Entity.getVelY(Player.getEntity()) > VEL_Y_OFFSET && velBeforeY == VEL_Y_OFFSET)
 		{
-			jumpHook();
+			jumpHook(blockUnderPlayerBefore);
 		}
 	},
 

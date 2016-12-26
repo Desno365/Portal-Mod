@@ -961,7 +961,7 @@ function destroyBlock(x, y, z)
 	}
 
 	// stop jukebox when destroyed
-	JukeboxHooks.destroyBlock();
+	JukeboxHooks.destroyBlock(x, y, z);
 }
 
 function attackHook(attacker, victim)

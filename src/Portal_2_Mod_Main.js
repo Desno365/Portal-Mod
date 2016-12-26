@@ -517,6 +517,8 @@ function newLevel()
 					if(isInGame)
 					{
 						loadPortalsAndDeleteThem();
+
+						clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
 					}
 				}
 			}), 500);
@@ -558,8 +560,6 @@ function newLevel()
 			}
 		}
 	}).start();
-
-	clientMessage("§fP§9O§fRTAL M§cO§fD " + CURRENT_VERSION + " by Desno365.");
 
 	if(playWelcomeSoundAtStartup)
 		playSoundFromFileName("game-entry1.mp3");

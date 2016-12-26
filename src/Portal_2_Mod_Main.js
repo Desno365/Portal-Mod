@@ -924,19 +924,14 @@ function destroyBlock(x, y, z)
 	var tile = Level.getTile(x, y, z);
 
 	// radio
-	if(isRadioPlaying)
-	{
-		if(x == Math.floor(radioX) && y == Math.floor(radioY) && z == Math.floor(radioZ))
-		{
-			stopRadioMusic();
-		}
-	}
-
-	// radio
 	if(tile == PORTAL_RADIO)
 	{
+		if(isRadioPlaying)
+			if(x == Math.floor(radioX) && y == Math.floor(radioY) && z == Math.floor(radioZ))
+				stopRadioMusic();
+
 		preventDefault();
-		Level.setTile(x, y, z, 0);
+		Level.destroyBlock(x, y, z, false);
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
 	}
 
@@ -987,16 +982,14 @@ function destroyBlock(x, y, z)
 	// jumper
 	if(tile == JUMPER_ID)
 	{
-		//
 		preventDefault();
-		Level.setTile(x, y, z, 0);
+		Level.destroyBlock(x, y, z, false);
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
 	}
 	if(tile == JUMPER_DIRECTION_ID)
 	{
-		//
 		preventDefault();
-		Level.setTile(x, y, z, 0);
+		Level.destroyBlock(x, y, z, false);
 	}
 
 	// jukebox
@@ -5224,11 +5217,11 @@ function informationUI()
 				var informationText1 = new android.widget.TextView(currentActivity);
 				informationText1.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				informationText1.setText(new android.text.Html.fromHtml("<b>Portal guns:</b>" +
-					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, can be used " + PORTAL_GUN_DAMAGE + " times." +
-					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, can be used " + PORTAL_GUN_GOLD_DAMAGE + " times." +
-					"<br>-<i>PortalGun Iron</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_IRON_DAMAGE + " times." +
-					"<br>-<i>PortalGun Lava</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_LAVA_DAMAGE + " times." +
-					"<br>-<i>PortalGun Wood & Stone</i>: Tap on a block to place a portal. Can be used " + PORTAL_GUN_WOOD_AND_STONE_DAMAGE + " times."));
+					"<br>-<i>PortalGun</i>: bullet speed: 40 block/second, can be used " + PORTAL_GUN_DAMAGE + " times in survival." +
+					"<br>-<i>PortalGun Gold</i>: bullet speed: 30 block/second, can be used " + PORTAL_GUN_GOLD_DAMAGE + " times in survival." +
+					"<br>-<i>PortalGun Iron</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_IRON_DAMAGE + " times in survival." +
+					"<br>-<i>PortalGun Lava</i>: bullet speed: 20 block/second, can be used " + PORTAL_GUN_LAVA_DAMAGE + " times in survival." +
+					"<br>-<i>PortalGun Wood & Stone</i>: Tap on a block to place a portal. Can be used " + PORTAL_GUN_WOOD_AND_STONE_DAMAGE + " times in survival."));
 				layout.addView(informationText1);
 
 				layout.addView(portalDivider());

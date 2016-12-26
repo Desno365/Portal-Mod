@@ -880,6 +880,35 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 	}
 }
 
+function projectileHitBlockHook(projectile, blockX, blockY, blockZ, side)
+{
+	// blue portal
+	if(blueBulletLaunched)
+	{
+		if(projectile == blueBullet)
+		{
+			var sidePosition = Level.getUseItemSideBlockPosition(blockX, blockY, blockZ, side);
+			setPortalBlue(sidePosition.x, sidePosition.y, sidePosition.z);
+			Entity.remove(projectile);
+			blueBulletLaunched = false;
+			blueBullet = null;
+		}
+	}
+
+	// orange portal
+	if(orangeBulletLaunched)
+	{
+		if(projectile == orangeBullet)
+		{
+			var sidePosition = Level.getUseItemSideBlockPosition(blockX, blockY, blockZ, side);
+			setPortalOrange(sidePosition.x, sidePosition.y, sidePosition.z);
+			Entity.remove(projectile);
+			orangeBulletLaunched = false;
+			orangeBullet = null;
+		}
+	}
+}
+
 function destroyBlock(x, y, z)
 {
 	if(indestructibleBlocks && Level.getGameMode() == GameMode.SURVIVAL)
@@ -1338,8 +1367,6 @@ function modTick()
 
 	ModTickFunctions.portals();
 
-	ModTickFunctions.portalGunBullets();
-
 	ModTickFunctions.portalGunPicking(); // portal gun picking entities
 
 	ModTickFunctions.gravityGun(); // gravity gun picking entities
@@ -1424,71 +1451,6 @@ var ModTickFunctions = {
 				{
 					entityIsInPortalOrange(entities[i], Entity.getX(entities[i]), Entity.getY(entities[i]) + 0.1, Entity.getZ(entities[i]));
 					entityIsInPortalBlue(entities[i], Entity.getX(entities[i]), Entity.getY(entities[i]) + 0.1, Entity.getZ(entities[i]));
-				}
-			}
-		}
-	},
-
-	portalGunBullets: function()
-	{
-		if(blueBulletLaunched)
-		{
-			var xArrow = Entity.getX(blueBullet.entity);
-			var yArrow = Entity.getY(blueBullet.entity);
-			var zArrow = Entity.getZ(blueBullet.entity);
-			if(blueBullet.previousX == xArrow && blueBullet.previousY == yArrow && blueBullet.previousZ == zArrow)
-			{
-				setPortalBlue(Math.floor(xArrow), Math.floor(yArrow), Math.floor(zArrow));
-
-				Entity.remove(blueBullet.entity);
-				blueBullet = null;
-				blueBulletLaunched = false;
-			} else
-			{
-				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
-				{
-					// the blueBullet hit an entity
-					playSoundFromFileName("portals/portal_invalid_surface.mp3", blueBullet.previousX, blueBullet.previousY, blueBullet.previousZ);
-
-					Entity.remove(blueBullet.entity);
-					blueBullet = null;
-					blueBulletLaunched = false;
-				} else
-				{
-					blueBullet.previousX = xArrow;
-					blueBullet.previousY = yArrow;
-					blueBullet.previousZ = zArrow;
-				}
-			}
-		}
-
-		if(orangeBulletLaunched)
-		{
-			var xArrow = Entity.getX(orangeBullet.entity);
-			var yArrow = Entity.getY(orangeBullet.entity);
-			var zArrow = Entity.getZ(orangeBullet.entity);
-			if(orangeBullet.previousX == xArrow && orangeBullet.previousY == yArrow && orangeBullet.previousZ == zArrow)
-			{
-				setPortalOrange(Math.floor(xArrow), Math.floor(yArrow), Math.floor(zArrow));
-
-				Entity.remove(orangeBullet.entity);
-				orangeBullet = null;
-				orangeBulletLaunched = false;
-			} else
-			{
-				if(xArrow == 0 && yArrow == 0 && zArrow == 0)
-				{
-					// the orangeBullet hit an entity
-					playSoundFromFileName("portals/portal_invalid_surface.mp3", orangeBullet.previousX, orangeBullet.previousY, orangeBullet.previousZ);
-
-					Entity.remove(orangeBullet.entity);
-					orangeBullet = null;
-					orangeBulletLaunched = false;
-				} else
-				{
-					orangeBullet.previousX = xArrow;
-					orangeBullet.previousY = yArrow;
-					orangeBullet.previousZ = zArrow;
 				}
 			}
 		}
@@ -1801,7 +1763,7 @@ function showPortalGunUI()
 						if(blueBulletLaunched)
 						{
 							blueBulletLaunched = false;
-							Entity.remove(blueBullet.entity);
+							Entity.remove(blueBullet);
 							blueBullet = null;
 						}
 						shootBluePortal();
@@ -1881,7 +1843,7 @@ function showPortalGunUI()
 						if(orangeBulletLaunched)
 						{
 							orangeBulletLaunched = false;
-							Entity.remove(orangeBullet.entity);
+							Entity.remove(orangeBullet);
 							orangeBullet = null;
 						}
 						shootOrangePortal();
@@ -1961,7 +1923,7 @@ function shootBluePortal()
 
 	changeCarriedPortalGunColorToBlue(); // change the carried item if necessary
 
-	blueBullet = new EntityClass(bullet);
+	blueBullet = bullet;
 	blueBulletLaunched = true;
 }
 
@@ -1984,7 +1946,7 @@ function shootOrangePortal()
 
 	changeCarriedPortalGunColorToOrange(); // change the carried item if necessary
 
-	orangeBullet = new EntityClass(bullet);
+	orangeBullet = bullet;
 	orangeBulletLaunched = true;
 }
 

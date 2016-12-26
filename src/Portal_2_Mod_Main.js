@@ -543,11 +543,11 @@ function newLevel()
 		run: function()
 		{
 			updateLatestVersionMod();
-			if(latestVersion != CURRENT_VERSION && latestVersion != undefined)
-				updateAvailableUI();
-			else
+			if(latestVersion != undefined) // if == undefined there was an error
 			{
-				if(latestVersion != undefined) // if == undefined there was an error
+				if(latestVersion != CURRENT_VERSION)
+					updateAvailableUI();
+				else
 				{
 					currentActivity.runOnUiThread(new java.lang.Runnable() {
 						run: function() {

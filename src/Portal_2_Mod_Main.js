@@ -609,12 +609,8 @@ function leaveGame()
 	// orange gel
 	speedMultiplier = SPEED_MULTIPLIER_MIN;
 
-	// jukebox
-	for(var i in jukeboxes)
-		jukeboxes[i].player.reset();
-	jukeboxes = [];
-	nowPlayingMessage = "";
-	currentColor = 0;
+	// reset jukebox variables
+	JukeboxHooks.leaveGame();
 
 	// turrets
 	turrets = [];
@@ -622,7 +618,7 @@ function leaveGame()
 	turretsDefective = [];
 }
 
-function useItem(x, y, z, itemId, blockId, side, itemDamage)
+function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
 {
 	x = Math.floor(x);
 	y = Math.floor(y);
@@ -797,36 +793,8 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage)
 		}
 	}
 
-	// jukebox
-	if(blockId == JUKEBOX_ID)
-	{
-		preventDefault();
-
-		// is block a playing jukebox?
-		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
-		if(checkBlockJukebox != -1)
-		{
-			checkBlockJukebox.stopJukebox();
-			return;
-		}
-
-		// is the player carrying a disc?
-		if(itemId == STILL_ALIVE_DISC_ID || itemId == WANT_YOU_GONE_DISC_ID || itemId == CARA_MIA_ADDIO_DISC_ID)
-		{
-			// jukebox: start playing
-			try
-			{
-				jukeboxes.push(new JukeboxPlayerClass(Math.floor(x) + 0.5, Math.floor(y), Math.floor(z) + 0.5, itemId));
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-					Player.decreaseByOneCarriedItem();
-			}
-			catch(err)
-			{
-				ModPE.showTipMessage("Portal Mod: Music files not installed!");
-				clientMessage(err);
-			}
-		}
-	}
+	// use jukebox
+	JukeboxHooks.useItem(x, y, z, itemId, blockId);
 
 	// turrets
 	if(itemId == ID_TURRET && Level.getTile(sidePosition.x, sidePosition.y + 1, sidePosition.z) == 0 && Level.getTile(sidePosition.x, sidePosition.y + 2, sidePosition.z) == 0)
@@ -992,13 +960,8 @@ function destroyBlock(x, y, z)
 		Level.destroyBlock(x, y, z, false);
 	}
 
-	// jukebox
-	if(tile == JUKEBOX_ID)
-	{
-		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
-		if(checkBlockJukebox != -1)
-			checkBlockJukebox.stopJukebox();
-	}
+	// stop jukebox when destroyed
+	JukeboxHooks.destroyBlock();
 }
 
 function attackHook(attacker, victim)
@@ -1368,7 +1331,8 @@ function modTick()
 
 	ModTickFunctions.gelBlue(blockUnderPlayer);
 
-	ModTickFunctions.jukebox();
+	// set volume of jukeboxes
+	JukeboxHooks.modTick();
 
 	ModTickFunctions.jumper(flatBlockUnderPlayer);
 
@@ -1536,19 +1500,6 @@ var ModTickFunctions = {
 			}
 
 			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
-		}
-	},
-
-	jukebox: function()
-	{
-		for(var i in jukeboxes)
-		{
-			jukeboxes[i].countdown++;
-			if(jukeboxes[i].countdown >= 10)
-			{
-				jukeboxes[i].countdown = 0;
-				jukeboxes[i].setVolumeBasedOnDistance();
-			}
 		}
 	},
 
@@ -4467,6 +4418,70 @@ function getFileNameFromDiscId(discId)
 		}
 	}
 }
+
+var JukeboxHooks = {
+
+	leaveGame: function()
+	{
+		for(var i in jukeboxes)
+			jukeboxes[i].player.release();
+		jukeboxes = [];
+		nowPlayingMessage = "";
+		currentColor = 0;
+	},
+
+	modTick: function()
+	{
+		for(var i in jukeboxes)
+		{
+			jukeboxes[i].countdown++;
+			if(jukeboxes[i].countdown >= 10)
+			{
+				jukeboxes[i].countdown = 0;
+				jukeboxes[i].setVolumeBasedOnDistance();
+			}
+		}
+	},
+
+	useItem: function(x, y, z, itemId, blockId)
+	{
+		if(blockId == JUKEBOX_ID)
+		{
+			preventDefault();
+
+			// is block a playing jukebox?
+			var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+			if(checkBlockJukebox != -1)
+			{
+				checkBlockJukebox.stopJukebox();
+			} else
+			{
+				// is the player carrying a disc?
+				if(itemId == STILL_ALIVE_DISC_ID || itemId == WANT_YOU_GONE_DISC_ID || itemId == CARA_MIA_ADDIO_DISC_ID)
+				{
+					// jukebox: start playing
+					try
+					{
+						jukeboxes.push(new JukeboxPlayerClass(Math.floor(x) + 0.5, Math.floor(y), Math.floor(z) + 0.5, itemId));
+						if(Level.getGameMode() == GameMode.SURVIVAL)
+							Player.decreaseByOneCarriedItem();
+					} catch(err)
+					{
+						ModPE.showTipMessage("Portal Mod: Music files not installed!");
+						clientMessage(err);
+					}
+				}
+			}
+		}
+	},
+
+	destroyBlock: function(x, y, z)
+	{
+		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
+		if(checkBlockJukebox != -1)
+			checkBlockJukebox.stopJukebox();
+	}
+};
 //########## JUKEBOX functions - END ##########
 
 

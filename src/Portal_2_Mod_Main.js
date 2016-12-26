@@ -468,7 +468,7 @@ function createOtherBlocks()
 
 	Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 	Block.setDestroyTime(PROPULSION_GEL_ID, 1);
-	Block.setFriction(CUBE_NORMAL_ID, 0.111);
+	Block.setFriction(PROPULSION_GEL_ID, 1.125);
 	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
@@ -1375,8 +1375,6 @@ function modTick()
 
 	ModTickFunctions.gelBlue(blockUnderPlayer);
 
-	ModTickFunctions.gelOrange(blockUnderPlayer);
-
 	ModTickFunctions.jukebox();
 
 	ModTickFunctions.jumper(flatBlockUnderPlayer);
@@ -1545,37 +1543,6 @@ var ModTickFunctions = {
 			}
 
 			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
-		}
-	},
-
-	gelOrange: function(blockUnderPlayer)
-	{
-		if(blockUnderPlayer == PROPULSION_GEL_ID)
-		{
-			currentActivity.runOnUiThread(new java.lang.Runnable(
-			{
-				run: function()
-				{
-					new android.os.Handler().postDelayed(new java.lang.Runnable(
-					{
-						run: function()
-						{
-							if(isInGame)
-							{
-								Entity.setVelX(Player.getEntity(), Entity.getVelX(Player.getEntity()) * speedMultiplier);
-								Entity.setVelZ(Player.getEntity(), Entity.getVelZ(Player.getEntity()) * speedMultiplier);
-									
-								if(speedMultiplier < SPEED_MULTIPLIER_MAX)
-									speedMultiplier = speedMultiplier + 0.025;
-							}
-						}
-					}), ((speedMultiplier - SPEED_MULTIPLIER_MIN) * 900));
-				}
-			}));
-		}else
-		{
-			if(speedMultiplier != SPEED_MULTIPLIER_MIN)
-				speedMultiplier = SPEED_MULTIPLIER_MIN;
 		}
 	},
 
@@ -4840,6 +4807,7 @@ Item.newArmor = function(id, iconName, iconIndex, name, texture, damageReduceAmo
 }
 //########## ITEM functions - END ##########
 
+
 //########## BLOCK functions ##########
 Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 {
@@ -4853,17 +4821,19 @@ Block.newBlock = function(id, name, textureNames, sourceId, opaque, renderType)
 		Block.defineBlock(id, name, "enchanting_table_top", sourceId, opaque, renderType);
 	}
 }
+
 Block.newPortal = function(id, name, textureName, xMin, yMin, zMin, xMax, yMax, zMax)
 {
 	Block.newBlock(id, name, textureName, 0, false, 0);
 	Block.setShape(id, xMin, yMin, zMin, xMax, yMax, zMax);
 	Block.setDestroyTime(id, 3);
-	Block.setRenderLayer(id, 4); // recently changed from 3 to 4
+	Block.setRenderLayer(id, 4);
 	Block.setLightLevel(id, 3);
 	Block.setLightOpacity(id, 0);
-	Block.setExplosionResistance(id, 30);
+	Block.setExplosionResistance(id, 6000);
 }
 //########## BLOCK functions - END ##########
+
 
 //########## INTERNET functions ##########
 function updateLatestVersionMod()
@@ -5013,14 +4983,6 @@ function DroppedItemClass(entity, id, data)
 	this.entity = entity;
 	this.id = id;
 	this.data = data;
-	this.previousX = 0;
-	this.previousY = 0;
-	this.previousZ = 0;
-}
-
-function EntityClass(entity)
-{
-	this.entity = entity;
 	this.previousX = 0;
 	this.previousY = 0;
 	this.previousZ = 0;

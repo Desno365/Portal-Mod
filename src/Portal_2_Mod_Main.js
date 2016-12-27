@@ -1289,18 +1289,11 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 
 function jumpHook(blockId) // not really an hook, blockId is the id of the block under the player
 {
-	// repulsion gel block
-	if(blockId == REPULSION_GEL_ID)
-	{
-		makeBounceSound();
-	}
+	// make bounce sound if block under is a blue gel block
+	BlueGelHooks.jumpHook(blockId);
 
-	// long fall boots
-	if(isFalling)
-	{
-		// player is spamming the jump button causing bugs
-		Entity.setVelY(Player.getEntity(), -3);
-	}
+	// prevent jump effect bug when the user is pressing the jump button fast
+	LongFallBootsHooks.jumpHook();
 }
 
 function modTick()
@@ -1323,14 +1316,16 @@ function modTick()
 
 	ModTickFunctions.placeShotBlocks(); // gravity gun picking entities
 
-	ModTickFunctions.gelBlue(blockUnderPlayer);
+	// set jump effect and check if falling on blue gel block
+	BlueGelHooks.modTick(blockUnderPlayer);
 
 	// set volume of jukeboxes
 	JukeboxHooks.modTick();
 
 	ModTickFunctions.jumper(flatBlockUnderPlayer);
 
-	ModTickFunctions.longFallBoots(blockUnderPlayer);
+	// activate effect of long fall boots
+	LongFallBootsHooks.modTick(blockUnderPlayer);
 
 	ModTickFunctions.radio();
 
@@ -1483,20 +1478,6 @@ var ModTickFunctions = {
 		}
 	},
 
-	gelBlue: function(blockUnderPlayer)
-	{
-		if(blockUnderPlayer == REPULSION_GEL_ID)
-		{
-			if(velBeforeY < -0.666) // Satan confirmed!
-			{
-				Entity.setVelY(Player.getEntity(), -velBeforeY);
-				makeBounceSound();
-			}
-
-			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
-		}
-	},
-
 	jumper: function(flatBlockUnderPlayer)
 	{
 		if(flatBlockUnderPlayer == JUMPER_ID)
@@ -1516,55 +1497,6 @@ var ModTickFunctions = {
 				angle += 180;
 
 			makeJumperJump(angle);
-		}
-	},
-
-	longFallBoots: function(blockUnderPlayer)
-	{
-		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
-		{
-			// player will hit the ground soon
-			if(isFalling && blockUnderPlayer > 0)
-			{
-				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
-				{
-					// STOP Long Fall Boots
-					isFalling = false;
-
-					if(Level.getGameMode() == GameMode.SURVIVAL)
-					{
-						// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
-						//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
-						Entity.removeAllEffects(Player.getEntity());
-					}
-
-					makeLongFallBootsSound();
-				}
-			}
-
-			// player is falling
-			if(Entity.getVelY(Player.getEntity()) <= -0.5)
-			{
-				// START Long Fall Boots
-				isFalling = true;
-
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-					Entity.addEffect(Player.getEntity(), MobEffect.jump, 999999, 254, false, false);
-			}
-		} else
-		{
-			if(isFalling)
-			{
-				// STOP Long Fall Boots
-				isFalling = false;
-
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-				{
-					// Entity.removeEffect(entity, id) doesn't remove particles of the effect https://github.com/zhuowei/MCPELauncher/issues/241
-					//Entity.removeEffect(Player.getEntity(), MobEffect.jump);
-					Entity.removeAllEffects(Player.getEntity());
-				}
-			}
 		}
 	},
 
@@ -3702,6 +3634,50 @@ function makeLongFallBootsSound()
 	var random = Math.floor((Math.random() * 2) + 1);
 	playSoundFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
 }
+
+var LongFallBootsHooks = {
+
+	modTick: function(blockUnderPlayer)
+	{
+		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
+		{
+			// player will hit the ground soon
+			if(isFalling && blockUnderPlayer > 0)
+			{
+				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
+				{
+					// STOP Long Fall Boots
+					isFalling = false;
+
+					makeLongFallBootsSound();
+				}
+			}
+
+			// player is falling
+			if(Entity.getVelY(Player.getEntity()) <= -0.5)
+			{
+				// START Long Fall Boots
+				isFalling = true;
+
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 254, false, false);
+			}
+		} else
+		{
+			if(isFalling)
+				isFalling = false; // STOP Long Fall Boots
+		}
+	},
+
+	jumpHook: function()
+	{
+		if(isFalling)
+		{
+			// player is spamming the jump button when jump effect enabled
+			Entity.setVelY(Player.getEntity(), -3);
+		}
+	},
+};
 //########## LONG FALl BOOTS functions - END ##########
 
 
@@ -4474,7 +4450,7 @@ var JukeboxHooks = {
 		var checkBlockJukebox = getJukeboxObjectFromXYZ(x, y, z);
 		if(checkBlockJukebox != -1)
 			checkBlockJukebox.stopJukebox();
-	}
+	},
 };
 //########## JUKEBOX functions - END ##########
 
@@ -4485,6 +4461,31 @@ function makeBounceSound()
 	var random = Math.floor((Math.random() * 2) + 1);
 	playSoundFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
 }
+
+var BlueGelHooks = {
+
+	modTick: function(blockUnderPlayer)
+	{
+		if(blockUnderPlayer == REPULSION_GEL_ID)
+		{
+			if(velBeforeY < -0.666) // Satan confirmed!
+			{
+				Entity.setVelY(Player.getEntity(), -velBeforeY); // note: jumpHook doesn't get called
+				makeBounceSound();
+			}
+
+			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
+		}
+	},
+
+	jumpHook: function(blockId)
+	{
+		if(blockId == REPULSION_GEL_ID)
+		{
+			makeBounceSound();
+		}
+	},
+};
 //########## BLUE GEL functions - END ##########
 
 

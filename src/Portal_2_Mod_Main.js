@@ -257,7 +257,6 @@ const LONG_FALL_BOOTS_MAX_DAMAGE = 1500;
 const JUMPER_ITEM_ID = 3665;
 
 const MAX_LOGARITHMIC_VOLUME_RADIO = 25;
-var radioPlayer = new android.media.MediaPlayer();
 var isRadioPlaying = false;
 var radioCountdown = 0;
 var radioX;
@@ -584,9 +583,6 @@ function leaveGame()
 	// settings only for maps
 	indestructibleBlocks = false;
 
-	// stop sounds
-	Sound.stopAllSounds();
-
 	// info item
 	removeInfoItemUI();
 
@@ -600,8 +596,11 @@ function leaveGame()
 	removeGravityGunUI();
 	ggShotBlocksToBePlaced = [];
 
-	// radio
-	stopRadioMusic();
+	// stop sounds (note: stops also the radio loop)
+	Sound.stopAllSounds();
+
+	// stop radio music
+	PortalRadioHooks.leaveGame();
 
 	// reset jukebox variables
 	JukeboxHooks.leaveGame();
@@ -620,7 +619,6 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
 	var sidePosition = Level.getUseItemSideBlockPosition(x, y, z, side);
 
 	//clientMessage(Block.getRenderType(blockId)); // TODO fizzler
-
 	//clientMessage("x " + x + " y " + y + " z " + z);
 
 	if(itemId == PORTAL_INFORMATION_ID)
@@ -747,45 +745,8 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
 		}
 	}
 
-	// radio
-	if(blockId == PORTAL_RADIO)
-	{
-		preventDefault();
-		if(isRadioPlaying && Math.floor(radioX) == Math.floor(x) && Math.floor(radioY) == Math.floor(y) && Math.floor(radioZ) == Math.floor(z))
-		{
-			stopRadioMusic();
-		} else
-		{
-			isRadioPlaying = true;
-			radioX = Math.floor(x) + 0.5;
-			radioY = Math.floor(y);
-			radioZ = Math.floor(z) + 0.5;
-
-			startRadioMusic();
-		}
-	} else
-	{
-		if(itemId == RADIO_ID)
-		{
-			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
-			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
-			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 0);
-			}
-			if(angle >= 45 && angle < 135)
-			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 3);
-			}
-			if(angle >= 135 && angle < 225)
-			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 1);
-			}
-			if(angle >= 225 && angle < 315)
-			{
-				Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 2);
-			}
-		}
-	}
+	// use portal radio and radio item
+	PortalRadioHooks.useItem(x, y, z, itemId, blockId, side);
 
 	// use jukebox
 	JukeboxHooks.useItem(x, y, z, itemId, blockId);
@@ -883,19 +844,7 @@ function destroyBlock(x, y, z)
 	x = Math.floor(x);
 	y = Math.floor(y);
 	z = Math.floor(z);
-	var tile = Level.getTile(x, y, z);
-
-	// radio
-	if(tile == PORTAL_RADIO)
-	{
-		if(isRadioPlaying)
-			if(x == Math.floor(radioX) && y == Math.floor(radioY) && z == Math.floor(radioZ))
-				stopRadioMusic();
-
-		preventDefault();
-		Level.destroyBlock(x, y, z, false);
-		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
-	}
+	var blockId = Level.getTile(x, y, z);
 
 	// portals
 	if(orangePortalCreated)
@@ -942,17 +891,20 @@ function destroyBlock(x, y, z)
 	}
 
 	// jumper
-	if(tile == JUMPER_ID)
+	if(blockId == JUMPER_ID)
 	{
 		preventDefault();
 		Level.destroyBlock(x, y, z, false);
 		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
 	}
-	if(tile == JUMPER_DIRECTION_ID)
+	if(blockId == JUMPER_DIRECTION_ID)
 	{
 		preventDefault();
 		Level.destroyBlock(x, y, z, false);
 	}
+
+	// stop audio if destroyed radio was playing and drop radio item
+	PortalRadioHooks.destroyBlock(x, y, z, blockId);
 
 	// stop jukebox when destroyed
 	JukeboxHooks.destroyBlock(x, y, z);
@@ -1327,7 +1279,8 @@ function modTick()
 	// activate effect of long fall boots
 	LongFallBootsHooks.modTick(blockUnderPlayer);
 
-	ModTickFunctions.radio();
+	// set volume of portal radio if playing
+	PortalRadioHooks.modTick();
 
 	ModTickFunctions.turretsAI();
 
@@ -1497,27 +1450,6 @@ var ModTickFunctions = {
 				angle += 180;
 
 			makeJumperJump(angle);
-		}
-	},
-
-	radio: function()
-	{
-		if(isRadioPlaying)
-		{
-			radioCountdown++;
-			if(radioCountdown >= 10)
-			{
-				radioCountdown = 0;
-				var distancePR = Math.sqrt( (Math.pow(radioX - Player.getX(), 2)) + (Math.pow(radioY - Player.getY(), 2)) + (Math.pow(radioZ - Player.getZ(), 2) ));
-				if(distancePR > MAX_LOGARITHMIC_VOLUME_RADIO)
-				{
-					stopRadioMusic();
-				}else
-				{
-					var radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
-					radioPlayer.setVolume(radioVolume * generalVolume, radioVolume * generalVolume);
-				}
-			}
 		}
 	},
 
@@ -4236,24 +4168,6 @@ function turretsStopSinging()
 
 
 //########## RADIO functions ##########
-function startRadioMusic()
-{
-	try
-	{
-		radioPlayer.reset();
-		radioPlayer.setDataSource(new android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/portal-mod-sounds/radio/looping_radio_mix.mp3");
-		radioPlayer.prepare();
-		radioPlayer.setLooping(true);
-		radioPlayer.setVolume(1.0 * generalVolume, 1.0 * generalVolume);
-		radioPlayer.start();
-	} catch(err)
-	{
-		ModPE.showTipMessage(Log.getLogPrefix() + "Sounds not installed!");
-		Log.log("Error in startRadioMusic: " + err);
-		stopRadioMusic();
-	}
-}
-
 function stopRadioMusic()
 {
 	isRadioPlaying = false;
@@ -4261,11 +4175,96 @@ function stopRadioMusic()
 	radioY = 0;
 	radioZ = 0;
 	radioCountdown = 0;
-	try
-	{
-		radioPlayer.reset();
-	} catch(err) { }
+	Sound.stopLoop();
 }
+
+function setRadioVolume(volume)
+{
+	if(DesnoUtils.soundLoop1 != null)
+		DesnoUtils.soundLoop1.setVolume(volume, volume);
+}
+
+var PortalRadioHooks = {
+
+	leaveGame: function()
+	{
+		//
+		stopRadioMusic();
+	},
+
+	modTick: function()
+	{
+		if(isRadioPlaying)
+		{
+			radioCountdown++;
+			if(radioCountdown >= 10)
+			{
+				radioCountdown = 0;
+				var distancePR = Math.sqrt( (Math.pow(radioX - Player.getX(), 2)) + (Math.pow(radioY - Player.getY(), 2)) + (Math.pow(radioZ - Player.getZ(), 2) ));
+				if(distancePR > MAX_LOGARITHMIC_VOLUME_RADIO)
+				{
+					stopRadioMusic();
+				}else
+				{
+					var radioVolume = 1 - (Math.log(distancePR) / Math.log(MAX_LOGARITHMIC_VOLUME_RADIO));
+					setRadioVolume(radioVolume * generalVolume);
+				}
+			}
+		}
+	},
+
+	destroyBlock: function(x, y, z, blockId)
+	{
+		if(blockId == PORTAL_RADIO)
+		{
+			if(isRadioPlaying)
+				if(x == Math.floor(radioX) && y == Math.floor(radioY) && z == Math.floor(radioZ))
+					stopRadioMusic();
+
+			preventDefault();
+			Level.destroyBlock(x, y, z, false);
+			Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, RADIO_ID, 1, 0);
+		}
+	},
+
+	useItem: function(x, y, z, itemId, blockId, side)
+	{
+		if(blockId == PORTAL_RADIO)
+		{
+			preventDefault();
+			if(isRadioPlaying && Math.floor(radioX) == Math.floor(x) && Math.floor(radioY) == Math.floor(y) && Math.floor(radioZ) == Math.floor(z))
+			{
+				stopRadioMusic();
+			} else
+			{
+				isRadioPlaying = true;
+				radioX = Math.floor(x) + 0.5;
+				radioY = Math.floor(y);
+				radioZ = Math.floor(z) + 0.5;
+
+				Sound.playLoopFromPath(sdcard + "/games/com.mojang/portal-mod-sounds/radio/looping_radio_mix.mp3", generalVolume);
+			}
+		} else
+		{
+			if(itemId == RADIO_ID)
+			{
+				var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
+
+				if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+					Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 0);
+
+				if(angle >= 45 && angle < 135)
+					Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 3);
+
+				if(angle >= 135 && angle < 225)
+					Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 1);
+
+				if(angle >= 225 && angle < 315)
+					Level.placeBlockFromItem(x, y, z, side, PORTAL_RADIO, 2);
+			}
+		}
+	},
+};
 //########## RADIO functions - END ##########
 
 

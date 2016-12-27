@@ -420,9 +420,6 @@ const PORTAL_RADIO = 229; // 4 directions with damage values
 const REPULSION_GEL_ID = 230;
 
 // orange gel
-const SPEED_MULTIPLIER_MIN = 1.35;
-const SPEED_MULTIPLIER_MAX = 1.65;
-var speedMultiplier = SPEED_MULTIPLIER_MIN;
 const PROPULSION_GEL_ID = 231;
 
 // cubes
@@ -605,9 +602,6 @@ function leaveGame()
 
 	// radio
 	stopRadioMusic();
-
-	// orange gel
-	speedMultiplier = SPEED_MULTIPLIER_MIN;
 
 	// reset jukebox variables
 	JukeboxHooks.leaveGame();

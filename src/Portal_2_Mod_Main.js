@@ -6127,10 +6127,10 @@ function turretOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turrets[i].entity);
-
 						var random = Math.floor((Math.random() * 9) + 1);
 						turrets[i].playSound("portal-mod-sounds/turrets/turret_disabled_" + random + ".mp3");
+
+						Entity.remove(turrets[i].entity);
 
 						customMobs.splice(findPositionInCustomMobs(turrets[i].entity), 1);
 						turrets.splice(i, 1);
@@ -6236,10 +6236,10 @@ function turretDefectiveOptionsUI(i)
 				{
 					onClick: function()
 					{
-						Entity.remove(turretsDefective[i].entity);
-
 						var random = Math.floor((Math.random() * 7) + 1);
 						turretsDefective[i].playSound("portal-mod-sounds/turrets_defective/turret_defective_disabled_" + random + ".wav");
+
+						Entity.remove(turretsDefective[i].entity);
 
 						customMobs.splice(findPositionInCustomMobs(turretsDefective[i].entity), 1);
 						turretsDefective.splice(i, 1);

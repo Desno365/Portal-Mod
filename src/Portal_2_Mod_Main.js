@@ -240,8 +240,9 @@ var turretsDefective = [];
 const ID_TURRET_DEFECTIVE = 3666;
 
 var turrets = [];
-var areTurretsSinging = false;
 var turretSoundPlayer;
+var turretShotByArrow;
+var areTurretsSinging = false;
 var turretsSongCountdown = 0;
 var turretsSongX;
 var turretsSongY;
@@ -600,6 +601,7 @@ function leaveGame()
 	turrets = [];
 	turretsStopSinging();
 	turretsDefective = [];
+	turretShotByArrow = null;
 
 	// stop sounds (note: stops also the radio loop)
 	Sound.stopAllSounds();
@@ -859,6 +861,17 @@ function destroyBlock(x, y, z)
 	JukeboxHooks.destroyBlock(x, y, z);
 }
 
+function projectileHitEntityHook(projectile, entity)
+{
+	for(var i in turrets)
+		if(entity == turrets[i].entity)
+			turretShotByArrow = entity;
+
+	for(var i in turretsDefective)
+		if(entity == turretsDefective[i].entity)
+			turretShotByArrow = entity;
+}
+
 function attackHook(attacker, victim)
 {
 	if(attacker == Player.getEntity())
@@ -983,7 +996,7 @@ function attackHook(attacker, victim)
 	}
 }
 
-function deathHook(murderer, victim)
+function deathHook(attacker, victim)
 {
 	// custom mobs
 	var index = findPositionInCustomMobs(victim);
@@ -1017,12 +1030,12 @@ function deathHook(murderer, victim)
 	{
 		if(victim == turrets[i].entity)
 		{
-			if(murderer != -1 && murderer != Player.getEntity())
+			if((attacker != -1 && attacker != Player.getEntity()) || victim == turretShotByArrow) // if attacked not by a player or if attacked by the player with an arrow
 			{
 				restoreTurretFromOldTurretObject(Entity.getX(turrets[i].entity), Entity.getY(turrets[i].entity), Entity.getZ(turrets[i].entity), turrets[i]);
 
-				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
-					Entity.remove(murderer);
+				if(Entity.getEntityTypeId(attacker) == EntityType.ZOMBIE || Entity.getEntityTypeId(attacker) == EntityType.ZOMBIE_VILLAGER)
+					Entity.remove(attacker);
 			} else
 			{
 				var random = Math.floor((Math.random() * 9) + 1);
@@ -1041,12 +1054,12 @@ function deathHook(murderer, victim)
 	{
 		if(victim == turretsDefective[i].entity)
 		{
-			if(murderer != -1 && murderer != Player.getEntity())
+			if((attacker != -1 && attacker != Player.getEntity()) || victim == turretShotByArrow) // if attacked not by a player or if attacked by the player with an arrow
 			{
 				restoreTurretDefectiveFromOldTurretObject(Entity.getX(turretsDefective[i].entity), Entity.getY(turretsDefective[i].entity), Entity.getZ(turretsDefective[i].entity), turretsDefective[i]);
 
-				if(Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE || Entity.getEntityTypeId(murderer) == EntityType.ZOMBIE_VILLAGER)
-					Entity.remove(murderer);
+				if(Entity.getEntityTypeId(attacker) == EntityType.ZOMBIE || Entity.getEntityTypeId(attacker) == EntityType.ZOMBIE_VILLAGER)
+					Entity.remove(attacker);
 			} else
 			{
 				var random = Math.floor((Math.random() * 7) + 1);

@@ -596,6 +596,11 @@ function leaveGame()
 	removeGravityGunUI();
 	ggShotBlocksToBePlaced = [];
 
+	// turrets
+	turrets = [];
+	turretsStopSinging();
+	turretsDefective = [];
+
 	// stop sounds (note: stops also the radio loop)
 	Sound.stopAllSounds();
 
@@ -604,11 +609,6 @@ function leaveGame()
 
 	// reset jukebox variables
 	JukeboxHooks.leaveGame();
-
-	// turrets
-	turrets = [];
-	turretsStopSinging();
-	turretsDefective = [];
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
@@ -701,56 +701,6 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
 		return;
 	}
 
-	// jumper
-	if(itemId == JUMPER_ITEM_ID)
-	{
-		if(side == 0 || side == 1)
-		{
-			var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
-
-			var y1 = y;
-			if(side == 1)
-				y1++;
-			if(side == 0)
-				y1--;
-			var x2 = x;
-			var z2 = z;
-
-			if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
-			{
-				z2++;
-			}
-			if(angle >= 45 && angle < 135)
-			{
-				x2--;
-			}
-			if(angle >= 135 && angle < 225)
-			{
-				z2--;
-			}
-			if(angle >= 225 && angle < 315)
-			{
-				x2++;
-			}
-
-			Level.setTile(x, y1, z, JUMPER_ID);
-			if(Level.getTile(x2, y1, z2) == 0)
-			{
-				// also the jumper direction can be placed
-				Level.setTile(x2, y1, z2, JUMPER_DIRECTION_ID);
-			}
-
-			if(Level.getGameMode() == GameMode.SURVIVAL)
-				Player.decreaseByOneCarriedItem();
-		}
-	}
-
-	// use portal radio and radio item
-	PortalRadioHooks.useItem(x, y, z, itemId, blockId, side);
-
-	// use jukebox
-	JukeboxHooks.useItem(x, y, z, itemId, blockId);
-
 	// turrets
 	if(itemId == ID_TURRET && Level.getTile(sidePosition.x, sidePosition.y + 1, sidePosition.z) == 0 && Level.getTile(sidePosition.x, sidePosition.y + 2, sidePosition.z) == 0)
 	{
@@ -801,6 +751,15 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage)
 		if(Level.getGameMode() == GameMode.SURVIVAL)
 			Player.decreaseByOneCarriedItem();
 	}
+
+	// jumper item
+	JumperHooks.useItem(x, y, z, itemId, blockId, side);
+
+	// use portal radio and radio item
+	PortalRadioHooks.useItem(x, y, z, itemId, blockId, side);
+
+	// use jukebox
+	JukeboxHooks.useItem(x, y, z, itemId, blockId);
 }
 
 function projectileHitBlockHook(projectile, blockX, blockY, blockZ, side)
@@ -890,18 +849,8 @@ function destroyBlock(x, y, z)
 		}
 	}
 
-	// jumper
-	if(blockId == JUMPER_ID)
-	{
-		preventDefault();
-		Level.destroyBlock(x, y, z, false);
-		Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
-	}
-	if(blockId == JUMPER_DIRECTION_ID)
-	{
-		preventDefault();
-		Level.destroyBlock(x, y, z, false);
-	}
+	// drop jumper item
+	JumperHooks.destroyBlock(x, y, z, blockId);
 
 	// stop audio if destroyed radio was playing and drop radio item
 	PortalRadioHooks.destroyBlock(x, y, z, blockId);
@@ -1268,13 +1217,15 @@ function modTick()
 
 	ModTickFunctions.placeShotBlocks(); // gravity gun picking entities
 
+	ModTickFunctions.turretsAI();
+
+	ModTickFunctions.turretsSong();
+
 	// set jump effect and check if falling on blue gel block
 	BlueGelHooks.modTick(blockUnderPlayer);
 
-	// set volume of jukeboxes
-	JukeboxHooks.modTick();
-
-	ModTickFunctions.jumper(flatBlockUnderPlayer);
+	// make the jump effect when walking on a jumper
+	JumperHooks.modTick(flatBlockUnderPlayer);
 
 	// activate effect of long fall boots
 	LongFallBootsHooks.modTick(blockUnderPlayer);
@@ -1282,9 +1233,8 @@ function modTick()
 	// set volume of portal radio if playing
 	PortalRadioHooks.modTick();
 
-	ModTickFunctions.turretsAI();
-
-	ModTickFunctions.turretsSong();
+	// set volume of jukeboxes
+	JukeboxHooks.modTick();
 
 	// player interactions
 	velBeforeX = Entity.getVelX(Player.getEntity());
@@ -1428,28 +1378,6 @@ var ModTickFunctions = {
 				ggShotBlocksToBePlaced[i].previousY = Entity.getY(entity);
 				ggShotBlocksToBePlaced[i].previousZ = Entity.getZ(entity);
 			}
-		}
-	},
-
-	jumper: function(flatBlockUnderPlayer)
-	{
-		if(flatBlockUnderPlayer == JUMPER_ID)
-		{
-			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_DIRECTION_ID);
-			if(angle == null)
-				angle = getYaw();
-
-			makeJumperJump(angle);
-		}
-		if(flatBlockUnderPlayer == JUMPER_DIRECTION_ID && blockUnderPlayerBefore != JUMPER_ID)
-		{
-			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_ID);
-			if(angle == null)
-				angle = getYaw();
-			else
-				angle += 180;
-
-			makeJumperJump(angle);
 		}
 	},
 
@@ -3560,59 +3488,6 @@ function removeGravityGunUI()
 //########## GRAVITY GUN functions - END ##########
 
 
-//########## LONG FALl BOOTS functions ##########
-function makeLongFallBootsSound()
-{
-	var random = Math.floor((Math.random() * 2) + 1);
-	playSoundFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
-}
-
-var LongFallBootsHooks = {
-
-	modTick: function(blockUnderPlayer)
-	{
-		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
-		{
-			// player will hit the ground soon
-			if(isFalling && blockUnderPlayer > 0)
-			{
-				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
-				{
-					// STOP Long Fall Boots
-					isFalling = false;
-
-					makeLongFallBootsSound();
-				}
-			}
-
-			// player is falling
-			if(Entity.getVelY(Player.getEntity()) <= -0.5)
-			{
-				// START Long Fall Boots
-				isFalling = true;
-
-				if(Level.getGameMode() == GameMode.SURVIVAL)
-					Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 254, false, false);
-			}
-		} else
-		{
-			if(isFalling)
-				isFalling = false; // STOP Long Fall Boots
-		}
-	},
-
-	jumpHook: function()
-	{
-		if(isFalling)
-		{
-			// player is spamming the jump button when jump effect enabled
-			Entity.setVelY(Player.getEntity(), -3);
-		}
-	},
-};
-//########## LONG FALl BOOTS functions - END ##########
-
-
 //########## CUSTOM MOBS functions ##########
 function saveCustomMobs()
 {
@@ -4167,6 +4042,183 @@ function turretsStopSinging()
 //########## TURRETS functions - END ##########
 
 
+//########## BLUE GEL functions ##########
+function makeBounceSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	playSoundFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
+}
+
+var BlueGelHooks = {
+
+	modTick: function(blockUnderPlayer)
+	{
+		if(blockUnderPlayer == REPULSION_GEL_ID)
+		{
+			if(velBeforeY < -0.666) // Satan confirmed!
+			{
+				Entity.setVelY(Player.getEntity(), -velBeforeY); // note: jumpHook doesn't get called
+				makeBounceSound();
+			}
+
+			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
+		}
+	},
+
+	jumpHook: function(blockId)
+	{
+		if(blockId == REPULSION_GEL_ID)
+		{
+			makeBounceSound();
+		}
+	},
+};
+//########## BLUE GEL functions - END ##########
+
+
+//########## JUMPER functions ##########
+function makeJumperJump(angle)
+{
+	var random = Math.floor((Math.random() * 3) + 4);
+	playSoundFromFileName("jumper/alyx_gun_fire" + random + ".mp3");
+
+	var jumperDir = DesnoUtils.getVector(angle, 0);
+	Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
+	Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
+	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
+}
+
+var JumperHooks = {
+
+	modTick: function(flatBlockUnderPlayer)
+	{
+		if(flatBlockUnderPlayer == JUMPER_ID)
+		{
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_DIRECTION_ID);
+			if(angle == null)
+				angle = getYaw();
+
+			makeJumperJump(angle);
+		}
+		if(flatBlockUnderPlayer == JUMPER_DIRECTION_ID && blockUnderPlayerBefore != JUMPER_ID)
+		{
+			var angle = getAngleOfNearBlockId(Math.floor(Player.getX()), Math.floor(Player.getY()) - 1, Math.floor(Player.getZ()), JUMPER_ID);
+			if(angle == null)
+				angle = getYaw();
+			else
+				angle += 180;
+
+			makeJumperJump(angle);
+		}
+	},
+
+	useItem: function(x, y, z, itemId, blockId, side)
+	{
+		if(itemId == JUMPER_ITEM_ID)
+		{
+			if(side == 0 || side == 1)
+			{
+				// get place position based on side (up or down)
+				if(side == 1)
+					y++;
+				if(side == 0)
+					y--;
+
+				// place main jumper block
+				Level.setTile(x, y, z, JUMPER_ID);
+
+				// place jumper direction block if possible
+				var x1 = x, y1 = y, z1 = z;
+				var angle = normalizeAngle(Entity.getYaw(Player.getEntity()));
+				if((angle >= 0 && angle < 45) || (angle >= 315 && angle <= 360))
+					z1++;
+				if(angle >= 45 && angle < 135)
+					x1--;
+				if(angle >= 135 && angle < 225)
+					z1--;
+				if(angle >= 225 && angle < 315)
+					x1++;
+				if(Level.getTile(x1, y1, z1) == 0)
+					Level.setTile(x1, y1, z1, JUMPER_DIRECTION_ID);
+
+				// remove one jumper item from inventory
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Player.decreaseByOneCarriedItem();
+			}
+		}
+	},
+
+	destroyBlock: function(x, y, z, blockId)
+	{
+		if(blockId == JUMPER_ID)
+		{
+			preventDefault();
+			Level.destroyBlock(x, y, z, false);
+			Level.dropItem(x + 0.5, y + 1, z + 0.5, 0, JUMPER_ITEM_ID, 1, 0);
+		}
+		if(blockId == JUMPER_DIRECTION_ID)
+		{
+			preventDefault();
+			Level.destroyBlock(x, y, z, false);
+		}
+	},
+};
+//########## JUMPER functions - END ##########
+
+
+//########## LONG FALl BOOTS functions ##########
+function makeLongFallBootsSound()
+{
+	var random = Math.floor((Math.random() * 2) + 1);
+	playSoundFromFileName("long_fall_boots/futureshoes" + random + ".mp3");
+}
+
+var LongFallBootsHooks = {
+
+	modTick: function(blockUnderPlayer)
+	{
+		if(Player.getArmorSlot(3) == LONG_FALL_BOOTS_ID)
+		{
+			// player will hit the ground soon
+			if(isFalling && blockUnderPlayer > 0)
+			{
+				if(Entity.getVelY(Player.getEntity()) == VEL_Y_OFFSET)
+				{
+					// STOP Long Fall Boots
+					isFalling = false;
+
+					makeLongFallBootsSound();
+				}
+			}
+
+			// player is falling
+			if(Entity.getVelY(Player.getEntity()) <= -0.5)
+			{
+				// START Long Fall Boots
+				isFalling = true;
+
+				if(Level.getGameMode() == GameMode.SURVIVAL)
+					Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 254, false, false);
+			}
+		} else
+		{
+			if(isFalling)
+				isFalling = false; // STOP Long Fall Boots
+		}
+	},
+
+	jumpHook: function()
+	{
+		if(isFalling)
+		{
+			// player is spamming the jump button when jump effect enabled
+			Entity.setVelY(Player.getEntity(), -3);
+		}
+	},
+};
+//########## LONG FALl BOOTS functions - END ##########
+
+
 //########## RADIO functions ##########
 function stopRadioMusic()
 {
@@ -4454,54 +4506,6 @@ var JukeboxHooks = {
 //########## JUKEBOX functions - END ##########
 
 
-//########## BLUE GEL functions ##########
-function makeBounceSound()
-{
-	var random = Math.floor((Math.random() * 2) + 1);
-	playSoundFromFileName("gelblue/player_bounce_jump_paint_0" + random + ".mp3");
-}
-
-var BlueGelHooks = {
-
-	modTick: function(blockUnderPlayer)
-	{
-		if(blockUnderPlayer == REPULSION_GEL_ID)
-		{
-			if(velBeforeY < -0.666) // Satan confirmed!
-			{
-				Entity.setVelY(Player.getEntity(), -velBeforeY); // note: jumpHook doesn't get called
-				makeBounceSound();
-			}
-
-			Entity.addEffect(Player.getEntity(), MobEffect.jump, 2, 5, false, false);
-		}
-	},
-
-	jumpHook: function(blockId)
-	{
-		if(blockId == REPULSION_GEL_ID)
-		{
-			makeBounceSound();
-		}
-	},
-};
-//########## BLUE GEL functions - END ##########
-
-
-//########## JUMPER functions ##########
-function makeJumperJump(angle)
-{
-	var random = Math.floor((Math.random() * 3) + 4);
-	playSoundFromFileName("jumper/alyx_gun_fire" + random + ".mp3");
-
-	var jumperDir = DesnoUtils.getVector(angle, 0);
-	Entity.setVelX(Player.getEntity(), jumperDir.x * 1.8);
-	Entity.setVelY(Player.getEntity(), 1.27); // cos(45) * 1.8
-	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
-}
-//########## JUMPER functions - END ##########
-
-
 //########## MAP OPTIONS functions ##########
 function saveMapOptions()
 {
@@ -4579,7 +4583,7 @@ function loadMapOptions()
 
 
 //########## SOUND functions ##########
-function playSoundFromFileName(fileName, x, y, z, volumeMultiplier)
+function playSoundFromFileName(fileName, x, y, z)
 {
 	//
 	Sound.playFromPath(sdcard + "/games/com.mojang/portal-mod-sounds/" + fileName, x, y, z, generalVolume);

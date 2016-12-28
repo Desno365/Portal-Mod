@@ -3697,6 +3697,7 @@ function spawnTurret(x, y, z)
 	z = Math.floor(z);
 
 	var turret = Level.spawnMob(x + 0.5, y + 0.6, z + 0.5, EntityType.VILLAGER, "mob/turret.png");
+	Entity.setAnimalAge(turret, 0);
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
@@ -3717,6 +3718,7 @@ function spawnTurretDefective(x, y, z)
 	z = Math.floor(z);
 
 	var turret = Level.spawnMob(x + 0.5, y + 0.6, z + 0.5, EntityType.VILLAGER, "mob/turretdefective.png");
+	Entity.setAnimalAge(turret, 0);
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);

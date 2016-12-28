@@ -17,7 +17,7 @@ SOFTWARE.
 const DEBUG = false;
 
 // updates variables
-const CURRENT_VERSION = "r014";
+const CURRENT_VERSION = "r015";
 var latestVersion;
 
 // activity and other Android variables
@@ -464,7 +464,7 @@ function createOtherBlocks()
 
 	Block.newBlock(PROPULSION_GEL_ID, "Propulsion Gel Block", [["wool", 1]]);
 	Block.setDestroyTime(PROPULSION_GEL_ID, 1);
-	Block.setFriction(PROPULSION_GEL_ID, 1.125);
+	Block.setFriction(PROPULSION_GEL_ID, 1.14);
 	Item.setCategory(PROPULSION_GEL_ID, ItemCategory.DECORATION);
 	Player.addItemCreativeInv(PROPULSION_GEL_ID, 1);
 
@@ -4090,6 +4090,24 @@ function makeJumperJump(angle)
 	Entity.setVelZ(Player.getEntity(), jumperDir.z * 1.8);
 }
 
+function getAngleOfNearBlockId(x, y, z, blockId)
+{
+	x = Math.floor(x);
+	y = Math.floor(y);
+	z = Math.floor(z);
+
+	if(Level.getTile(x + 1, y, z) == blockId)
+		return 270;
+	if(Level.getTile(x, y, z + 1) == blockId)
+		return 0;
+	if(Level.getTile(x - 1, y, z) == blockId)
+		return 90;
+	if(Level.getTile(x, y, z - 1) == blockId)
+		return 180;
+
+	return null;
+}
+
 var JumperHooks = {
 
 	modTick: function(flatBlockUnderPlayer)
@@ -4972,24 +4990,6 @@ function normalizeAngle(angle)
 	while (newAngle < 0) newAngle += 360;
 	while (newAngle > 360) newAngle -= 360;
 	return newAngle;
-}
-
-function getAngleOfNearBlockId(x, y, z, blockId)
-{
-	x = Math.floor(x);
-	y = Math.floor(y);
-	z = Math.floor(z);
-
-	if(Level.getTile(x + 1, y, z) == blockId)
-		return 270;
-	if(Level.getTile(x, y, z + 1) == blockId)
-		return 0;
-	if(Level.getTile(x - 1, y, z) == blockId)
-		return 90;
-	if(Level.getTile(x, y, z - 1) == blockId)
-		return 180;
-
-	return null;
 }
 
 function DroppedItemClass(entity, id, data)

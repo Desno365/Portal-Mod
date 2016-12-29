@@ -14,7 +14,7 @@ SOFTWARE.
 
 /* ******* Portal 2 Mod by Desno365 ******* */
 
-const DEBUG = false;
+const DEBUG_ENTITIES_ARRAY_SIZE = false;
 
 // updates variables
 const CURRENT_VERSION = "r015";
@@ -56,9 +56,6 @@ var playWelcomeSoundAtStartup = true;
 // map-makers settings
 var indestructibleBlocks = false;
 var alwaysFullHungerBar = false;
-
-// all the entities array
-var entities = [];
 
 // custom mobs array
 var customMobs = [];
@@ -575,8 +572,8 @@ function leaveGame()
 	velBeforeZ = 0;
 	blockUnderPlayerBefore = 0;
 
-	// entities container
-	entities = [];
+	// reset entities array
+	AllEntitiesHooks.leaveGame();
 
 	// save custom mobs
 	saveCustomMobs();
@@ -1073,6 +1070,9 @@ function deathHook(attacker, victim)
 
 function entityAddedHook(entity)
 {
+	// add entity in entities array if needed
+	AllEntitiesHooks.entityAddedHook(entity);
+
 	// custom mobs
 	customMobRespawnerCheck(entity);
 
@@ -1082,37 +1082,12 @@ function entityAddedHook(entity)
 		Entity.remove(entity);
 		return;
 	}
-
-	// needed for mobs support for portal and jumper
-	var entityId = Entity.getEntityTypeId(entity);
-	if(entityId != 0 && entityId != EntityType.ARROW && entityId != EntityType.EGG && entityId != EntityType.EXPERIENCE_ORB && entityId != EntityType.EXPERIENCE_POTION && entityId != EntityType.FIREBALL && entityId != EntityType.FISHING_HOOK && entityId != EntityType.LIGHTNING_BOLT && entityId != EntityType.PAINTING && entityId != EntityType.PAINTING && entityId != EntityType.SMALL_FIREBALL && entityId != EntityType.SNOWBALL && entityId != EntityType.THROWN_POTION)
-		entities.push(entity);
-
-	// debug entities size
-	if(DEBUG)
-	{
-		var array = [];
-		for(var i in entities)
-		{
-			if(array[Entity.getEntityTypeId(entities[i])] == null)
-				array[Entity.getEntityTypeId(entities[i])] = 0;
-			array[Entity.getEntityTypeId(entities[i])]++;
-		}
-		clientMessage("entities " + array.toString());
-	}
 }
 
 function entityRemovedHook(entity)
 {
-	removeThisEntityFromContainer:
-	for(var i in entities)
-	{
-		if(entities[i] == entity)
-		{
-			entities.splice(i, 1);
-			break removeThisEntityFromContainer;
-		}
-	}
+	// remove entity from entities array if present
+	AllEntitiesHooks.entityRemovedHook(entity);
 
 	// GravityGun
 	if(entity == ggEntity)
@@ -1141,24 +1116,16 @@ function changeCarriedItemHook(currentItem, previousItem) // not really an hook
 {
 	// remove gravity gun UI
 	if(previousItem == GRAVITY_GUN_ID)
-	{
-		//
 		removeGravityGunUI();
-	}
 
 	// remove portal gun UI
 	if(isItemPortalGun(previousItem) && !isItemPortalGun(currentItem))
-	{
-		//
 		removePortalGunUI();
-	}
 
-	// remove gravity gun UI
+	// remove info item UI
 	if(previousItem == PORTAL_INFORMATION_ID)
-	{
-		//
 		removeInfoItemUI();
-	}
+
 
 	switch(currentItem)
 	{
@@ -3650,12 +3617,8 @@ function customMobRespawnerCheck(entity)
 function findPositionInCustomMobs(entity)
 {
 	for(var i in customMobs)
-	{
 		if(customMobs[i].entity == entity)
-		{
 			return i;
-		}
-	}
 	return -1;
 }
 
@@ -3714,7 +3677,7 @@ function spawnTurret(x, y, z)
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
-	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true); // 	Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, false); // Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
 
 	turrets.push(new TurretClass(turret));
 	turrets[turrets.length - 1].x = Entity.getX(turret);
@@ -3735,7 +3698,7 @@ function spawnTurretDefective(x, y, z)
 	Entity.setHealth(turret, 1);
 	Entity.setRenderType(turret, TurretRenderType.renderType);
 	Entity.setCollisionSize(turret, 8/16, 16/16);
-	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, true); // 	Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
+	Entity.addEffect(turret, MobEffect.movementSlowdown, 999999, 126, false, false); // Entity.setImmobile(turret, true) makes it completely immobile, not affected by gravity
 
 	turretsDefective.push(new TurretDefectiveClass(turret));
 	turretsDefective[turretsDefective.length - 1].x = Entity.getX(turret);
@@ -4782,6 +4745,53 @@ function removeInfoItemUI()
 //########## INFO ITEM functions - END ##########
 
 
+//########## ALL ENTITIES functions ##########
+var entities = [];
+
+var AllEntitiesHooks = {
+
+	leaveGame: function()
+	{
+		// reset entities array
+		entities = [];
+	},
+
+	entityAddedHook: function(entity)
+	{
+		// we don't need all the entities, since it's used only for portals
+		var entityId = Entity.getEntityTypeId(entity);
+		if(entityId != 0 && entityId != EntityType.ARROW && entityId != EntityType.EGG && entityId != EntityType.EXPERIENCE_ORB && entityId != EntityType.EXPERIENCE_POTION && entityId != EntityType.FIREBALL && entityId != EntityType.FISHING_HOOK && entityId != EntityType.LIGHTNING_BOLT && entityId != EntityType.PAINTING && entityId != EntityType.PAINTING && entityId != EntityType.SMALL_FIREBALL && entityId != EntityType.SNOWBALL && entityId != EntityType.THROWN_POTION)
+			entities.push(entity);
+
+		if(DEBUG_ENTITIES_ARRAY_SIZE)
+		{
+			var array = [];
+			for(var i in entities)
+			{
+				if(array[Entity.getEntityTypeId(entities[i])] == null)
+					array[Entity.getEntityTypeId(entities[i])] = 0;
+				array[Entity.getEntityTypeId(entities[i])]++;
+			}
+			clientMessage("entities " + array.toString());
+		}
+	},
+
+	entityRemovedHook: function(entity)
+	{
+	 	removeThisEntityFromArray:
+		for(var i in entities)
+		{
+			if(entities[i] == entity)
+			{
+				entities.splice(i, 1);
+				break removeThisEntityFromArray;
+			}
+		}
+	},
+};
+//########## ALL ENTITIES functions - END ##########
+
+
 //########## LEVEL functions ##########
 Level.setTileNotInAir = function(x, y, z, id, data)
 {
@@ -5549,7 +5559,7 @@ function settingsGeneralUI()
 
 				var switchEntitiesSupportPortals = new android.widget.Switch(currentActivity);
 				switchEntitiesSupportPortals.setChecked(entitiesSupportForPortals);
-				switchEntitiesSupportPortals.setText("Support for mobs and entities for Portals (can cause lags on very old devices)");
+				switchEntitiesSupportPortals.setText("Support for mobs for Portals (can cause lags on very old devices)");
 				switchEntitiesSupportPortals.setTextColor(android.graphics.Color.parseColor("#FFFFFFFF"));
 				switchEntitiesSupportPortals.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener()
 				{
